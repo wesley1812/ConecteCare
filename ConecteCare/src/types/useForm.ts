@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 interface FormData {
   nome: string;
+  idade: number;
   cpf: string;
   cpfPaciente: string;
   email: string;
   telefone: string;
+  parentesco: string;
   residencia: File | null;
   foto: File | null;
   aceitarTermo: boolean;
@@ -14,10 +16,12 @@ interface FormData {
 
 const initialFormData: FormData = {
   nome: "",
+  idade: 0,
   cpf: "",
   cpfPaciente: "",
   email: "",
   telefone: "",
+  parentesco: "",
   residencia: null,
   foto: null,
   aceitarTermo: false,

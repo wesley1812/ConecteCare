@@ -24,7 +24,20 @@ const FormularioCadastro: React.FC<FormProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        
+
+        <div>
+          <label htmlFor="idade" className="block text-sm font-medium text-gray-700 mb-2">
+            Idade:
+          </label>
+          <input
+            type="number"
+            id="idade"
+            name="idade"
+            value={formData.idade}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
         <div>
           <label htmlFor="cpf" className="block text-sm font-medium text-gray-700 mb-2">
             CPF do Cuidador:
@@ -69,6 +82,20 @@ const FormularioCadastro: React.FC<FormProps> = ({
           />
         </div>
         
+        <div>
+          <label htmlFor="idade" className="block text-sm font-medium text-gray-700 mb-2">
+            Relação com o Paciente:
+          </label>
+          <input
+            type="string"
+            id="parentesco"
+            name="parentesco"
+            value={formData.parentesco}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
         <div>
           <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-2">
             Telefone para Contato:

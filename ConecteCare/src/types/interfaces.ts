@@ -111,10 +111,12 @@ export interface DepoimentoProps {
 export interface FormProps {
   formData: {
     nome: string;
+    idade: number;
     cpf: string;
     cpfPaciente: string;
     email: string;
     telefone: string;
+    paretensco: string;
     aceitarTermo: boolean;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
