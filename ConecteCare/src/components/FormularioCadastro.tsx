@@ -7,6 +7,8 @@ const FormularioCadastro: React.FC<FormProps> = ({
   onSubmit,
   onTermoOpen,
 }) => {
+
+
   return (
     <form onSubmit={onSubmit} className="bg-white p-8 rounded-lg shadow-md">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

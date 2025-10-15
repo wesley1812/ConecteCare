@@ -23,3 +23,5 @@ export const formSchema = z.object({
         .refine((val: boolean) => val === true,
         { message: "Você deve aceitar o Termo de Compromisso" }),
 })
+
+export type FormSchema = z.infer<typeof formSchema>;

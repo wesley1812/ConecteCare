@@ -116,9 +116,10 @@ export interface FormProps {
     cpfPaciente: string;
     email: string;
     telefone: string;
-    paretensco: string;
+    parentesco: string;
     aceitarTermo: boolean;
   };
+  
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onTermoOpen: () => void;
