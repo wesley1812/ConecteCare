@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
-import BenefitCard from "../components/VantagensConecte";
-import Testimonial from "../components/Depoimentos";
+import {Layout} from "../components/Layout";
+import {VantagensConecte} from "../components/Recursos";
+import {Depoimento} from "../components/Recursos";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -69,7 +69,7 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {vantagens.map((vantagem, index) => (
-              <BenefitCard
+              <VantagensConecte
                 key={index}
                 title={vantagem.title}
                 description={vantagem.description}
@@ -87,7 +87,7 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {depoimentosUsuarios.map((depoimento, index) => (
-              <Testimonial
+              <Depoimento
                 key={index}
                 text={depoimento.text}
                 author={depoimento.author}

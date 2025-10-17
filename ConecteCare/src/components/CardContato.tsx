@@ -1,6 +1,6 @@
 import type { CardContatos } from "../types/interfaces";
 
-const CardContato = ({ info }: CardContatos) => {
+export function CardContato ({ info }: CardContatos){
   return (
     <div className="bg-white p-6 rounded-lg shadow-md text-center">
       <div className="text-3xl mb-4">{info.icon}</div>
@@ -9,5 +9,3 @@ const CardContato = ({ info }: CardContatos) => {
     </div>
   );
 };
-
-export default CardContato;

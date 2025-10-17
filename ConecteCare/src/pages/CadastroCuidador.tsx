@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom"; 
-import Layout from "../components/Layout";
+import {Layout} from "../components/Layout";
 import FormularioCadastro from "../components/FormularioCadastro";
-import Termo from "../components/Termo";
+import {Termo} from "../components/Recursos";
 import { useForm } from "../types/useForm";
 
-const CadastroCuidador = () => {
+export function CadastroCuidador() {
   const navigate = useNavigate();
   
   const { formData, handleInputChange, handleSubmit } = useForm();

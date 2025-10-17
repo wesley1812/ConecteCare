@@ -1,4 +1,4 @@
-import Layout from '../components/Layout';
+import {Layout} from '../components/Layout';
 
 const GuiaDoUsuario = () => {
   const videoUrl = "/assets/midia/guia.mp4";

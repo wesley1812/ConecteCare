@@ -1,13 +1,6 @@
-import React from "react";
 import type { FormProps } from "../types/interfaces";
 
-const FormularioCadastro: React.FC<FormProps> = ({
-  formData,
-  handleInputChange,
-  onSubmit,
-  onTermoOpen,
-}) => {
-
+export function FormularioCadastro({ formData, handleInputChange, onSubmit, onTermoOpen }: FormProps) {
 
   return (
     <form onSubmit={onSubmit} className="bg-white p-8 rounded-lg shadow-md">
