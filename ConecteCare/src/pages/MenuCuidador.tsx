@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import Layout from "../components/Layout";
-import HealthIndicator from "../components/CardIndicadorSaude";
-import AppointmentCard from "../components/CardConsulta";
+import {Layout} from "../components/Layout";
+import {CardIndicadorSaude} from "../components/CardSaude";
+import {CardConsulta} from "../components/CardSaude";
 import type { Patient, HealthIndicatorType, AppointmentType } from "../types/interfaces";
 
 
@@ -101,7 +101,7 @@ const MenuCuidador = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Evolução da Saúde</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {healthIndicators.map((indicator, index) => (
-                <HealthIndicator 
+                <CardIndicadorSaude 
                   key={index} 
                   indicador={indicator} 
                 />
@@ -113,7 +113,7 @@ const MenuCuidador = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Próximas Consultas</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {appointments.map((appointment) => (
-                <AppointmentCard
+                <CardConsulta
                   key={appointment.id}
                   appointment={appointment}
                   onContact={handleContactDoctor}

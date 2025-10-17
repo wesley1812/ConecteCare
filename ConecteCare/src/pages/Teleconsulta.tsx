@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Layout from '../components/Layout';
+import {Layout} from '../components/Layout';
 import type { TeleconsultaData } from '../types/interfaces';
 
 

@@ -1,5 +1,5 @@
-import Layout from "../components/Layout";
-import TeamCard from "../components/CardEquipe";
+import {Layout} from "../components/Layout";
+import {TeamCard} from "../components/CardEquipe";
 import joaoImage from "/assets/midia/joao.jpg";
 import wesleyImage from "/assets/midia/wesley.jpg";
 import gabrielImage from "/assets/midia/gabriel.jpg"; 

@@ -1,8 +1,8 @@
-import Layout from "../components/Layout";
-import ContactCard from "../components/CardContato";
+import {Layout} from "../components/Layout";
+import {CardContato} from "../components/CardContato";
 import type { ContactInfo } from "../types/interfaces";
 
-const Contato = () => {
+export function Contato() {
 
   const contactInfo: ContactInfo[] = [
     {
@@ -37,7 +37,7 @@ const Contato = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {contactInfo.map((info, index) => (
-              <ContactCard key={index} info={info} />
+              <CardContato key={index} info={info} />
             ))}
           </div>
 

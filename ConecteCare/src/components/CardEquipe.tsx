@@ -1,7 +1,6 @@
 import type { TeamCardProps } from "../types/interfaces";
 
-
-const TeamCard = ({ member }: TeamCardProps) => {
+export function TeamCard({ member }: TeamCardProps) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md text-center">
       <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl overflow-hidden">
@@ -39,5 +38,3 @@ const TeamCard = ({ member }: TeamCardProps) => {
     </div>
   );
 };
-
-export default TeamCard;

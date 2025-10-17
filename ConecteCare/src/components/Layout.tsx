@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import type { HeaderProps, LayoutProps } from "../types/interfaces";
 
 // Componente Header
-const Header = ({ isMenuOpen, toggleMenu }: HeaderProps) => {
+export function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
   const location = useLocation();
 
   const navigation = [
@@ -82,7 +82,7 @@ const Header = ({ isMenuOpen, toggleMenu }: HeaderProps) => {
 };
 
 // Componente Footer
-const Footer = () => {
+export function Footer() {
   return (
     <footer className="bg-gray-800 text-white">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -95,7 +95,7 @@ const Footer = () => {
   );
 };
 
-const Layout = ({ children }: LayoutProps) => {
+export function Layout({ children }: LayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -111,6 +111,5 @@ const Layout = ({ children }: LayoutProps) => {
   );
 };
 
-export default Layout;
 
 

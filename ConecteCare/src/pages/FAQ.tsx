@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Layout from "../components/Layout";
-import FAQItemComponent from "../components/FaqItem";
+import {Layout} from "../components/Layout";
+import {FaqItemComponent} from "../components/Recursos";
 import type { FAQItem } from "../types/interfaces";
 
 const FAQ = () => {
@@ -51,7 +51,7 @@ const FAQ = () => {
           
           <div className="space-y-4">
             {faqInfo.map((item, index) => (
-              <FAQItemComponent
+              <FaqItemComponent
                 key={index}
                 item={item}
                 isOpen={openIndex === index}
