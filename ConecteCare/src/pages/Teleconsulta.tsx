@@ -5,7 +5,7 @@ import type { TeleconsultaData } from '../types/interfaces';
 
 
 
-const Teleconsulta = () => {
+export function Teleconsulta() {
   const { consultaId } = useParams<{ consultaId: string }>();
   const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null); 
@@ -68,5 +68,3 @@ const Teleconsulta = () => {
     </Layout>
   );
 };
-
-export default Teleconsulta;

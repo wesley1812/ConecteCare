@@ -56,5 +56,3 @@ export function Contato() {
     </Layout>
   );
 };
-
-export default Contato;

@@ -1,6 +1,6 @@
 import {Layout} from '../components/Layout';
 
-const GuiaDoUsuario = () => {
+export function GuiaDoUsuario() {
   const videoUrl = "/assets/midia/guia.mp4";
 
   return (
@@ -35,5 +35,3 @@ const GuiaDoUsuario = () => {
     </Layout>
   );
 };
-
-export default GuiaDoUsuario;
