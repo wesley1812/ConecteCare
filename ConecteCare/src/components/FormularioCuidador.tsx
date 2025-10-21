@@ -1,14 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useCadastro } from "../context/cadastro-context";
 import { formSchemaCuidador, type FormSchemaCuidador } from "../schemas/forms-schema";
 import type { Cuidador } from "../types/interfaces";
 
 interface FormularioCuidadorProps {
-  onAdd: (cuidador: Cuidador) => void;
   onTermoOpen: () => void;
 }
 
-export function FormularioCuidador({ onAdd, onTermoOpen }: FormularioCuidadorProps) {
+export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
+    const { saveCuidador } = useCadastro();
+    
     const {
         register,
         handleSubmit,
@@ -17,7 +19,7 @@ export function FormularioCuidador({ onAdd, onTermoOpen }: FormularioCuidadorPro
         resolver: zodResolver(formSchemaCuidador),
     });
 
-    function onSubmit({
+    async function onSubmit({
       nome,
       idade,
       cpf,
@@ -28,7 +30,7 @@ export function FormularioCuidador({ onAdd, onTermoOpen }: FormularioCuidadorPro
       residencia,
       foto,
       aceitarTermo
-    } : FormSchemaCuidador): void {
+    } : FormSchemaCuidador): Promise<void> {
         const cuidador: Cuidador = {
             id: crypto.randomUUID(),
             nome,
@@ -40,10 +42,11 @@ export function FormularioCuidador({ onAdd, onTermoOpen }: FormularioCuidadorPro
             parentesco,
             residencia,
             foto,
-            aceitarTermo
+            aceitarTermo,
     };
-        onAdd(cuidador);
-    }
+        await saveCuidador(cuidador);
+
+    }   
 
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out";
     const labelClass = "block text-sm font-medium text-gray-700 mb-2";
@@ -103,11 +106,13 @@ export function FormularioCuidador({ onAdd, onTermoOpen }: FormularioCuidadorPro
                 <div>
                     <label htmlFor="residencia" className={labelClass}>Comprovante de Residência (Foto):</label>
                     <input type="file" id="residencia" {...register("residencia")} accept="image/*" className={inputClass} />
+                    {errors.residencia && <p className={errorClass}>{errors.residencia.message}</p>}
                 </div>
                 
                 <div>
                     <label htmlFor="foto" className={labelClass}>Foto 3x4:</label>
                     <input type="file" id="foto" {...register("foto")} accept="image/*" className={inputClass} />
+                    {errors.foto && <p className={errorClass}>{errors.foto.message}</p>}
                 </div>
             </div>
 

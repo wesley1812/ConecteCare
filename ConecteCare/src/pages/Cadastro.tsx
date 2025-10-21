@@ -22,9 +22,15 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
         const typeLabel = registrationType === 'cuidador' ? 'Cuidador' : 'Paciente';
         setMessage(`Cadastro de ${typeLabel} realizado com sucesso! Redirecionando...`);
 
+        if (registrationType == 'cuidador')
         setTimeout(() => {
             setMessage(''); 
             navigate('/menu-cuidador');
+        }, 2000);
+        else
+        setTimeout(() => {
+            setMessage(''); 
+            navigate('/menu-paciente');
         }, 2000);
     };
 
@@ -56,7 +62,8 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
     }
         
         return (
-            <div className="flex flex-col md:flex-row gap-8 justify-center items-center p-8 bg-white rounded-2xl shadow-xl max-w-4xl mx-auto border-t-8 border-gray-300">
+            <div className= "flex justify-center items-center min-h-screen">
+                <div className="flex flex-col md:flex-row gap-8 justify-center items-center p-8 bg-white rounded-2xl shadow-xl max-w-4xl mx-auto border-t-8 border-gray-300">
                 <button
                     onClick={() => setRegistrationType('cuidador')}
                     className="hover:cursor-pointer flex-1 w-full bg-indigo-600 text-white p-8 rounded-xl text-2xl font-bold hover:bg-indigo-700 transition-all transform hover:scale-[1.02] shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-300"
@@ -72,6 +79,8 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
                     <p className="text-base font-normal mt-2 opacity-95">Para pacientes que se registram diretamente.</p>
                 </button>
             </div>
+            </div>
+            
         );
     };
 
