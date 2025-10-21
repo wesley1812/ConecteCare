@@ -1,14 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useCadastro } from "../context/cadastro-context";
 import { formSchemaPaciente, type FormSchemaPaciente } from "../schemas/forms-schema";
 import type { Paciente } from "../types/interfaces";
 
 interface FormularioPacienteProps {
-    onAdd: (paciente: Paciente) => void;
     onTermoOpen: () => void;
 }
 
-export function FormularioPaciente({ onAdd, onTermoOpen }: FormularioPacienteProps) {
+export function FormularioPaciente({ onTermoOpen }: FormularioPacienteProps) {
+    const { savePaciente } = useCadastro();
+    
     const {
         register,
         handleSubmit,
@@ -17,7 +19,7 @@ export function FormularioPaciente({ onAdd, onTermoOpen }: FormularioPacientePro
         resolver: zodResolver(formSchemaPaciente),
     });
 
-    function onSubmit({
+    async function onSubmit({
         nome,
         idade,
         cpfPaciente,
@@ -25,7 +27,7 @@ export function FormularioPaciente({ onAdd, onTermoOpen }: FormularioPacientePro
         telefone,
         patologia,
         aceitarTermo
-    }: FormSchemaPaciente) : void {
+    }: FormSchemaPaciente) : Promise<void> {
         const paciente: Paciente = {
             id: crypto.randomUUID(),
             nome,
@@ -36,8 +38,7 @@ export function FormularioPaciente({ onAdd, onTermoOpen }: FormularioPacientePro
             patologia,
             aceitarTermo
         };
-
-        onAdd(paciente);
+            await savePaciente(paciente);
     }
 
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-150 ease-in-out";
