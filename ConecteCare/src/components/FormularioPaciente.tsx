@@ -1,22 +1,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useCadastro } from "../context/cadastro-context";
-import { formSchemaPaciente, type FormSchemaPaciente } from "../schemas/forms-schema";
+import { useCadastro } from "../context/cadastro-context.tsx";
+import { type FormSchemaPaciente, formSchemaPaciente } from "../schemas/forms-schema";
 import type { Paciente } from "../types/interfaces";
 
 interface FormularioPacienteProps {
     onTermoOpen: () => void;
+    onSuccess: () => void;
 }
 
-export function FormularioPaciente({ onTermoOpen }: FormularioPacienteProps) {
+export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacienteProps) {
     const { savePaciente } = useCadastro();
     
     const {
         register,
         handleSubmit,
-        formState: { errors }
+        formState: { errors },
     } = useForm<FormSchemaPaciente>({
-        resolver: zodResolver(formSchemaPaciente),
+        resolver: zodResolver(formSchemaPaciente)
     });
 
     async function onSubmit({
@@ -38,7 +39,9 @@ export function FormularioPaciente({ onTermoOpen }: FormularioPacienteProps) {
             patologia,
             aceitarTermo
         };
-            await savePaciente(paciente);
+        await savePaciente(paciente);
+        
+        onSuccess();
     }
 
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-150 ease-in-out";

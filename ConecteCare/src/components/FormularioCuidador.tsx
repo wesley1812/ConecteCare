@@ -6,15 +6,16 @@ import type { Cuidador } from "../types/interfaces";
 
 interface FormularioCuidadorProps {
   onTermoOpen: () => void;
+  onSuccess: () => void;
 }
 
-export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
+export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidadorProps) {
     const { saveCuidador } = useCadastro();
     
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors }
     } = useForm<FormSchemaCuidador>({
         resolver: zodResolver(formSchemaCuidador),
     });
@@ -46,6 +47,7 @@ export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
     };
         await saveCuidador(cuidador);
 
+        onSuccess();
     }   
 
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out";

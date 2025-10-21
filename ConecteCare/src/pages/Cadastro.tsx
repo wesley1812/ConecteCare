@@ -1,41 +1,37 @@
 import { useState } from "react";
-import {Layout} from "../components/Layout";
-import {FormularioCuidador} from "../components/FormularioCuidador";
-import { FormularioPaciente } from "../components/FormularioPaciente";
-import type { FormSchemaCuidador, FormSchemaPaciente } from "../schemas/forms-schema";
-import { Termo } from "../components/Recursos";
+import {Layout} from "../components/Layout.tsx"; 
+import {FormularioCuidador} from "../components/FormularioCuidador.tsx"; 
+import { FormularioPaciente } from "../components/FormularioPaciente.tsx";
+import { Termo } from "../components/Recursos.tsx";
 
 interface MenuCadastroProps {
     navigate: (path: string) => void;
 }
 
 export function MenuCadastro({ navigate }: MenuCadastroProps) {
+    
     const [registrationType, setRegistrationType] = useState<'cuidador' | 'paciente' | null>(null);
     const [message, setMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     const [, setTermoType] = useState<'cuidador' | 'paciente'>('cuidador');
 
-    const handleRegistration = (data: FormSchemaCuidador | FormSchemaPaciente) => {
-        console.log(`Dados de ${registrationType} enviados:`, data);
-        
-        const typeLabel = registrationType === 'cuidador' ? 'Cuidador' : 'Paciente';
+    const handleSuccess = (type: 'cuidador' | 'paciente') => {
+        const typeLabel = type === 'cuidador' ? 'Cuidador' : 'Paciente';
         setMessage(`Cadastro de ${typeLabel} realizado com sucesso! Redirecionando...`);
 
-        if (registrationType == 'cuidador')
+        const targetPath = type === 'cuidador' ? '/menu-cuidador' : '/menu-paciente';
+
         setTimeout(() => {
             setMessage(''); 
-            navigate('/menu-cuidador');
-        }, 2000);
-        else
-        setTimeout(() => {
-            setMessage(''); 
-            navigate('/menu-paciente');
+            navigate(targetPath);
         }, 2000);
     };
 
     const handleTermoOpen = () => {
-        setTermoType(registrationType === 'cuidador' ? 'cuidador' : 'paciente');
+        if (registrationType) {
+            setTermoType(registrationType);
+        }
         setIsModalOpen(true);
     };
     
@@ -47,16 +43,16 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
     if (registrationType === 'cuidador') {
         return (
             <FormularioCuidador 
-                onAdd={handleRegistration} 
                 onTermoOpen={handleTermoOpen} 
+                onSuccess={() => handleSuccess('cuidador')} 
             />
         );
     }
     if (registrationType === 'paciente') {
         return (
             <FormularioPaciente 
-                onAdd={handleRegistration} 
                 onTermoOpen={handleTermoOpen} 
+                onSuccess={() => handleSuccess('paciente')}
             />
         );
     }
@@ -78,7 +74,7 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
                     Sou Paciente
                     <p className="text-base font-normal mt-2 opacity-95">Para pacientes que se registram diretamente.</p>
                 </button>
-            </div>
+                </div>
             </div>
             
         );
