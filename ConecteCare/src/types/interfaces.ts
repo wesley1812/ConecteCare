@@ -132,9 +132,10 @@ export interface Cuidador {
     email: string;
     telefone: string;
     parentesco: string;
-    residencia: File;
-    foto: File;
+    // residencia: File;
+    // foto: File;
     aceitarTermo: boolean;
+    userID:number;
   };
 
 export interface Paciente {
@@ -145,5 +146,6 @@ export interface Paciente {
     email: string;
     telefone: string;
     patologia: string;
-    aceitarTermo: boolean;  
+    aceitarTermo: boolean;
+    userID:number;
   };

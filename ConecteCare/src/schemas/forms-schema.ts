@@ -16,10 +16,10 @@ export const formSchemaCuidador = z.object({
         .regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Telefone inválido"),
     parentesco: z.string()
         .min(1, "Parentesco é obrigatório"),
-    residencia: z.instanceof(Image,
-        { message: "Comprovante de Residência é obrigatório" }),
-    foto: z.instanceof(Image,
-        { message: "Foto 3x4 é obrigatória" }),
+    // residencia: z.instanceof(Image,
+    //     { message: "Comprovante de Residência é obrigatório" }),
+    // foto: z.instanceof(Image,
+    //     { message: "Foto 3x4 é obrigatória" }),
     aceitarTermo: z.boolean()
         .refine((val: boolean) => val === true,
         { message: "Você deve aceitar o Termo de Compromisso" }),

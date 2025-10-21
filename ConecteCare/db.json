@@ -19,7 +19,29 @@
       "telefone": "(11) 99999-9999",
       "patologia": "dor no joelho",
       "aceitarTermo": true
+    },
+    {
+      "id": "64923841-ed39-4930-87c7-f9900ef65524",
+      "nome": "Gabriel Wince",
+      "idade": 25,
+      "cpfPaciente": "444.444.444-44",
+      "email": "gabriel@hotmail.com",
+      "telefone": "(11) 99999-9999",
+      "patologia": "dor no joelho",
+      "aceitarTermo": true
     }
   ],
-  "cuidador": []
+  "cuidador": [
+    {
+      "id": "d938b6a7-33d6-46c1-a00c-da47a83c892e",
+      "nome": "Wesley Silva de Andrade",
+      "idade": 23,
+      "cpf": "441.268.578-00",
+      "cpfPaciente": "257.938.818-40",
+      "email": "wda1812@hotmail.com",
+      "telefone": "(11) 96113-0931",
+      "parentesco": "sa",
+      "aceitarTermo": true
+    }
+  ]
 }

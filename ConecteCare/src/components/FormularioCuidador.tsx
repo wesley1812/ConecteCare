@@ -28,8 +28,8 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
       email,
       telefone,
       parentesco,
-      residencia,
-      foto,
+    //   residencia,
+    //   foto,
       aceitarTermo
     } : FormSchemaCuidador): Promise<void> {
         const cuidador: Cuidador = {
@@ -41,8 +41,8 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
             email,
             telefone,
             parentesco,
-            residencia,
-            foto,
+            // residencia,
+            // foto,
             aceitarTermo,
     };
         await saveCuidador(cuidador);
@@ -105,7 +105,7 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                     {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
                 </div>
 
-                <div>
+                {/* <div>
                     <label htmlFor="residencia" className={labelClass}>Comprovante de Residência (Foto):</label>
                     <input type="file" id="residencia" {...register("residencia")} accept="image/*" className={inputClass} />
                     {errors.residencia && <p className={errorClass}>{errors.residencia.message}</p>}
@@ -115,7 +115,7 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                     <label htmlFor="foto" className={labelClass}>Foto 3x4:</label>
                     <input type="file" id="foto" {...register("foto")} accept="image/*" className={inputClass} />
                     {errors.foto && <p className={errorClass}>{errors.foto.message}</p>}
-                </div>
+                </div> */}
             </div>
 
             <div className="mt-8 border-t pt-6">
