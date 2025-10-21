@@ -6,7 +6,7 @@ import {CardConsulta} from "../components/CardSaude";
 import type { Patient, HealthIndicatorType, AppointmentType } from "../types/interfaces";
 
 
-const MenuCuidador = () => {
+export function MenuCuidador() {
   const { id } = useParams<{ id: string }>();
 
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -126,5 +126,3 @@ const MenuCuidador = () => {
     </Layout>
   );
 };
-
-export default MenuCuidador;

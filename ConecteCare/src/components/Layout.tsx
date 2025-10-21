@@ -12,8 +12,9 @@ export function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
     { name: "Quem Somos", href: "/quem-somos" },
     { name: "FAQ", href: "/faq" },
     { name: "Contato", href: "/contato" },
-    { name: "Cadastro do Cuidador", href: "/cadastro-cuidador" },
-    { name: "Menu do Cuidador", href: "/menu-cuidador" },
+    { name: "Login", href: "/login" },
+    { name: "Menu de Cadastro", href: "/cadastro" },
+    // { name: "Menu do Cuidador", href: "/menu-cuidador" },
     { name: "Teleconsulta", href: "/teleconsulta" },
   ];
 

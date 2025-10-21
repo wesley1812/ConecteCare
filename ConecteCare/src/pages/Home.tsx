@@ -3,7 +3,7 @@ import {Layout} from "../components/Layout";
 import {VantagensConecte} from "../components/Recursos";
 import {Depoimento} from "../components/Recursos";
 
-const Home = () => {
+export function Home() {
   const navigate = useNavigate();
 
   const vantagens = [
@@ -40,7 +40,7 @@ const Home = () => {
   ];
 
   const handleCadastroClick = () => {
-    navigate("/cadastro-cuidador");
+    navigate("/cadastro");
   };
 
   return (
@@ -53,9 +53,9 @@ const Home = () => {
           <p className="text-xl mb-8 max-w-3xl mx-auto">
             Uma plataforma intuitiva para melhorar o cuidado médico e reduzir faltas em consultas.
           </p>
-          <button
+          <button 
             onClick={handleCadastroClick}
-            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            className="hover:cursor-pointer bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
           >
             Comece Agora
           </button>
@@ -100,5 +100,4 @@ const Home = () => {
   );
 };
 
-export default Home;
 

@@ -6,7 +6,7 @@ import gabrielImage from "/assets/midia/gabriel.jpg";
 import type { TeamMember } from "../types/interfaces";
 
 
-const QuemSomos = () => {
+export function QuemSomos() {
   const teamMembers: TeamMember[] = [
     {
       name: "João Pedro Scarpin Carvalho",
@@ -64,5 +64,3 @@ const QuemSomos = () => {
     </Layout>
   );
 };
-
-export default QuemSomos;

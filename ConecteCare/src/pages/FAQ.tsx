@@ -3,7 +3,7 @@ import {Layout} from "../components/Layout";
 import {FaqItemComponent} from "../components/Recursos";
 import type { FAQItem } from "../types/interfaces";
 
-const FAQ = () => {
+export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const faqInfo: FAQItem[] = [
@@ -64,5 +64,3 @@ const FAQ = () => {
     </Layout>
   );
 };
-
-export default FAQ;

@@ -108,23 +108,6 @@ export interface DepoimentoProps {
   author: string;
 }
 
-export interface FormProps {
-  formData: {
-    nome: string;
-    idade: number;
-    cpf: string;
-    cpfPaciente: string;
-    email: string;
-    telefone: string;
-    parentesco: string;
-    aceitarTermo: boolean;
-  };
-  
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onTermoOpen: () => void;
-}
-
 export interface HeaderProps {
   isMenuOpen: boolean;
   toggleMenu: () => void;
@@ -139,3 +122,28 @@ export interface TeleconsultaData {
   patientName: string;
   patientAge: number;
 }
+
+export interface Cuidador {
+    id: string;
+    nome: string;
+    idade: number;
+    cpf: string;
+    cpfPaciente: string;
+    email: string;
+    telefone: string;
+    parentesco: string;
+    residencia: File;
+    foto: File;
+    aceitarTermo: boolean;
+  };
+
+export interface Paciente {
+    id: string;
+    nome: string;
+    idade: number;
+    cpfPaciente: string;
+    email: string;
+    telefone: string;
+    patologia: string;
+    aceitarTermo: boolean;  
+  };
