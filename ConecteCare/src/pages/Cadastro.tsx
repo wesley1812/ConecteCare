@@ -1,6 +1,6 @@
 import { useState } from "react";
-import {Layout} from "../components/Layout.tsx"; 
-import {FormularioCuidador} from "../components/FormularioCuidador.tsx"; 
+import { Layout } from "../components/Layout.tsx"; 
+import { FormularioCuidador } from "../components/FormularioCuidador.tsx"; 
 import { FormularioPaciente } from "../components/FormularioPaciente.tsx";
 import { Termo } from "../components/Recursos.tsx";
 

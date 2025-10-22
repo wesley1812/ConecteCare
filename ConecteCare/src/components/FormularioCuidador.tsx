@@ -10,12 +10,13 @@ interface FormularioCuidadorProps {
 }
 
 export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidadorProps) {
-    const { saveCuidador } = useCadastro();
+    const { saveCuidador, isCpfCuidadorCadastrado } = useCadastro();
     
     const {
         register,
         handleSubmit,
-        formState: { errors }
+        formState: { errors },
+        setError,
     } = useForm<FormSchemaCuidador>({
         resolver: zodResolver(formSchemaCuidador),
     });
@@ -26,19 +27,29 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
       cpf,
       cpfPaciente,
       email,
+      senha,
       telefone,
       parentesco,
     //   residencia,
     //   foto,
       aceitarTermo
     } : FormSchemaCuidador): Promise<void> {
+        if (isCpfCuidadorCadastrado(cpf)) {
+            setError("cpf", {
+                type: "manual",
+                message: "Este CPF já está cadastrado como cuidador.",
+            });
+            return; // Interrompe o processo de cadastro
+        }
         const cuidador: Cuidador = {
             id: crypto.randomUUID(),
+            // userID,
             nome,
             idade,
             cpf,
             cpfPaciente,
             email,
+            senha,
             telefone,
             parentesco,
             // residencia,
@@ -91,6 +102,12 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                     <label htmlFor="email" className={labelClass}>Email do Cuidador:</label>
                     <input type="email" id="email" {...register("email")} className={inputClass} />
                     {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+                </div>
+
+                <div>
+                    <label htmlFor="senha" className={labelClass}>Senha do Cuidador:</label>
+                    <input type="password" id="senha" {...register("senha")} className={inputClass} />
+                    {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
                 </div>
 
                 <div>

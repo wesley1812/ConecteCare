@@ -12,6 +12,8 @@ export const formSchemaCuidador = z.object({
         .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF do Paciente inválido"),
     email: z.string()
         .email("Email inválido"),
+    senha: z.string()
+        .min(6, "Senha deve ter pelo menos 6 caracteres"),
     telefone: z.string()
         .regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Telefone inválido"),
     parentesco: z.string()
@@ -37,6 +39,8 @@ export const formSchemaPaciente = z.object({
         .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF do Paciente inválido"),
     email: z.string()
         .email("Email inválido"),
+    senha: z.string()
+        .min(6, "Senha deve ter pelo menos 6 caracteres"),
     telefone: z.string()
         .regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Telefone inválido"),
     patologia: z.string()

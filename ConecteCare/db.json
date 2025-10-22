@@ -1,46 +1,16 @@
 {
-  "pacientes": [
-    {
-      "id": "22dcc9d4-9015-4bf6-8274-95620876007b",
-      "nome": "Wesley Silva de Andrade",
-      "idade": 25,
-      "cpfPaciente": "257.938.818-40",
-      "email": "wda1812@hotmail.com",
-      "telefone": "(11) 96113-0931",
-      "patologia": "nada",
-      "aceitarTermo": true
-    },
-    {
-      "id": "71e021e7-4391-4614-a6bc-64cbf4217a55",
-      "nome": "Gabriel Wince",
-      "idade": 25,
-      "cpfPaciente": "444.444.444-44",
-      "email": "gabriel@hotmail.com",
-      "telefone": "(11) 99999-9999",
-      "patologia": "dor no joelho",
-      "aceitarTermo": true
-    },
-    {
-      "id": "64923841-ed39-4930-87c7-f9900ef65524",
-      "nome": "Gabriel Wince",
-      "idade": 25,
-      "cpfPaciente": "444.444.444-44",
-      "email": "gabriel@hotmail.com",
-      "telefone": "(11) 99999-9999",
-      "patologia": "dor no joelho",
-      "aceitarTermo": true
-    }
-  ],
+  "pacientes": [],
   "cuidador": [
     {
-      "id": "d938b6a7-33d6-46c1-a00c-da47a83c892e",
+      "id": "bebf20d3-c398-4439-9422-f8c41bed275f",
       "nome": "Wesley Silva de Andrade",
-      "idade": 23,
+      "idade": 18,
       "cpf": "441.268.578-00",
       "cpfPaciente": "257.938.818-40",
       "email": "wda1812@hotmail.com",
+      "senha": "12345678",
       "telefone": "(11) 96113-0931",
-      "parentesco": "sa",
+      "parentesco": "Filho",
       "aceitarTermo": true
     }
   ]

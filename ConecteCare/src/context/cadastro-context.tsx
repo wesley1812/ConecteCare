@@ -8,107 +8,130 @@ import {
 
 import type { Paciente, Cuidador } from "../types/interfaces";
 
-interface CadastroContextValues {
+interface CadastroContextProps {
   paciente: Paciente[];
   cuidador: Cuidador[]
-  loading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-  savePaciente: (input: Omit<Paciente, "id" | "userID">) => void;
-  removePaciente: (id: ID) => Promise<void>;
-  saveCuidador: (input: Omit<Cuidador, "id" | "userID">) => void;
-  removeCuidador: (id: ID) => Promise<void>;
-  clearCache: () => void;
+  savePaciente: (paciente: Paciente) => void;
+  removePaciente: (id: string) => void;
+  saveCuidador: (cuidador: Cuidador) => void;
+  removeCuidador: (id: string) => void;
+  isCpfCuidadorCadastrado: (cpf: string) => boolean;
+  isCpfPacienteCadastrado: (cpf: string) => boolean;
 }
 
-const CadastroContext = createContext<CadastroContextValues | null>(null);
-const API = import.meta.env.VITE_API_URL as string;
+const CadastroContext = createContext<CadastroContextProps | null>(null);
 
 export function CadastroProvider({ children }: { children: React.ReactNode }) {
-  const {user} = useAuth();
   const [paciente, setPaciente] = useState<Paciente[]>([]);
   const [cuidador, setCuidador] = useState<Cuidador[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const refresh = useCallback(async () => {
-      if (!user) {
-        setPaciente([]);
-        return;
-      }
-      try{
-        setLoading(true);
-        setError(null);
-        const res = await fetch(`${API}/pacientes?userId=${user.id}`, {
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!res.ok) throw new Error("Falha ao buscar pacientes");
-        const data: Paciente[] = await res.json();
-        setPaciente(data);
-      } catch (err : any) {
-        setError(error.message ?? "Erro ao carregar pacientes");
-      } finally {
-        setLoading(false);
-      }
-    }, [user]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
-
-
-  const savePaciente = useCallback(async (input: Omit<Paciente, "id" | "userID">) => {
-    if (!user) return;
-    const res = await fetch(`${API}/pacientes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...input, userID: user.id }),
+  const fetchPacientes = useCallback(async () => {
+    const response = await fetch("http://localhost:4000/pacientes", {
+      headers: {
+        "Content-type": "application/json",
+      },
+      method: "GET",
     });
-    if (!res.ok) throw new Error("Falha ao salvar paciente");
-    await refresh();
-  }, [user, refresh]);
 
-  const removePaciente = useCallback(async (id: ID) => {
-    await fetch(`${API}/pacientes/${id}`, {method: "DELETE",});
-    if (!res.ok) throw new Error("Falha ao remover paciente");
-    await refresh();
-  }, [refresh]);
+    const data: Paciente[] = await response.json();
 
-  const clearCache = useCallback(() => {
-    setPaciente([]);
-    setError(null);
-  }, []);
+    setPaciente(data);
+  }, []); 
 
-  const value = useMemo(
-    () => ({ paciente, loading, error, refresh, savePaciente, removePaciente, clearCache }),
-    [paciente, loading, error, refresh, savePaciente, removePaciente, clearCache]
-  );
-
-
-  const saveCuidador = useCallback(async (input: Omit<Cuidador, "id" | "userID">) => {
-    if (!user) return;
-    const res = await fetch(`${API}/cuidador`, {
+  const savePaciente = useCallback(async (paciente: Paciente) => {
+    await fetch("http://localhost:4000/pacientes", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...input, userID: user.id }),
+      body: JSON.stringify(paciente),
+      headers: {
+         "Content-type": "application/json",
+      },
     });
-    if (!res.ok) throw new Error("Falha ao salvar cuidador");
-    await refresh();
-  }, [user, refresh]); 
 
-  const removeCuidador = useCallback(async (id: ID) => {
-      const res = await fetch(`${API}/cuidador/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Falha ao remover cuidador");
-      await refresh();
-    }, [refresh]);
+    await fetchPacientes();
+  }, [fetchPacientes]); 
+
+  const removePaciente = useCallback(async (id: string) => {
+    await fetch(`http://localhost:4000/pacientes/${id}`, {
+      method: "DELETE",
+    });
+
+    await fetchPacientes();
+  }, [fetchPacientes]);
+
+  const fetchCuidador = useCallback(async () => {
+    const response = await fetch("http://localhost:4000/cuidador", {
+      headers: {
+        "Content-type": "application/json",
+      },
+      method: "GET",
+    });
+
+    const data: Cuidador[] = await response.json();
+
+    setCuidador(data);
+  }, []); 
+
+  const saveCuidador = useCallback(async (cuidador: Cuidador) => {
+    await fetch("http://localhost:4000/cuidador", {
+      method: "POST",
+      body: JSON.stringify(cuidador),
+      headers: {
+         "Content-type": "application/json",
+      },
+    });
+
+    await fetchCuidador();
+  }, [fetchCuidador]); 
+
+  const removeCuidador = useCallback(async (id: string) => {
+    await fetch(`http://localhost:4000/cuidador/${id}`, {
+      method: "DELETE",
+    });
+
+    await fetchCuidador();
+  }, [fetchCuidador]);
+
+  useEffect(() => {
+    fetchPacientes();
+  }, [fetchPacientes]);
+
+  useEffect(() => {
+    fetchCuidador();
+  }, [fetchCuidador]);
+
+  const isCpfCuidadorCadastrado = useCallback((cpf: string): boolean => {
+    return cuidador.some(c => c.cpf === cpf); 
+  }, [cuidador]);
+
+  const isCpfPacienteCadastrado = useCallback((cpf: string): boolean => {
+    return paciente.some(p => p.cpfPaciente === cpf);
+  }, [paciente]);
+
 
   return (
-    <CadastroContext.Provider value={value}>{children} </CadastroContext.Provider>
+    <CadastroContext.Provider
+      value={{
+        paciente,
+        savePaciente,
+        removePaciente,
+        isCpfPacienteCadastrado,
+        cuidador,
+        saveCuidador,
+        removeCuidador,
+        isCpfCuidadorCadastrado,
+      }}
+    >
+      {children}
+    </CadastroContext.Provider>
   );
 }
 
 export function useCadastro() {
-  const ctx = useContext(CadastroContext);
+  const ctx = useContext<CadastroContextProps | null>(CadastroContext);
+
   if (!ctx) {
     throw new Error("useCadastro deve ser usado dentro de CadastroProvider");
   }
+
   return ctx;
 }

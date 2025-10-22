@@ -10,12 +10,14 @@ interface FormularioPacienteProps {
 }
 
 export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacienteProps) {
-    const { savePaciente } = useCadastro();
+    const { savePaciente, isCpfPacienteCadastrado } = useCadastro();
+
     
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setError,
     } = useForm<FormSchemaPaciente>({
         resolver: zodResolver(formSchemaPaciente)
     });
@@ -25,16 +27,25 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
         idade,
         cpfPaciente,
         email,
+        senha,
         telefone,
         patologia,
         aceitarTermo
     }: FormSchemaPaciente) : Promise<void> {
+        if (isCpfPacienteCadastrado(cpfPaciente)) {
+            setError("cpfPaciente", {
+                type: "manual",
+                message: "Este CPF já está cadastrado como paciente.",
+            });
+            return; // Interrompe o processo de cadastro
+        }
         const paciente: Paciente = {
             id: crypto.randomUUID(),
             nome,
             idade,
             cpfPaciente,
             email,
+            senha,
             telefone,
             patologia,
             aceitarTermo
@@ -78,6 +89,12 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                     <label htmlFor="paciente-email" className={labelClass}>Email:</label>
                     <input type="email" id="paciente-email" {...register("email")} className={inputClass} />
                     {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+                </div>
+
+                <div>
+                    <label htmlFor="paciente-senha" className={labelClass}>Senha:</label>
+                    <input type="password" id="paciente-senha" {...register("senha")} className={inputClass} />
+                    {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
                 </div>
 
                 <div>
