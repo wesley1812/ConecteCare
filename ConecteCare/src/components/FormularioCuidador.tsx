@@ -6,15 +6,17 @@ import type { Cuidador } from "../types/interfaces";
 
 interface FormularioCuidadorProps {
   onTermoOpen: () => void;
+  onSuccess: () => void;
 }
 
-export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
-    const { saveCuidador } = useCadastro();
+export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidadorProps) {
+    const { saveCuidador, isCpfCuidadorCadastrado } = useCadastro();
     
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setError,
     } = useForm<FormSchemaCuidador>({
         resolver: zodResolver(formSchemaCuidador),
     });
@@ -25,27 +27,38 @@ export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
       cpf,
       cpfPaciente,
       email,
+      senha,
       telefone,
       parentesco,
-      residencia,
-      foto,
+    //   residencia,
+    //   foto,
       aceitarTermo
     } : FormSchemaCuidador): Promise<void> {
+        if (isCpfCuidadorCadastrado(cpf)) {
+            setError("cpf", {
+                type: "manual",
+                message: "Este CPF já está cadastrado como cuidador.",
+            });
+            return; // Interrompe o processo de cadastro
+        }
         const cuidador: Cuidador = {
             id: crypto.randomUUID(),
+            // userID,
             nome,
             idade,
             cpf,
             cpfPaciente,
             email,
+            senha,
             telefone,
             parentesco,
-            residencia,
-            foto,
+            // residencia,
+            // foto,
             aceitarTermo,
     };
         await saveCuidador(cuidador);
 
+        onSuccess();
     }   
 
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out";
@@ -92,6 +105,12 @@ export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
                 </div>
 
                 <div>
+                    <label htmlFor="senha" className={labelClass}>Senha do Cuidador:</label>
+                    <input type="password" id="senha" {...register("senha")} className={inputClass} />
+                    {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
+                </div>
+
+                <div>
                     <label htmlFor="parentesco" className={labelClass}>Relação com o Paciente:</label>
                     <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} />
                     {errors.parentesco && <p className={errorClass}>{errors.parentesco.message}</p>}
@@ -103,7 +122,7 @@ export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
                     {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
                 </div>
 
-                <div>
+                {/* <div>
                     <label htmlFor="residencia" className={labelClass}>Comprovante de Residência (Foto):</label>
                     <input type="file" id="residencia" {...register("residencia")} accept="image/*" className={inputClass} />
                     {errors.residencia && <p className={errorClass}>{errors.residencia.message}</p>}
@@ -113,7 +132,7 @@ export function FormularioCuidador({ onTermoOpen }: FormularioCuidadorProps) {
                     <label htmlFor="foto" className={labelClass}>Foto 3x4:</label>
                     <input type="file" id="foto" {...register("foto")} accept="image/*" className={inputClass} />
                     {errors.foto && <p className={errorClass}>{errors.foto.message}</p>}
-                </div>
+                </div> */}
             </div>
 
             <div className="mt-8 border-t pt-6">

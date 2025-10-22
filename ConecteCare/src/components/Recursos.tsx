@@ -1,26 +1,37 @@
-import type { VantagensConecteProps } from "../types/interfaces";
-import type { DepoimentoProps } from "../types/interfaces";
+import type { DepoimentoProps, VantagemProps } from "../types/interfaces";
 import type { FAQItemProps } from '../types/interfaces';
 import type { TermoProps } from "../types/interfaces";
 
-export function VantagensConecte({ title, description, icon }: VantagensConecteProps) {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md text-center">
-      <div className="text-4xl mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
-    </div>
-  );
-};
+export const VantagensConecte = ({ title, description, icon }: VantagemProps) => (
+    <div className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl border border-gray-100 
+                    hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 
+                    h-full flex flex-col items-start ease-in-out cursor-pointer">
+        
+        <div className="text-4xl mb-6 bg-gradient-to-r from-blue-500 to-cyan-500 p-4 rounded-xl shadow-lg transform rotate-[-4deg] group-hover:rotate-0 transition-transform duration-500">
+            {icon}
+        </div>
 
-export function Depoimento({ text, author }: DepoimentoProps) {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <p className="text-gray-700 italic mb-4">"{text}"</p>
-      <p className="text-gray-900 font-semibold">- {author}</p>
+        <h3 className="text-2xl font-extrabold text-gray-900 mb-3">{title}</h3>
+        <p className="text-gray-600 flex-grow text-base leading-relaxed">{description}</p>
     </div>
-  );
-};
+);
+
+export const Depoimento = ({ text, author }: DepoimentoProps) => (
+    <div className="bg-gray-100 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col justify-between border-l-4 border-cyan-500">
+        
+        {/* Aspas grandes e estilizadas */}
+        <svg className="w-10 h-10 text-cyan-500 mb-4 opacity-75" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.473 21.84c-3.235 0-5.748-1.577-7.533-4.73C4.157 14.156 3 11.238 3 8.32V3h6.587v5.32c0 1.25.178 2.22.535 2.91.356.687 1.05 1.03 2.08 1.03 1.107 0 1.838-.343 2.195-1.03.356-.69.534-1.66.534-2.91V3H21v5.32c0 2.918-1.157 5.836-3.09 8.783-1.785 3.153-4.298 4.73-7.537 4.73z"/>
+        </svg>
+
+        <blockquote className="text-gray-800 mb-6 text-xl font-medium leading-relaxed italic">
+            {text}
+        </blockquote>
+        <p className="font-extrabold text-lg text-blue-700">
+            — {author}
+        </p>
+    </div>
+);
 
 export function FaqItemComponent({ item, isOpen, onToggle }: FAQItemProps) {
   console.log("Renderizando FaqItem:", item.question);

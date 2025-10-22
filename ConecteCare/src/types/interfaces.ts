@@ -24,11 +24,18 @@ export interface TermoProps {
   children: React.ReactNode;
 }
 
-export interface VantagensConecteProps {
-  title: string;
-  description: string;
-  icon: string;
+export interface VantagemProps {
+    title: string;
+    description: string;
+    icon: string;
 }
+
+
+export interface DepoimentoProps {
+    text: string;
+    author: string;
+}
+
 
 export interface ContactInfo {
   title: string;
@@ -103,11 +110,6 @@ export interface IndicadorSaudeProps {
   indicador: IndicadorSaude;
 }
 
-export interface DepoimentoProps {
-  text: string;
-  author: string;
-}
-
 export interface HeaderProps {
   isMenuOpen: boolean;
   toggleMenu: () => void;
@@ -130,11 +132,13 @@ export interface Cuidador {
     cpf: string;
     cpfPaciente: string;
     email: string;
+    senha: string;
     telefone: string;
     parentesco: string;
-    residencia: File;
-    foto: File;
+    // residencia: File;
+    // foto: File;
     aceitarTermo: boolean;
+    // userID:number;
   };
 
 export interface Paciente {
@@ -143,7 +147,9 @@ export interface Paciente {
     idade: number;
     cpfPaciente: string;
     email: string;
+    senha: string;
     telefone: string;
     patologia: string;
-    aceitarTermo: boolean;  
+    aceitarTermo: boolean;
+    // userID:number;
   };

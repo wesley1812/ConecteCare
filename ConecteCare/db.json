@@ -1,11 +1,17 @@
 {
-  "users": [
-    { "id": 1, "name": "leandro" },
-    { "id": 2, "name": "joao" }
-  ],
-  "workouts": [
-    { "id": 1, "userId": 1, "title": "Corrida leve", "duration": 30, "intensity": 3, "date": "2025-08-10" },
-    { "id": 2, "userId": 1, "title": "Peito e tríceps", "duration": 45, "intensity": 4, "date": "2025-08-11" },
-    { "id": 3, "userId": 2, "title": "Costas e bíceps", "duration": 50, "intensity": 4, "date": "2025-08-09" }
+  "pacientes": [],
+  "cuidador": [
+    {
+      "id": "bebf20d3-c398-4439-9422-f8c41bed275f",
+      "nome": "Wesley Silva de Andrade",
+      "idade": 18,
+      "cpf": "441.268.578-00",
+      "cpfPaciente": "257.938.818-40",
+      "email": "wda1812@hotmail.com",
+      "senha": "12345678",
+      "telefone": "(11) 96113-0931",
+      "parentesco": "Filho",
+      "aceitarTermo": true
+    }
   ]
 }

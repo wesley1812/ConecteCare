@@ -15,6 +15,8 @@ interface CadastroContextProps {
   removePaciente: (id: string) => void;
   saveCuidador: (cuidador: Cuidador) => void;
   removeCuidador: (id: string) => void;
+  isCpfCuidadorCadastrado: (cpf: string) => boolean;
+  isCpfPacienteCadastrado: (cpf: string) => boolean;
 }
 
 const CadastroContext = createContext<CadastroContextProps | null>(null);
@@ -97,16 +99,26 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
     fetchCuidador();
   }, [fetchCuidador]);
 
-  
+  const isCpfCuidadorCadastrado = useCallback((cpf: string): boolean => {
+    return cuidador.some(c => c.cpf === cpf); 
+  }, [cuidador]);
+
+  const isCpfPacienteCadastrado = useCallback((cpf: string): boolean => {
+    return paciente.some(p => p.cpfPaciente === cpf);
+  }, [paciente]);
+
+
   return (
     <CadastroContext.Provider
       value={{
         paciente,
         savePaciente,
         removePaciente,
+        isCpfPacienteCadastrado,
         cuidador,
         saveCuidador,
         removeCuidador,
+        isCpfCuidadorCadastrado,
       }}
     >
       {children}

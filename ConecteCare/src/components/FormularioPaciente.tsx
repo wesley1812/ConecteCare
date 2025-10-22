@@ -1,22 +1,25 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useCadastro } from "../context/cadastro-context";
-import { formSchemaPaciente, type FormSchemaPaciente } from "../schemas/forms-schema";
+import { useCadastro } from "../context/cadastro-context.tsx";
+import { type FormSchemaPaciente, formSchemaPaciente } from "../schemas/forms-schema";
 import type { Paciente } from "../types/interfaces";
 
 interface FormularioPacienteProps {
     onTermoOpen: () => void;
+    onSuccess: () => void;
 }
 
-export function FormularioPaciente({ onTermoOpen }: FormularioPacienteProps) {
-    const { savePaciente } = useCadastro();
+export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacienteProps) {
+    const { savePaciente, isCpfPacienteCadastrado } = useCadastro();
+
     
     const {
         register,
         handleSubmit,
-        formState: { errors }
+        formState: { errors },
+        setError,
     } = useForm<FormSchemaPaciente>({
-        resolver: zodResolver(formSchemaPaciente),
+        resolver: zodResolver(formSchemaPaciente)
     });
 
     async function onSubmit({
@@ -24,21 +27,32 @@ export function FormularioPaciente({ onTermoOpen }: FormularioPacienteProps) {
         idade,
         cpfPaciente,
         email,
+        senha,
         telefone,
         patologia,
         aceitarTermo
     }: FormSchemaPaciente) : Promise<void> {
+        if (isCpfPacienteCadastrado(cpfPaciente)) {
+            setError("cpfPaciente", {
+                type: "manual",
+                message: "Este CPF já está cadastrado como paciente.",
+            });
+            return; // Interrompe o processo de cadastro
+        }
         const paciente: Paciente = {
             id: crypto.randomUUID(),
             nome,
             idade,
             cpfPaciente,
             email,
+            senha,
             telefone,
             patologia,
             aceitarTermo
         };
-            await savePaciente(paciente);
+        await savePaciente(paciente);
+        
+        onSuccess();
     }
 
     const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-150 ease-in-out";
@@ -75,6 +89,12 @@ export function FormularioPaciente({ onTermoOpen }: FormularioPacienteProps) {
                     <label htmlFor="paciente-email" className={labelClass}>Email:</label>
                     <input type="email" id="paciente-email" {...register("email")} className={inputClass} />
                     {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+                </div>
+
+                <div>
+                    <label htmlFor="paciente-senha" className={labelClass}>Senha:</label>
+                    <input type="password" id="paciente-senha" {...register("senha")} className={inputClass} />
+                    {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
                 </div>
 
                 <div>
