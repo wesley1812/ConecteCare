@@ -1,12 +1,14 @@
-import {Layout} from "../components/Layout";
-import {TeamCard} from "../components/CardEquipe";
-import joaoImage from "/assets/midia/joao.jpg";
-import wesleyImage from "/assets/midia/wesley.jpg";
-import gabrielImage from "/assets/midia/gabriel.jpg"; 
+import { Layout } from "../components/Layout";
+import { TeamCard } from "../components/CardEquipe";
 import type { TeamMember } from "../types/interfaces";
 
 
+
 export function QuemSomos() {
+  const joaoImage = "/assets/midia/joao.jpg";
+  const wesleyImage = "/assets/midia/wesley.jpg";
+  const gabrielImage = "/assets/midia/gabriel.jpg";
+
   const teamMembers: TeamMember[] = [
     {
       name: "João Pedro Scarpin Carvalho",
@@ -22,7 +24,7 @@ export function QuemSomos() {
       turma: "TDSPX",
       github: "https://github.com/wesley1812",
       linkedin: "https://www.linkedin.com/in/wesley-silva-de-andrade/",
-      image: wesleyImage 
+      image: wesleyImage
     },
     {
       name: "Gabriel Otávio Wince Souza",
@@ -36,11 +38,21 @@ export function QuemSomos() {
 
   return (
     <Layout>
-      <div className="py-12 bg-gray-50 min-h-screen">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Nossa Equipe
-          </h1>
+      <div className="bg-gray-50 min-h-screen">
+
+        <div className="bg-gradient-to-r from-blue-700 to-cyan-600  text-white py-20 sm:py-24 shadow-2xl">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span className="text-cyan-300 uppercase tracking-widest text-lg font-bold">Por Trás do ConecteCare</span>
+            <h1 className="text-5xl sm:text-6xl font-black mt-2 tracking-tighter">
+              Nossa Equipe
+            </h1>
+            <p className="mt-4 text-xl text-blue-200 max-w-3xl mx-auto">
+              Conheça os estudantes de Tecnologia em Desenvolvimento de Sistemas responsáveis pela criação e evolução desta plataforma.
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 pb-16">
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {teamMembers.map((member, index) => (
@@ -48,19 +60,23 @@ export function QuemSomos() {
             ))}
           </div>
 
-          <div className="mt-16 bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-              Sobre o Projeto ConecteCare
-            </h2>
-            <p className="text-gray-700 text-center max-w-4xl mx-auto leading-relaxed">
-              O ConecteCare é uma plataforma desenvolvida por estudantes de Tecnologia em
-              Desenvolvimento de Sistemas para facilitar o acesso à saúde através da telemedicina.
-              Nosso objetivo é conectar pacientes, cuidadores e profissionais de saúde de forma
-              simples e eficiente, garantindo que ninguém perca uma consulta importante.
-            </p>
+          <div className="mt-20 p-8 sm:p-12 rounded-3xl bg-white shadow-3xl border border-gray-100">
+            <div className="text-center">
+              <span className="text-sm font-bold uppercase text-blue-600 tracking-wider">Missão & Visão</span>
+              <h2 className="text-3xl font-black text-gray-900 mt-2 mb-6">
+                Sobre o Projeto ConecteCare
+              </h2>
+              <p className="text-lg text-gray-700 max-w-4xl mx-auto leading-relaxed">
+                O **ConecteCare** é uma plataforma inovadora desenvolvida por estudantes focados em facilitar o acesso à saúde através da telemedicina. Nosso principal objetivo é **conectar pacientes, cuidadores e profissionais de saúde** de forma simples, eficiente e, acima de tudo, segura. Utilizando tecnologia de ponta, garantimos que a distância não seja um obstáculo para o acompanhamento médico importante, promovendo cuidado contínuo e acessível.
+              </p>
+            </div>
+            <div className="mt-8 flex justify-center">
+              <div className="w-16 h-1 bg-cyan-400 rounded-full shadow-lg"></div>
+            </div>
           </div>
+
         </div>
       </div>
     </Layout>
   );
-};
+}
