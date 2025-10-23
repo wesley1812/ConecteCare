@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import type { HeaderProps, LayoutProps } from "../types/interfaces";
 
-// Componente Header
-export function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
+const PhoneIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6.7-6.7A19.79 19.79 0 0 1 2 4.18a2 2 0 0 1 2-2h3.07a2 2 0 0 1 2 1.76 13.75 13.75 0 0 0 .52 2 2 2 0 0 1-.4 2.14l-2.16 2.16a12 12 0 0 0 6.62 6.62l2.16-2.16a2 2 0 0 1 2.14-.4 13.75 13.75 0 0 0 2 .52 2 2 0 0 1 1.76 2z" /></svg>
+);
+const MailIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+);
+
+
+export function Header({ isMenuOpen, toggleMenu }: any) { 
   const location = useLocation();
 
   const navigation = [
@@ -12,64 +18,80 @@ export function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
     { name: "Quem Somos", href: "/quem-somos" },
     { name: "FAQ", href: "/faq" },
     { name: "Contato", href: "/contato" },
-    { name: "Login", href: "/login" },
-    { name: "Menu de Cadastro", href: "/cadastro" },
-    // { name: "Menu do Cuidador", href: "/menu-cuidador" },
-    { name: "Teleconsulta", href: "/teleconsulta" },
+  ];
+
+  const actionNavigation = [
+    { name: "Login", href: "/login", primary: false },
+    { name: "Menu de Cadastro", href: "/cadastro", primary: true },
   ];
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-white sticky top-0 z-40 shadow-xl border-t-4 border-cyan-500">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-20"> 
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-blue-600">
+            <Link to="/" className="text-3xl font-black text-blue-700 tracking-tighter hover:text-cyan-500 transition-colors">
               ConecteCare
             </Link>
           </div>
 
-          {/* Responsividade para Desktop */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-2">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  location.pathname === item.href
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
+                className={`px-4 py-2 rounded-lg text-base font-semibold transition-all duration-200 ${location.pathname === item.href
+                    ? "text-white bg-blue-600 shadow-md hover:bg-blue-700"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+                  }`}
               >
                 {item.name}
               </Link>
             ))}
           </div>
 
-          {/* Esse botão é o de Hamburguer que vai no mobile */}
-          <div className="md:hidden flex items-center">
+          <div className="hidden lg:flex items-center space-x-3">
+            {actionNavigation.map(item => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-lg ${item.primary
+                    ? "bg-cyan-500 text-white hover:bg-cyan-600"
+                    : "border border-blue-600 text-blue-600 hover:bg-blue-50"
+                  }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+
+
+          <div className="lg:hidden flex items-center">
             <button
               onClick={toggleMenu}
               className="p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none"
             >
-              {isMenuOpen ? "✕" : "☰"}
+              {isMenuOpen ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Menu da responsividade: Mobile */}
         {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
-              {navigation.map((item) => (
+          <div className="lg:hidden absolute w-full left-0 bg-white shadow-xl pt-2 pb-4 border-t border-gray-100">
+            <div className="px-2 space-y-2">
+              {navigation.concat(actionNavigation.map(a => ({ ...a, name: a.name }))).map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
                   onClick={toggleMenu}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                    location.pathname === item.href
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700 hover:text-blue-600"
-                  }`}
+                  className={`block mx-4 px-3 py-2 rounded-lg text-base font-semibold transition-colors ${location.pathname === item.href
+                      ? "text-white bg-blue-600 shadow-md"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+                    }`}
                 >
                   {item.name}
                 </Link>
@@ -82,21 +104,57 @@ export function Header({ isMenuOpen, toggleMenu }: HeaderProps) {
   );
 };
 
-// Componente Footer
 export function Footer() {
   return (
-    <footer className="bg-gray-800 text-white">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <p>&copy; 2025 ConecteCare. Todos os direitos reservados.</p>
-          <p className="mt-2">Feito com 💙 pela nossa equipe.</p>
+    <footer className="bg-gray-900 text-white border-t-4 border-cyan-500">
+      <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+
+          <div>
+            <h3 className="text-2xl font-black text-cyan-400 mb-3 tracking-tighter">ConecteCare</h3>
+            <p className="text-gray-400 text-sm max-w-sm mx-auto md:mx-0">
+              A plataforma de telemedicina focada em simplificar o cuidado e a conexão entre pacientes, cuidadores e profissionais de saúde.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold text-white mb-4">Fale Conosco</h3>
+            <ul className="space-y-2 text-gray-400">
+              <li className="flex items-center justify-center md:justify-start">
+                <PhoneIcon />
+                <span className="ml-3">Central: +55 11 3053-5131</span>
+              </li>
+              <li className="flex items-center justify-center md:justify-start">
+                <MailIcon />
+                <span className="ml-3">Suporte: ouvidoria@hcor.com.br</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold text-white mb-4">Acesso Rápido</h3>
+            <ul className="space-y-2">
+              <li><Link to="/guia-usuario" className="text-gray-400 hover:text-cyan-400 transition-colors">Guia do Usuário</Link></li>
+              <li><Link to="/faq" className="text-gray-400 hover:text-cyan-400 transition-colors">Perguntas Frequentes</Link></li>
+              <li><Link to="/login" className="text-gray-400 hover:text-cyan-400 transition-colors">Área do Cliente</Link></li>
+            </ul>
+          </div>
+
         </div>
+
+        <div className="mt-10 pt-6 border-t border-gray-700 text-center">
+          <p className="text-sm text-gray-500">&copy; 2025 ConecteCare. Todos os direitos reservados.</p>
+          <p className="mt-1 text-sm text-gray-500">Desenvolvido com 💙 pela Equipe TDSPX.</p>
+        </div>
+
       </div>
     </footer>
   );
 };
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children }: any) { 
+
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -111,6 +169,3 @@ export function Layout({ children }: LayoutProps) {
     </div>
   );
 };
-
-
-

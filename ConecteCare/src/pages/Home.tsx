@@ -50,7 +50,7 @@ export function Home() {
 
     return (
         <Layout>
-            <section className="bg-gradient-to-br from-blue-900 to-indigo-800 text-white min-h-[85vh] flex items-center relative overflow-hidden">
+            <section className="bg-gradient-to-r from-blue-700 to-cyan-600  text-white min-h-[85vh] flex items-center relative overflow-hidden">
                 <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                     <path fill="#ffffff" fillOpacity="1" d="M0,192L48,197.3C96,203,192,213,288,208C384,203,480,181,576,170.7C672,160,768,160,864,170.7C960,181,1056,203,1152,213.3C1248,224,1344,224,1392,224L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
                 </svg>

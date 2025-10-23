@@ -1,19 +1,10 @@
-export interface TeamMember {
-  name: string;
-  rm: string;
-  turma: string;
-  github: string;
-  linkedin: string;
-  image: string;
-}
-
 export interface FAQItemProps {
   item: FAQItem;
   isOpen: boolean;
   onToggle: () => void;
 }
 
-export interface FAQItem {
+export type FAQItem = {
   question: string;
   answer: string;
 }
