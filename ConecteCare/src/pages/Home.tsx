@@ -50,13 +50,13 @@ export function Home() {
 
     return (
         <Layout>
-            <section className="bg-gradient-to-r from-blue-700 to-cyan-600  text-white min-h-[85vh] flex items-center relative overflow-hidden">
+            <section className="bg-gradient-to-r from-blue-700 to-cyan-500  text-white min-h-[85vh] flex items-center relative overflow-hidden">
                 <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                     <path fill="#ffffff" fillOpacity="1" d="M0,192L48,197.3C96,203,192,213,288,208C384,203,480,181,576,170.7C672,160,768,160,864,170.7C960,181,1056,203,1152,213.3C1248,224,1344,224,1392,224L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
                 </svg>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 py-20">
-                    <span className="inline-block text-cyan-400 text-base font-semibold uppercase tracking-widest mb-4">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 py-20">
+                    <span className="text-cyan-200 uppercase tracking-widest text-sm font-bold">
                         Inovação em Cuidado Médico
                     </span>
                     <h1 className="text-6xl md:text-7xl font-black mb-8 tracking-tight leading-tight">
@@ -70,7 +70,7 @@ export function Home() {
                         className="
                             hover: cursor-pointer
                             inline-flex items-center 
-                            bg-gradient-to-r from-cyan-400 to-teal-400 text-blue-900 
+                            bg-gradient-to-r from-cyan-400 to-teal-400 text-white-900 
                             px-12 py-4 rounded-full font-extrabold text-xl 
                             shadow-2xl shadow-cyan-500/50 
                             transition-all duration-300 transform hover:scale-105 hover:shadow-cyan-400/80
@@ -120,19 +120,19 @@ export function Home() {
                 </div>
             </section>
 
-             <section className="bg-blue-800 py-20">
+             <section className="bg-gradient-to-r from-blue-700 to-cyan-600 py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
                     <h3 className="text-4xl font-black text-white mb-4">
-                        Sua Próxima Geração de Cuidado Começa Aqui.
+                        Sua Próxima Geração de Cuidado Começa Aqui
                     </h3>
                     <p className="text-xl text-blue-200 mb-8 max-w-2xl">
-                        Cadastre-se hoje e descubra como a ConecteCare pode simplificar a saúde e o bem-estar.
+                        Cadastre-se hoje e descubra como a ConecteCare pode simplificar a saúde e o bem-estar
                     </p>
                     <button 
                         onClick={handleCadastroClick}
                         className="
                             hover: cursor-pointer
-                            inline-flex items-center 
+                            inline-flex items-center    
                             bg-white text-blue-800 
                             px-12 py-4 rounded-full font-extrabold text-xl 
                             shadow-2xl hover:bg-gray-200 transition-all duration-300 

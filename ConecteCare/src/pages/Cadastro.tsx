@@ -118,7 +118,7 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
             <div className="min-h-[90vh] flex">
 
                 <div className="hidden lg:flex w-full lg:w-1/2 items-center justify-center 
-                                bg-gradient-to-br from-indigo-900 to-blue-900 
+                                bg-gradient-to-r from-blue-700 to-cyan-500 
                                 relative overflow-hidden p-12">
 
                     <div className="absolute inset-0 opacity-10">
@@ -142,7 +142,7 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
                         <div className="mt-8">
                             <button
                                 onClick={() => navigate('/')}
-                                className="inline-block px-8 py-3 bg-cyan-500 text-blue-900 font-bold rounded-full 
+                                className="inline-block px-8 py-3 bg-cyan-500 text-white-900 font-bold rounded-full 
                                            transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-cyan-400/50"
                             >
                                 Voltar para o Login

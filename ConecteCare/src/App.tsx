@@ -11,6 +11,8 @@ import { MenuCadastro } from './pages/Cadastro';
 import { CadastroProvider } from './context/cadastro-context';
 import { AuthProvider } from './context/auth-context'; 
 import { ProtectedRoute } from './routes/ProtectedRoute'; 
+import { PerfilCuidador } from './pages/PerfilCuidador';
+import { AtualizarPerfilCuidador } from './pages/AtualizarPerfilCuidador';
 
 function App() {
   return (
@@ -28,11 +30,34 @@ function App() {
               <Route path="/login" element={<Login/>} />
               <Route path="/teleconsulta" element={<Teleconsulta/>} /> 
               
-              <Route path="/menu-cuidador" element={
+              <Route path="/perfil-cuidador" element={
                 <ProtectedRoute>
-                  <MenuCuidador/>
+                  <PerfilCuidador/>
                 </ProtectedRoute>
               } />
+
+              {/* Rota para a página de ATUALIZAÇÃO de perfil */}
+            <Route path="/perfil/cuidador/atualizar" element={
+              <ProtectedRoute>
+                <AtualizarPerfilCuidador />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rota para o Menu do Cuidador (ver paciente) */}
+            <Route path="/menu-cuidador/:id" element={
+              <ProtectedRoute>
+                <MenuCuidador />
+              </ProtectedRoute>
+            } />
+
+            {/* Rota da Teleconsulta (precisa do ID) */}
+            <Route path="/teleconsulta/:consultaId" element={
+              <ProtectedRoute>
+                <Teleconsulta/>
+              </ProtectedRoute>
+            } /> 
+
+
 
             </Routes>
         </Router>
@@ -42,3 +67,5 @@ function App() {
 }
 
 export default App;
+
+

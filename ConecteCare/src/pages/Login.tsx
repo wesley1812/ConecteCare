@@ -56,14 +56,14 @@ export function Login() {
 
         login(user.email);
 
-        navigate((user as Cuidador).parentesco ? '/menu-cuidador' : '/menu-paciente');
+        navigate((user as Cuidador).parentesco ? '/perfil-cuidador' : '/menu-paciente');
     }
     return (
         <Layout>
             <div className="min-h-[90vh] flex">
 
                 <div className="hidden lg:flex w-full lg:w-1/2 items-center justify-center 
-                                bg-gradient-to-r from-blue-700 to-cyan-600 
+                                bg-gradient-to-r from-blue-700 to-cyan-500 
                                 relative overflow-hidden p-12">
 
                     <div className="absolute inset-0 opacity-10">
@@ -87,12 +87,10 @@ export function Login() {
                         <div className="mt-8">
                             <Link
                                 to="/"
-                                // className="inline-block px-8 py-3 bg-gradient-to-r from-blue-700 to-cyan-600 text-white font-bold rounded-full 
-                                //            transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-cyan-400/50"
-                                className="inline-block px-8 py-3 bg-cyan-500 text-blue-900 font-bold rounded-full 
+                                className="inline-block px-8 py-3 bg-cyan-500 text-white-900 font-bold rounded-full 
                                            transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-cyan-400/50"
                              >
-                                Voltar para a Home
+                                Voltar para a Início
                             </Link>
                         </div>
                     </div>
@@ -195,7 +193,6 @@ export function Login() {
                             </div>
                         </form>
 
-                        {/* Link para Cadastro */}
                         <div className="mt-8 pt-6 border-t border-gray-100 text-center text-base">
                             <p className="text-gray-600">
                                 Não tem uma conta?
