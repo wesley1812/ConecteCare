@@ -67,16 +67,6 @@ export interface AgendamentoConsultaProps {
   onContact: (appointmentId: number) => void;
 }
 
-export interface ContactInfo {
-  title: string;
-  content: string;
-  icon: string;
-}
-
-export interface CardContatos {
-  info: ContactInfo;
-}
-
 export interface TeamMember {
   name: string;
   rm: string;
@@ -129,7 +119,6 @@ export interface Cuidador {
     // residencia: File;
     // foto: File;
     aceitarTermo: boolean;
-    // userID:number;
   };
 
 export interface Paciente {
@@ -142,5 +131,4 @@ export interface Paciente {
     telefone: string;
     patologia: string;
     aceitarTermo: boolean;
-    // userID:number;
   };

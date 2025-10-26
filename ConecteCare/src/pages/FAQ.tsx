@@ -49,7 +49,7 @@ export function FAQ() {
     <Layout>
       <div className="bg-gray-50 min-h-screen">
         
-        <div className="bg-gradient-to-r from-blue-700 to-cyan-600 text-white py-16 sm:py-20 shadow-xl">
+        <div className="bg-gradient-to-r from-blue-700 to-cyan-500 text-white py-16 sm:py-20 shadow-xl">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <span className="text-cyan-200 uppercase tracking-widest text-sm font-bold">Ajuda & Suporte</span>
                 <h1 className="text-4xl sm:text-5xl font-extrabold mt-2 tracking-tight">

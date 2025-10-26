@@ -24,10 +24,28 @@ export const formSchemaCuidador = z.object({
     //     { message: "Foto 3x4 é obrigatória" }),
     aceitarTermo: z.boolean()
         .refine((val: boolean) => val === true,
-        { message: "Você deve aceitar o Termo de Compromisso" }),
+            { message: "Você deve aceitar o Termo de Compromisso" }),
 })
 
 export type FormSchemaCuidador = z.infer<typeof formSchemaCuidador>;
+
+export const formSchemaAtualizarCuidador = z.object({
+    nome: z
+        .string()
+        .min(3, "O nome é obrigatório."),
+    idade: z
+        .number()
+        .min(18, "Idade deve ser maior que 18.")
+        .max(120),
+    telefone: z
+        .string()
+        .min(10, "Telefone inválido."),
+    parentesco: z
+        .string()
+        .min(2, "Informe o parentesco."),
+});
+
+export type FormSchemaAtualizarCuidador = z.infer<typeof formSchemaAtualizarCuidador>
 
 export const formSchemaPaciente = z.object({
     nome: z.string()
@@ -47,7 +65,7 @@ export const formSchemaPaciente = z.object({
         .min(1, "Patologia é obrigatória"),
     aceitarTermo: z.boolean()
         .refine((val: boolean) => val === true,
-        { message: "Você deve aceitar o Termo de Compromisso" }),
+            { message: "Você deve aceitar o Termo de Compromisso" }),
 })
 
 export type FormSchemaPaciente = z.infer<typeof formSchemaPaciente>;

@@ -17,17 +17,17 @@ export function GuiaDoUsuario() {
         
         <div className="bg-gradient-to-r from-blue-700 to-cyan-500 text-white py-16 sm:py-20 shadow-xl">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <span className="text-white uppercase tracking-widest text-lg font-bold">Inicie sua Jornada</span>
-                <h1 className="text-5xl sm:text-6xl font-black mt-2 tracking-tighter">
+                <span className="text-cyan-200 uppercase tracking-widest text-sm font-bold">Inicie sua Jornada</span>
+                <h1 className="text-4xl sm:text-5xl font-extrabold mt-2 tracking-tight">
                     Guia do Usuário
                 </h1>
-                <p className="mt-4 text-xl text-cyan-100 max-w-3xl mx-auto">
+                <p className="mt-4 text-xl text-cyan-100 max-w-2xl mx-auto">
                     Boas vindas à ConecteCare! Assista ao tutorial abaixo para dominar o uso da nossa plataforma de telemedicina.
                 </p>
             </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
           
           <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-3xl border border-gray-100 transition-all duration-300">
             <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">

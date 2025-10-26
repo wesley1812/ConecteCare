@@ -39,11 +39,10 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                 type: "manual",
                 message: "Este CPF já está cadastrado como cuidador.",
             });
-            return; // Interrompe o processo de cadastro
+            return;
         }
         const cuidador: Cuidador = {
             id: crypto.randomUUID(),
-            // userID,
             nome,
             idade,
             cpf,

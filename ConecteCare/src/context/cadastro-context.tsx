@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import type { Paciente, Cuidador } from "../types/interfaces";
+import { API_CONECTE_CARE } from "../api/conecte-care-api";
 
 interface CadastroContextProps {
   paciente: Paciente[];
@@ -15,6 +16,7 @@ interface CadastroContextProps {
   removePaciente: (id: string) => void;
   saveCuidador: (cuidador: Cuidador) => void;
   removeCuidador: (id: string) => void;
+  updateCuidador: (cuidador: Cuidador) => void; // <-- ADICIONADO
   isCpfCuidadorCadastrado: (cpf: string) => boolean;
   isCpfPacienteCadastrado: (cpf: string) => boolean;
 }
@@ -26,7 +28,7 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
   const [cuidador, setCuidador] = useState<Cuidador[]>([]);
 
   const fetchPacientes = useCallback(async () => {
-    const response = await fetch("http://localhost:4000/pacientes", {
+    const response = await fetch(`${API_CONECTE_CARE}/pacientes`, {
       headers: {
         "Content-type": "application/json",
       },
@@ -36,22 +38,22 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
     const data: Paciente[] = await response.json();
 
     setPaciente(data);
-  }, []); 
+  }, []);
 
   const savePaciente = useCallback(async (paciente: Paciente) => {
-    await fetch("http://localhost:4000/pacientes", {
+    await fetch(`${API_CONECTE_CARE}/pacientes`, {
       method: "POST",
       body: JSON.stringify(paciente),
       headers: {
-         "Content-type": "application/json",
+        "Content-type": "application/json",
       },
     });
 
     await fetchPacientes();
-  }, [fetchPacientes]); 
+  }, [fetchPacientes]);
 
   const removePaciente = useCallback(async (id: string) => {
-    await fetch(`http://localhost:4000/pacientes/${id}`, {
+    await fetch(`${API_CONECTE_CARE}/pacientes/${id}`, {
       method: "DELETE",
     });
 
@@ -59,7 +61,7 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
   }, [fetchPacientes]);
 
   const fetchCuidador = useCallback(async () => {
-    const response = await fetch("http://localhost:4000/cuidador", {
+    const response = await fetch(`${API_CONECTE_CARE}/cuidador`, {
       headers: {
         "Content-type": "application/json",
       },
@@ -68,44 +70,61 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
 
     const data: Cuidador[] = await response.json();
 
-    setCuidador(data);
-  }, []); 
+    setCuidador(data)
+  }, []);
 
   const saveCuidador = useCallback(async (cuidador: Cuidador) => {
-    await fetch("http://localhost:4000/cuidador", {
+    await fetch(`${API_CONECTE_CARE}/cuidador`, {
       method: "POST",
       body: JSON.stringify(cuidador),
       headers: {
-         "Content-type": "application/json",
+        "Content-type": "application/json",
       },
     });
 
     await fetchCuidador();
-  }, [fetchCuidador]); 
+  }, [fetchCuidador]); //
 
   const removeCuidador = useCallback(async (id: string) => {
-    await fetch(`http://localhost:4000/cuidador/${id}`, {
+    await fetch(`${API_CONECTE_CARE}/cuidador/${id}`, {
       method: "DELETE",
     });
 
     await fetchCuidador();
+  }, [fetchCuidador]); //
+
+  // --- FUNÇÃO ADICIONADA ---
+  const updateCuidador = useCallback(async (cuidador: Cuidador) => {
+    // A rota padrão REST para update é PUT ou PATCH com o ID
+    await fetch(`${API_CONECTE_CARE}/cuidador/${cuidador.id}`, {
+      method: "PUT", 
+      body: JSON.stringify(cuidador),
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+
+    // Re-busca os dados para manter o contexto atualizado
+    await fetchCuidador();
   }, [fetchCuidador]);
+  // --- FIM DA ADIÇÃO ---
+
 
   useEffect(() => {
     fetchPacientes();
   }, [fetchPacientes]);
 
   useEffect(() => {
-    fetchCuidador();
+    fetchCuidador()
   }, [fetchCuidador]);
 
   const isCpfCuidadorCadastrado = useCallback((cpf: string): boolean => {
-    return cuidador.some(c => c.cpf === cpf); 
-  }, [cuidador]);
+    return cuidador.some(c => c.cpf === cpf);
+  }, [cuidador]); //
 
   const isCpfPacienteCadastrado = useCallback((cpf: string): boolean => {
     return paciente.some(p => p.cpfPaciente === cpf);
-  }, [paciente]);
+  }, [paciente]); //
 
 
   return (
@@ -119,6 +138,7 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
         saveCuidador,
         removeCuidador,
         isCpfCuidadorCadastrado,
+        updateCuidador, 
       }}
     >
       {children}
