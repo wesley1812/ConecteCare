@@ -1,21 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/auth-context";
 import { useCadastro } from "../context/cadastro-context";
 import type { Cuidador } from "../types/interfaces";
-
-const formSchemaAtualizarCuidador = z.object({
-  nome: z.string().min(3, "O nome é obrigatório."),
-  idade: z.number().min(18, "Idade deve ser maior que 18.").max(120),
-  telefone: z.string().min(10, "Telefone inválido."),
-  parentesco: z.string().min(2, "Informe o parentesco."),
-});
-
-type FormSchemaAtualizarCuidador = z.infer<typeof formSchemaAtualizarCuidador>;
+import { formSchemaAtualizarCuidador, type FormSchemaAtualizarCuidador } from "../schemas/forms-schema";
 
 export function AtualizarPerfilCuidador() {
   const navigate = useNavigate();
@@ -48,6 +39,7 @@ export function AtualizarPerfilCuidador() {
           idade: foundCuidador.idade,
           telefone: foundCuidador.telefone,
           parentesco: foundCuidador.parentesco,
+          cpfPaciente: foundCuidador.cpfPaciente
         }); 
       }
     }
@@ -61,12 +53,12 @@ export function AtualizarPerfilCuidador() {
       ...data,
     };
     
-    await updateCuidador(cuidadorAtualizado); //
+    await updateCuidador(cuidadorAtualizado); 
 
     setMensagemSucesso("Perfil atualizado com sucesso!");
     setTimeout(() => {
       setMensagemSucesso("");
-      navigate("/perfil/cuidador");
+      navigate("/perfil-cuidador");
     }, 2000);
   };
 
@@ -91,7 +83,7 @@ export function AtualizarPerfilCuidador() {
           
           <div className="mb-4">
             <Link
-              to="/perfil/cuidador"
+              to="/perfil-cuidador"
               className="hover:cursor-pointer text-gray-600 hover:text-indigo-600 flex items-center transition-colors text-base font-medium group"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
@@ -148,8 +140,9 @@ export function AtualizarPerfilCuidador() {
                   <input type="text" id="cpf" value={cuidadorAtual.cpf} className={`${inputClass} bg-gray-200 cursor-not-allowed`} readOnly />
                 </div>
                 <div>
-                  <label htmlFor="cpfPaciente" className={labelClass}>CPF Paciente (Não editável)</label>
-                  <input type="text" id="cpfPaciente" value={cuidadorAtual.cpfPaciente} className={`${inputClass} bg-gray-200 cursor-not-allowed`} readOnly />
+                  <label htmlFor="cpfPaciente" className={labelClass}>CPF Paciente</label>
+                  <input type="text" id="cpfPaciente" {...register("cpfPaciente")} className={inputClass}/>
+                  {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
                 </div>
               </div>
 

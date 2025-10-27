@@ -53,6 +53,7 @@ export interface AppointmentType {
   type: string;
   date: string;
   time: string;
+  cpfPaciente: string
 }
 
 export interface Appointment {

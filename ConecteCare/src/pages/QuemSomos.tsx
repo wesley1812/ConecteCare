@@ -2,8 +2,6 @@ import { Layout } from "../components/Layout";
 import { TeamCard } from "../components/CardEquipe";
 import type { TeamMember } from "../types/interfaces";
 
-
-
 export function QuemSomos() {
   const joaoImage = "/assets/midia/joao.jpg";
   const wesleyImage = "/assets/midia/wesley.jpg";

@@ -7,19 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {  loginSchema, type LoginFormData } from "../schemas/login-schema.ts";
 import type { Paciente, Cuidador } from "../types/interfaces.ts";
-
-const ArrowRightIcon = () => (
-    <svg className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-    </svg>
-);
-
-const LockIcon = () => (
-    <svg className="w-10 h-10 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 9V5a3 3 0 00-6 0v4"></path>
-    </svg>
-);
+import { LockIcon, ArrowRightIconLogin } from "../styles/icons.tsx";
 
 export function Login() {
     const [isLoading, setIsLoading] = useState(false);
@@ -186,7 +174,7 @@ export function Login() {
                                     ) : (
                                         <>
                                             Entrar
-                                            <ArrowRightIcon />
+                                            <ArrowRightIconLogin />
                                         </>
                                     )}
                                 </button>

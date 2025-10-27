@@ -24,6 +24,34 @@
       "telefone": "(11) 96113-0931",
       "parentesco": "Filho",
       "aceitarTermo": true
+    },
+    {
+      "id": "b9995c74-7bef-4a5f-a71d-da53204b724a",
+      "nome": "Beatriz",
+      "idade": 27,
+      "cpf": "082.428.128-45",
+      "cpfPaciente": "257.938.818-40",
+      "email": "beatriz_cros@hotmail.com",
+      "senha": "12345678",
+      "telefone": "(11) 96113-0931",
+      "parentesco": "Filho",
+      "aceitarTermo": true
+    }
+  ],
+  "consultasHC":[
+    { 
+      "id": 1, 
+      "type": "Consulta de fisioterapia", 
+      "date": "20/11/2025", 
+      "time": "14h00",
+      "cpfPaciente":"257.938.818-40"
+    },
+    { 
+      "id": 2, 
+      "type": "Consulta de Psicologia", 
+      "date": "28/11/2025",
+      "time": "10h30",
+      "cpfPaciente":"257.938.818-40"
     }
   ]
 }

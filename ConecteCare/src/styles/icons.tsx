@@ -1,3 +1,5 @@
+// icone do Contato
+
 export const PhoneIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6.7-6.7A19.79 19.79 0 0 1 2 4.18a2 2 0 0 1 2-2h3.07a2 2 0 0 1 2 1.76 13.75 13.75 0 0 0 .52 2 2 2 0 0 1-.4 2.14l-2.16 2.16a12 12 0 0 0 6.62 6.62l2.16-2.16a2 2 0 0 1 2.14-.4 13.75 13.75 0 0 0 2 .52 2 2 0 0 1 1.76 2z" /></svg>
 );
@@ -28,4 +30,34 @@ export const VideoCameraIcon = () => (
 );
 export const ClipboardListIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+);
+
+
+// icone do Cadastro
+export const UserPlusIcon = () => (
+    <svg className="w-10 h-10 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-6-3a9 9 0 11-9 9m9 0a9 9 0 01-9-9"></path>
+    </svg>
+);
+
+
+// Home
+export const ArrowRightIcon = () => (
+    <svg className="w-5 h-5 ml-2 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+    </svg>
+);
+
+// Login
+export const ArrowRightIconLogin = () => (
+    <svg className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+    </svg>
+);
+
+export const LockIcon = () => (
+    <svg className="w-10 h-10 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 9V5a3 3 0 00-6 0v4"></path>
+    </svg>
 );

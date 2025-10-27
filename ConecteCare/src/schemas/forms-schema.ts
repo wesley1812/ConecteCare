@@ -40,6 +40,9 @@ export const formSchemaAtualizarCuidador = z.object({
     telefone: z
         .string()
         .min(10, "Telefone inválido."),
+    cpfPaciente: z
+        .string()
+        .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF do Paciente inválido"),
     parentesco: z
         .string()
         .min(2, "Informe o parentesco."),

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
-// Supondo que seus ícones estejam em types/icons.tsx
-import { PhoneIcon, MailIcon } from "../types/icons"; 
+import { PhoneIcon, MailIcon } from "../styles/icons"; 
 
 export function Header({ isMenuOpen, toggleMenu }: any) { 
   const location = useLocation();
