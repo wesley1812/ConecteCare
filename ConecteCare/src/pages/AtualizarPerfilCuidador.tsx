@@ -1,23 +1,27 @@
 import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/auth-context";
 import { useCadastro } from "../context/cadastro-context";
-import  { formSchemaAtualizarCuidador,type FormSchemaAtualizarCuidador } from "../schemas/forms-schema";
 import type { Cuidador } from "../types/interfaces";
 
-// 1. Schema de validação para a ATUALIZAÇÃO.
-// (Senha, CPF, etc. não devem ser alterados aqui)
+const formSchemaAtualizarCuidador = z.object({
+  nome: z.string().min(3, "O nome é obrigatório."),
+  idade: z.number().min(18, "Idade deve ser maior que 18.").max(120),
+  telefone: z.string().min(10, "Telefone inválido."),
+  parentesco: z.string().min(2, "Informe o parentesco."),
+});
 
+type FormSchemaAtualizarCuidador = z.infer<typeof formSchemaAtualizarCuidador>;
 
 export function AtualizarPerfilCuidador() {
   const navigate = useNavigate();
   
-  // 2. Acessa os contextos
-  const { user: loggedInUserEmail } = useAuth(); //
-  const { cuidador: listaCuidadores, updateCuidador } = useCadastro(); //
+  const { user } = useAuth();
+  const { cuidador: listaCuidadores, updateCuidador } = useCadastro(); 
 
   const [cuidadorAtual, setCuidadorAtual] = useState<Cuidador | null>(null);
   const [mensagemSucesso, setMensagemSucesso] = useState("");
@@ -31,43 +35,38 @@ export function AtualizarPerfilCuidador() {
     resolver: zodResolver(formSchemaAtualizarCuidador),
   });
 
-  // 3. Carrega os dados do cuidador logado
   useEffect(() => {
-    if (loggedInUserEmail && listaCuidadores.length > 0) {
+    if (user && listaCuidadores.length > 0) {
       const foundCuidador = listaCuidadores.find(
-        (c) => c.email === loggedInUserEmail
-      ); //
+        (c) => c.email === user
+      ); 
 
       if (foundCuidador) {
         setCuidadorAtual(foundCuidador);
-        // 4. Popula o formulário com os dados atuais
         reset({
           nome: foundCuidador.nome,
           idade: foundCuidador.idade,
           telefone: foundCuidador.telefone,
           parentesco: foundCuidador.parentesco,
-        }); //
+        }); 
       }
     }
-  }, [loggedInUserEmail, listaCuidadores, reset]);
+  }, [user, listaCuidadores, reset]);
 
-  // 5. Função de Submissão
   const onSubmit: SubmitHandler<FormSchemaAtualizarCuidador> = async (data) => {
     if (!cuidadorAtual) return;
 
-    // 6. Monta o objeto completo do cuidador para enviar à API
     const cuidadorAtualizado: Cuidador = {
       ...cuidadorAtual,
       ...data,
     };
     
-    // 7. Chama a nova função do contexto
-    await updateCuidador(cuidadorAtualizado);
+    await updateCuidador(cuidadorAtualizado); //
 
     setMensagemSucesso("Perfil atualizado com sucesso!");
     setTimeout(() => {
       setMensagemSucesso("");
-      navigate("/perfil-cuidador");
+      navigate("/perfil/cuidador");
     }, 2000);
   };
 
@@ -90,10 +89,9 @@ export function AtualizarPerfilCuidador() {
       <div className="py-12 bg-gray-100 min-h-screen">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Botão de Voltar */}
           <div className="mb-4">
             <Link
-              to="/perfil-cuidador"
+              to="/perfil/cuidador"
               className="hover:cursor-pointer text-gray-600 hover:text-indigo-600 flex items-center transition-colors text-base font-medium group"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>

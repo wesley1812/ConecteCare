@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-
-const PhoneIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6.7-6.7A19.79 19.79 0 0 1 2 4.18a2 2 0 0 1 2-2h3.07a2 2 0 0 1 2 1.76 13.75 13.75 0 0 0 .52 2 2 2 0 0 1-.4 2.14l-2.16 2.16a12 12 0 0 0 6.62 6.62l2.16-2.16a2 2 0 0 1 2.14-.4 13.75 13.75 0 0 0 2 .52 2 2 0 0 1 1.76 2z" /></svg>
-);
-const MailIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-);
-
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/auth-context";
+// Supondo que seus ícones estejam em types/icons.tsx
+import { PhoneIcon, MailIcon } from "../types/icons"; 
 
 export function Header({ isMenuOpen, toggleMenu }: any) { 
   const location = useLocation();
+  
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const navigation = [
     { name: "Início", href: "/" },
@@ -24,6 +22,11 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
     { name: "Login", href: "/login", primary: false },
     { name: "Menu de Cadastro", href: "/cadastro", primary: true },
   ];
+
+  const handleLogout = () => {
+    logout(); 
+    navigate('/login');
+  };
 
   return (
     <header className="bg-white sticky top-0 z-40 shadow-xl border-t-4 border-cyan-500">
@@ -50,19 +53,48 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
             ))}
           </div>
 
+          {/* --- BOTÕES CONDICIONAIS (DESKTOP) --- */}
           <div className="hidden lg:flex items-center space-x-3">
-            {actionNavigation.map(item => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-lg ${item.primary
-                    ? "bg-cyan-500 text-white hover:bg-cyan-600"
-                    : "border border-blue-600 text-blue-600 hover:bg-blue-50"
-                  }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {user ? (
+              // --- SE ESTIVER LOGADO ---
+              <>
+                {/* --- BOTÃO ADICIONADO --- */}
+                <Link
+                  to="/perfil-cuidador"
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-lg 
+                              bg-cyan-500 text-white hover:bg-cyan-600
+                              focus:outline-none focus:ring-4 focus:ring-cyan-300`}
+                >
+                  Meu Painel
+                </Link>
+                {/* --- FIM DA ADIÇÃO --- */}
+                
+                <button
+                  onClick={handleLogout}
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-lg 
+                              bg-red-600 text-white hover:bg-red-700
+                              focus:outline-none focus:ring-4 focus:ring-red-300`}
+                >
+                  Sair (Logout)
+                </button>
+              </>
+            ) : (
+              // --- SE NÃO ESTIVER LOGADO ---
+              <>
+                {actionNavigation.map(item => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-lg ${item.primary
+                        ? "bg-cyan-500 text-white hover:bg-cyan-600"
+                        : "border border-blue-600 text-blue-600 hover:bg-blue-50"
+                      }`}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </>
+            )}
           </div>
 
 
@@ -80,10 +112,11 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
           </div>
         </div>
 
+        {/* --- MENU MOBILE CONDICIONAL --- */}
         {isMenuOpen && (
           <div className="lg:hidden absolute w-full left-0 bg-white shadow-xl pt-2 pb-4 border-t border-gray-100">
             <div className="px-2 space-y-2">
-              {navigation.concat(actionNavigation.map(a => ({ ...a, name: a.name }))).map((item) => (
+              {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
@@ -96,6 +129,51 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
                   {item.name}
                 </Link>
               ))}
+              
+              {user ? (
+                // --- SE ESTIVER LOGADO (Mobile) ---
+                <>
+                  {/* --- BOTÃO ADICIONADO (Mobile) --- */}
+                  <Link
+                    key="meu-painel"
+                    to="/perfil/cuidador"
+                    onClick={toggleMenu}
+                    className={`block mx-4 px-3 py-2 rounded-lg text-base font-semibold transition-colors 
+                                text-white bg-cyan-500 shadow-md hover:bg-cyan-600`}
+                  >
+                    Meu Painel
+                  </Link>
+                  {/* --- FIM DA ADIÇÃO --- */}
+                
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      toggleMenu(); 
+                    }}
+                    className={`block w-full text-left mx-4 px-3 py-2 rounded-lg text-base font-semibold 
+                                text-white bg-red-600 hover:bg-red-700`}
+                  >
+                    Sair (Logout)
+                  </button>
+                </>
+              ) : (
+                // --- SE NÃO ESTIVER LOGADO (Mobile) ---
+                <>
+                  {actionNavigation.map(item => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={toggleMenu}
+                      className={`block mx-4 px-3 py-2 rounded-lg text-base font-semibold transition-colors ${item.primary
+                          ? "text-white bg-cyan-500 shadow-md"
+                          : "text-blue-600 hover:bg-gray-100"
+                        }`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         )}
@@ -153,8 +231,6 @@ export function Footer() {
 };
 
 export function Layout({ children }: any) { 
-
-  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
