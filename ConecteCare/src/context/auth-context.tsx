@@ -13,7 +13,9 @@ interface AuthProviderPRops {
 }
 
 export function AuthProvider({ children }: AuthProviderPRops) {
-  const [user, setUser] = useState<string | null>(null);
+  const [user, setUser] = useState<string | null>(() => {
+    return localStorage.getItem("user");
+  });
 
   function login(username: string) {
     setUser(username);
@@ -22,6 +24,7 @@ export function AuthProvider({ children }: AuthProviderPRops) {
 
   function logout() {
     localStorage.removeItem("user");
+    setUser(null); 
   }
 
   return (
