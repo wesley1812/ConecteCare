@@ -3,8 +3,6 @@ import { useParams } from 'react-router-dom';
 import {Layout} from '../components/Layout';
 import type { TeleconsultaData } from '../types/interfaces';
 
-
-
 export function Teleconsulta() {
   const { consultaId } = useParams<{ consultaId: string }>();
   const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);

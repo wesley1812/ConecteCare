@@ -3,16 +3,13 @@ import { Layout } from "../components/Layout.tsx";
 import { FormularioCuidador } from "../components/FormularioCuidador.tsx"; 
 import { FormularioPaciente } from "../components/FormularioPaciente.tsx";
 import { Termo } from "../components/Recursos.tsx";
+import { UserPlusIcon } from "../styles/icons.tsx";
+import { Link } from "react-router-dom";
 
 interface MenuCadastroProps {
     navigate: (path: string) => void;
 }
 
-const UserPlusIcon = () => (
-    <svg className="w-10 h-10 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-6-3a9 9 0 11-9 9m9 0a9 9 0 01-9-9"></path>
-    </svg>
-);
 
 export function MenuCadastro({ navigate }: MenuCadastroProps) {
     
@@ -26,7 +23,7 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
         const typeLabel = type === 'cuidador' ? 'Cuidador' : 'Paciente';
         setMessage(`Cadastro de ${typeLabel} realizado com sucesso! Redirecionando...`);
 
-        const targetPath = type === 'cuidador' ? '/menu-cuidador' : '/menu-paciente';
+        const targetPath = type === 'cuidador' ? '/dashboard' : '/menu-paciente';
 
         setTimeout(() => {
             setMessage(''); 
@@ -81,12 +78,12 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
             <div className="mt-8 pt-6 border-t border-gray-100 text-center text-base">
                 <p className="text-gray-600">
                     Já tem uma conta?
-                    <button 
-                        onClick={() => navigate('/')} 
-                        className="font-extrabold text-blue-700 hover:text-cyan-600 ml-2 transition-colors hover:underline"
+                    <Link 
+                        to = '/login'
+                        className="hover: cursor-pointer font-extrabold text-blue-700 hover:text-cyan-600 ml-2 transition-colors hover:underline"
                     >
                         Fazer Login
-                    </button>
+                    </Link>
                 </p>
             </div>
         </>
@@ -140,13 +137,13 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
                             Cadastre-se para acessar todas as ferramentas e monitorar o bem-estar do paciente em tempo real.
                         </p>
                         <div className="mt-8">
-                            <button
-                                onClick={() => navigate('/')}
-                                className="inline-block px-8 py-3 bg-cyan-500 text-white-900 font-bold rounded-full 
+                            <Link
+                                to ='/login'
+                                className="hover: cursor-pointer inline-block px-8 py-3 bg-cyan-500 text-white-900 font-bold rounded-full 
                                            transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-cyan-400/50"
                             >
                                 Voltar para o Login
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

@@ -4,9 +4,6 @@ import {FaqItemComponent} from "../components/Recursos";
 import type { FAQItem } from "../types/interfaces";
 
 
-
-
-
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 

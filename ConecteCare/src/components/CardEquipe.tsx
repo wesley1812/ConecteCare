@@ -1,4 +1,4 @@
-import { GithubIcon, LinkedinIcon } from "../types/icons";
+import { GithubIcon, LinkedinIcon } from "../styles/icons";
 import type { TeamMember } from "../types/interfaces";
 
 
