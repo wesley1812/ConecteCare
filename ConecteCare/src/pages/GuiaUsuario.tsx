@@ -1,39 +1,60 @@
-import Layout from '../components/Layout';
+import {Layout} from '../components/Layout';
 
-const GuiaDoUsuario = () => {
-  const videoUrl = "/assets/midia/guia.mp4";
+const AspectRatioBox = ({ children }: { children: React.ReactNode }) => (
+    <div className="relative w-full" style={{ paddingTop: "56.25%" /* 16:9 Aspect Ratio */ }}>
+        <div className="absolute inset-0">
+            {children}
+        </div>
+    </div>
+);
+
+export function GuiaDoUsuario() {
+  const videoUrl = "/assets/midia/guia.mp4"; 
 
   return (
     <Layout>
-      <div className="py-12 bg-gray-50 min-h-screen">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-8">
-            Guia de Acessibilidade
-          </h1>
-          <p className="text-center text-lg text-gray-700 mb-12">
-            Boas vindas à ConecteCare! Assista ao vídeo abaixo para entender como nossa plataforma funciona. Ele foi criado para que você possa usar o site de forma simples e intuitiva.
-          </p>
+      <div className="bg-gray-50 min-h-screen pb-16">
+        
+        <div className="bg-gradient-to-r from-blue-700 to-cyan-500 text-white py-16 sm:py-20 shadow-xl">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <span className="text-cyan-200 uppercase tracking-widest text-sm font-bold">Inicie sua Jornada</span>
+                <h1 className="text-4xl sm:text-5xl font-extrabold mt-2 tracking-tight">
+                    Guia do Usuário
+                </h1>
+                <p className="mt-4 text-xl text-cyan-100 max-w-2xl mx-auto">
+                    Boas vindas à ConecteCare! Assista ao tutorial abaixo para dominar o uso da nossa plataforma de telemedicina.
+                </p>
+            </div>
+        </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-              Como Usar a Plataforma ConecteCare
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+          
+          <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-3xl border border-gray-100 transition-all duration-300">
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+              Tutorial em Vídeo: Como Usar
             </h2>
-            <div className="aspect-w-16 aspect-h-9">
+            
+            <AspectRatioBox>
               <video
-                className="w-full h-auto rounded-lg"
+                className="w-full h-full rounded-2xl shadow-xl border-4 border-cyan-400/50 object-cover"
                 controls
-                autoPlay
-                muted
               >
                 <source src={videoUrl} type="video/mp4" />
                 Seu navegador não suporta a tag de vídeo.
               </video>
+            </AspectRatioBox>
+
+            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+                <p className="text-lg text-gray-700 font-medium">
+                    <span className="text-blue-600 font-bold mr-1">Dica:</span>
+                    Certifique-se de que sua conexão com a internet esteja estável para uma visualização sem interrupções.
+                </p>
             </div>
+
           </div>
         </div>
+        
       </div>
     </Layout>
   );
-};
-
-export default GuiaDoUsuario;
+}
