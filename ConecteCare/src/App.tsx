@@ -50,10 +50,8 @@ function App() {
               </ProtectedRoute>
             } />
 
-            <Route path="/teleconsulta/:consultaId" element={
-              <ProtectedRoute>
+            <Route path="/teleconsulta/" element={
                 <Teleconsulta/>
-              </ProtectedRoute>
             } /> 
             </Routes>
         </Router>
