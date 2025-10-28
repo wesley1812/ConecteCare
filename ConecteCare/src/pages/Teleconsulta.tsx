@@ -165,7 +165,7 @@ export function Teleconsulta() {
    };
 
   // *** FUNÇÃO DE FEEDBACK ATUALIZADA ***
-  const checkPoseAndFeedback = (landmarks: NormalizedLandmark[], videoWidth: number, videoHeight: number): string | null => {
+  const checkPoseAndFeedback = (landmarks: NormalizedLandmark[], _videoWidth: number, _videoHeight: number): string | null => {
     if (!landmarks || landmarks.length === 0) {
       return "Nenhuma pessoa detectada. Posicione-se em frente à câmera.";
     }
