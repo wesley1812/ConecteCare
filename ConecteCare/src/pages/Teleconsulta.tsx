@@ -42,7 +42,7 @@ export function Teleconsulta() {
     const createPoseLandmarker = async () => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@medapipe/tasks-vision@latest/wasm"
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
         );
         const landmarker = await PoseLandmarker.createFromOptions(vision, {
           baseOptions: {
