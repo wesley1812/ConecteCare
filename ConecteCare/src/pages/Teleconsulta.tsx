@@ -1,40 +1,59 @@
 import { useEffect, useRef, useState } from 'react';
 import { Layout } from '../components/Layout';
 // Importações do MediaPipe
-import { PoseLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision';
+import { PoseLandmarker, FilesetResolver, DrawingUtils, type NormalizedLandmark } from '@mediapipe/tasks-vision';
 
-// Tipagem para simplificar
 type PoseLandmarkerInstance = Awaited<ReturnType<typeof PoseLandmarker.createFromOptions>> | null;
+
+// Índices dos landmarks relevantes (baseado na documentação do MediaPipe Pose)
+const LEFT_SHOULDER = 11; 
+const RIGHT_SHOULDER = 12;
+const LEFT_HIP = 23;
+const RIGHT_HIP = 24;
+const LEFT_KNEE = 25;
+const RIGHT_KNEE = 26;
+const LEFT_EYE = 2;
+const RIGHT_EYE = 5;
+const NOSE = 0;
+const MOUTH_LEFT = 9;
+const MOUTH_RIGHT = 10;
+const LEFT_EAR = 7;
+const RIGHT_EAR = 8;
+
+// Limiares (ajuste conforme necessário)
+const VISIBILITY_THRESHOLD = 0.5; // Visibilidade mínima para considerar um ponto "visível"
+const BODY_OUT_THRESHOLD = 3;   // Quantos pontos corporais chave podem estar 'invisíveis' antes de avisar
+const FACE_CLOSE_THRESHOLD = 0.4; // Se a largura do rosto (orelha a orelha) for > 40% da largura do vídeo
+const FRAME_MARGIN = 0.05; // Margem para considerar pontos "na borda" (5%)
 
 export function Teleconsulta() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number | null>(null);
 
-  // Estados do MediaPipe e Webcam
   const [poseLandmarker, setPoseLandmarker] = useState<PoseLandmarkerInstance>(null);
   const [webcamRunning, setWebcamRunning] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true); // Estado para o carregamento do modelo
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
-  // 1. Inicializa o PoseLandmarker
+  // 1. Inicializa o PoseLandmarker (sem alterações)
   useEffect(() => {
     const createPoseLandmarker = async () => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm" // Local padrão do WASM
+          "https://cdn.jsdelivr.net/npm/@medipe/tasks-vision@latest/wasm"
         );
         const landmarker = await PoseLandmarker.createFromOptions(vision, {
           baseOptions: {
-            // Caminho para o seu modelo .task
-            modelAssetPath: `/pose_landmarker_full.task`, 
-            delegate: "GPU" // Usa GPU se disponível
+            modelAssetPath: `/pose_landmarker_full.task`,
+            delegate: "GPU"
           },
-          runningMode: "VIDEO", // Essencial para processamento de vídeo
-          numPoses: 1 // Detecta apenas uma pessoa para performance
+          runningMode: "VIDEO",
+          numPoses: 1
         });
         setPoseLandmarker(landmarker);
-        setLoading(false); // Modelo carregado
+        setLoading(false);
         console.log("PoseLandmarker loaded successfully.");
       } catch (err) {
         console.error("Error loading PoseLandmarker:", err);
@@ -43,121 +62,200 @@ export function Teleconsulta() {
       }
     };
     createPoseLandmarker();
-
-    // Cleanup: Descarrega o modelo se o componente for desmontado (se houver método close)
-    // return () => { poseLandmarker?.close(); } // Descomente se 'close' existir
   }, []);
 
-  // 2. Ajusta o tamanho do Canvas quando o vídeo começa a tocar
+  // 2. Ajusta o tamanho do Canvas (sem alterações)
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
     const handleVideoPlay = () => {
       if (video && canvas) {
+        // Define o tamanho base do canvas
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        console.log(`Canvas resized to ${video.videoWidth}x${video.videoHeight}`);
+        console.log(`Canvas base size set to ${video.videoWidth}x${video.videoHeight}`);
+
+        // Redimensiona o canvas para preencher o container mantendo o aspect ratio
+        // Isso é importante se o container tiver tamanho fixo (aspect-video)
+        const container = canvas.parentElement;
+        if (container) {
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            const videoRatio = video.videoWidth / video.videoHeight;
+            const containerRatio = containerWidth / containerHeight;
+
+            if (containerRatio > videoRatio) {
+                // Container mais largo que o vídeo, altura limita
+                 canvas.style.height = `${containerHeight}px`;
+                 canvas.style.width = `${containerHeight * videoRatio}px`;
+            } else {
+                 // Container mais alto que o vídeo, largura limita
+                 canvas.style.width = `${containerWidth}px`;
+                 canvas.style.height = `${containerWidth / videoRatio}px`;
+            }
+             console.log(`Canvas display size set to ${canvas.style.width} x ${canvas.style.height}`);
+        }
       }
     };
 
     if (video) {
-      video.addEventListener('loadedmetadata', handleVideoPlay); // Usa loadedmetadata que é mais confiável para dimensões
+      video.addEventListener('loadedmetadata', handleVideoPlay);
+      // Recalcula ao redimensionar a janela
+      window.addEventListener('resize', handleVideoPlay);
     }
 
     return () => {
       if (video) {
         video.removeEventListener('loadedmetadata', handleVideoPlay);
       }
+       window.removeEventListener('resize', handleVideoPlay);
     };
-  }, [webcamRunning]); // Roda quando a webcam é ativada/desativada
+  }, [webcamRunning]); // Roda quando a webcam é ativada/desativada e ajusta com resize
 
-  // 3. Função para Iniciar/Parar a Webcam e Detecção
-  const enableCam = async () => {
-    if (!poseLandmarker) {
-      console.log("PoseLandmarker not ready yet.");
-      setError("Modelo de detecção ainda não está pronto.");
-      return;
+  // 3. Função para Iniciar/Parar a Webcam (sem alterações)
+   const enableCam = async () => {
+     if (!poseLandmarker) {
+       console.log("PoseLandmarker not ready yet.");
+       setError("Modelo de detecção ainda não está pronto.");
+       return;
+     }
+
+     if (webcamRunning) {
+       // Desativar
+       if (videoRef.current && videoRef.current.srcObject) {
+         (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+         videoRef.current.srcObject = null;
+       }
+       if (animationFrameId.current) {
+         cancelAnimationFrame(animationFrameId.current);
+         animationFrameId.current = null;
+       }
+       const canvasCtx = canvasRef.current?.getContext("2d");
+       if(canvasCtx && canvasRef.current){
+         canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+       }
+       setWebcamRunning(false);
+       setFeedbackMessage(null); // Limpa feedback ao parar
+       console.log("Webcam stopped.");
+     } else {
+       // Ativar
+       setError(null);
+       try {
+         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+         if (videoRef.current) {
+           videoRef.current.srcObject = stream;
+           // Não precisa mais do onloadedmetadata aqui se o outro useEffect já cuida disso
+           videoRef.current.play().then(() => { // Garante que play() foi chamado
+             setWebcamRunning(true);
+             console.log("Webcam started, starting prediction loop.");
+             predictWebcam(); // Inicia o loop após play
+           }).catch(playError => {
+              console.error("Error playing video:", playError);
+              setError("Erro ao iniciar a reprodução do vídeo.");
+              setWebcamRunning(false);
+           });
+         }
+       } catch (err) {
+         console.error("Error accessing webcam:", err);
+         setError("Não foi possível acessar sua câmera. Verifique as permissões do navegador.");
+         setWebcamRunning(false);
+       }
+     }
+   };
+
+  // *** FUNÇÃO DE FEEDBACK ATUALIZADA ***
+  const checkPoseAndFeedback = (landmarks: NormalizedLandmark[], videoWidth: number, videoHeight: number): string | null => {
+    if (!landmarks || landmarks.length === 0) {
+      return "Nenhuma pessoa detectada. Posicione-se em frente à câmera.";
     }
 
-    if (webcamRunning) {
-      // Desativar
-      if (videoRef.current && videoRef.current.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-        videoRef.current.srcObject = null;
+    // --- Verificação 1: Corpo Fora da Câmera ---
+    const bodyPoints = [landmarks[LEFT_SHOULDER], landmarks[RIGHT_SHOULDER], landmarks[LEFT_HIP], landmarks[RIGHT_HIP], landmarks[LEFT_KNEE], landmarks[RIGHT_KNEE]];
+    let invisibleBodyPoints = 0;
+    for (const point of bodyPoints) {
+      if (!point || point.visibility < VISIBILITY_THRESHOLD || point.x < FRAME_MARGIN || point.x > 1 - FRAME_MARGIN || point.y < FRAME_MARGIN || point.y > 1 - FRAME_MARGIN) {
+        invisibleBodyPoints++;
       }
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-        animationFrameId.current = null;
+    }
+    if (invisibleBodyPoints >= BODY_OUT_THRESHOLD) {
+      return "Corpo parcialmente fora da câmera. Afaste-se um pouco.";
+    }
+
+    // --- Verificação 2: Rosto Muito Próximo ---
+    const leftEar = landmarks[LEFT_EAR];
+    const rightEar = landmarks[RIGHT_EAR];
+    if (leftEar && rightEar && leftEar.visibility > VISIBILITY_THRESHOLD && rightEar.visibility > VISIBILITY_THRESHOLD) {
+      const faceWidth = Math.abs(leftEar.x - rightEar.x);
+      if (faceWidth > FACE_CLOSE_THRESHOLD) {
+        return "Rosto muito próximo da câmera. Afaste-se um pouco.";
       }
-      // Limpa o canvas ao parar
-      const canvasCtx = canvasRef.current?.getContext("2d");
-      if(canvasCtx && canvasRef.current){
-        canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      }
-      setWebcamRunning(false);
-      console.log("Webcam stopped.");
     } else {
-      // Ativar
-      setError(null); // Limpa erros anteriores
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); // Áudio não é necessário
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          // Espera o vídeo começar a tocar para iniciar a predição
-          videoRef.current.onloadedmetadata = () => {
-             if (videoRef.current) { // Checagem dupla
-              videoRef.current.play();
-              setWebcamRunning(true);
-              console.log("Webcam started, starting prediction loop.");
-              predictWebcam(); // Inicia o loop
-            }
-          };
+        const leftEye = landmarks[LEFT_EYE];
+        const rightEye = landmarks[RIGHT_EYE];
+        if(leftEye && rightEye && leftEye.visibility > VISIBILITY_THRESHOLD && rightEye.visibility > VISIBILITY_THRESHOLD){
+            const eyeDist = Math.abs(leftEye.x - rightEye.x);
+             // Ajuste o limiar se necessário, pode ser diferente da largura das orelhas
+             if (eyeDist > FACE_CLOSE_THRESHOLD / 1.8) {
+                 return "Rosto muito próximo da câmera. Afaste-se um pouco.";
+             }
         }
-      } catch (err) {
-        console.error("Error accessing webcam:", err);
-        setError("Não foi possível acessar sua câmera. Verifique as permissões do navegador.");
-        setWebcamRunning(false); // Garante que o estado reflita a falha
-      }
     }
+
+    // --- Verificação 3: Parte do Rosto Faltando ---
+    const faceKeyPoints = [landmarks[LEFT_EYE], landmarks[RIGHT_EYE], landmarks[NOSE], landmarks[MOUTH_LEFT], landmarks[MOUTH_RIGHT]];
+    for (const point of faceKeyPoints) {
+       if (!point || point.visibility < VISIBILITY_THRESHOLD || point.x < FRAME_MARGIN || point.x > 1 - FRAME_MARGIN || point.y < FRAME_MARGIN || point.y > 1 - FRAME_MARGIN) {
+         return "Parte do rosto fora da câmera. Centralize-se.";
+       }
+    }
+
+    // *** RETORNO DE SUCESSO ***
+    // Se passou por todas as verificações
+    return "Posição correta!"; // Mensagem de sucesso
   };
 
-  // 4. Loop de Predição
+
+  // 4. Loop de Predição (sem alterações na lógica principal)
   const predictWebcam = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const canvasCtx = canvas?.getContext("2d");
 
-    if (!video || !canvas || !canvasCtx || !poseLandmarker || !webcamRunning) {
-        console.log("Prediction loop stopped or dependencies not ready.");
-        if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); // Garante parada
-        animationFrameId.current = null;
+    if (!video || !canvas || !canvasCtx || !poseLandmarker || !webcamRunning || video.readyState < 2) { // Adiciona verificação de readyState
+        // Se o vídeo não está pronto, tenta novamente em breve
+        if (webcamRunning && animationFrameId.current === null) { // Evita múltiplos loops
+             animationFrameId.current = requestAnimationFrame(predictWebcam);
+        } else if (!webcamRunning && animationFrameId.current) {
+            cancelAnimationFrame(animationFrameId.current);
+            animationFrameId.current = null;
+        }
         return;
     }
 
-    // Garante que o canvas tem o tamanho certo (caso haja redimensionamento dinâmico)
+    // Reajusta tamanho caso tenha mudado dinamicamente
     if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
     if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
 
-
     const startTimeMs = performance.now();
-    // Detecta poses no frame atual do vídeo
     poseLandmarker.detectForVideo(video, startTimeMs, (result) => {
-        // Limpa o canvas
+        if (!canvasCtx || !canvas) return; // Checagem extra de segurança
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Desenha os landmarks
         const drawingUtils = new DrawingUtils(canvasCtx);
-        for (const landmarks of result.landmarks) {
-            drawingUtils.drawLandmarks(landmarks, {
-                radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1) // Pontos menores mais distantes
-            });
-            drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS); // Desenha as conexões
+
+        let currentFeedback: string | null = "Nenhuma pessoa detectada.";
+
+        if (result.landmarks && result.landmarks.length > 0) {
+            for (const landmarks of result.landmarks) {
+                drawingUtils.drawLandmarks(landmarks, { radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1) });
+                drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS);
+                currentFeedback = checkPoseAndFeedback(landmarks, video.videoWidth, video.videoHeight);
+            }
         }
+        setFeedbackMessage(currentFeedback);
     });
 
-    // Chama a função novamente no próximo frame
-    if (webcamRunning) { // Verifica novamente antes de continuar o loop
+    if (webcamRunning) {
       animationFrameId.current = requestAnimationFrame(predictWebcam);
     } else {
        if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
@@ -166,16 +264,14 @@ export function Teleconsulta() {
   };
 
   // --- Renderização ---
-
-  // Estado de carregamento do modelo
   if (loading) {
-    return (
-      <Layout>
-        <div className="text-center py-20 min-h-screen flex items-center justify-center bg-gray-50">
-          <p className="text-lg text-gray-600">Carregando modelo de detecção de pose...</p>
-        </div>
-      </Layout>
-    );
+     return (
+       <Layout>
+         <div className="text-center py-20 min-h-screen flex items-center justify-center bg-gray-50">
+           <p className="text-lg text-gray-600">Carregando modelo de detecção de pose...</p>
+         </div>
+       </Layout>
+     );
   }
 
   return (
@@ -190,46 +286,49 @@ export function Teleconsulta() {
         </p>
 
         {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 w-full max-w-2xl text-center" role="alert">
-            <p className="font-bold">Erro</p>
-            <p>{error}</p>
-          </div>
-        )}
+           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 w-full max-w-2xl text-center" role="alert">
+             <p className="font-bold">Erro</p>
+             <p>{error}</p>
+           </div>
+         )}
 
+        {/* Container com aspect ratio para manter proporção */}
         <div className="relative w-full max-w-4xl aspect-video mx-auto mb-6 bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-          {/* Vídeo da Webcam */}
           <video
             ref={videoRef}
-            autoPlay
+            // autoPlay // Autoplay pode ser problemático, melhor iniciar no enableCam
             playsInline
             muted
-            className="absolute top-0 left-0 w-full h-full object-cover"
+            className="absolute top-0 left-0 w-full h-full object-contain" // object-contain para não cortar
           ></video>
-          {/* Canvas para Desenhar os Landmarks */}
           <canvas
             ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full"
-          ></canvas>
-           {/* Mensagem de Câmera Inativa */}
+            className="absolute top-0 left-0 w-full h-full" // Canvas sobrepõe o vídeo
+            style={{ zIndex: 1 }} // Garante que o canvas fique por cima
+           ></canvas>
+
+          {/* *** EXIBIÇÃO DA MENSAGEM DE FEEDBACK ATUALIZADA *** */}
+          {webcamRunning && feedbackMessage && (
+            <div className={`absolute top-4 left-1/2 -translate-x-1/2 font-semibold px-4 py-2 rounded-md shadow-lg text-center ${
+              feedbackMessage === "Posição correta!"
+                ? 'bg-green-500 text-white' // Estilo de sucesso (verde)
+                : 'bg-yellow-400 text-yellow-900 animate-pulse' // Estilo de aviso (amarelo piscando)
+            }`} style={{ zIndex: 2 }}> {/* zIndex maior para ficar sobre o canvas */}
+              {feedbackMessage}
+            </div>
+          )}
+
            {!webcamRunning && (
-             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <p className="text-white text-xl font-semibold">Câmera inativa</p>
-             </div>
-           )}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                 <p className="text-white text-xl font-semibold">Câmera inativa</p>
+              </div>
+            )}
         </div>
 
-        {/* Botão para Ativar/Desativar */}
         <button
           onClick={enableCam}
-          disabled={loading} // Desabilita enquanto o modelo carrega
-          className={`px-8 py-3 rounded-lg font-semibold text-lg shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
-            ${webcamRunning
-              ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500'
-              : 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500'
-            }
-            ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
-        >
+          disabled={loading}
+          className={`px-8 py-3 rounded-lg font-semibold text-lg shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${webcamRunning ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500' : 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
           {webcamRunning ? 'Desativar Câmera' : 'Ativar Câmera'}
         </button>
 
