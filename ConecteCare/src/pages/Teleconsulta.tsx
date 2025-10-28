@@ -27,7 +27,7 @@ export function Teleconsulta() {
         const landmarker = await PoseLandmarker.createFromOptions(vision, {
           baseOptions: {
             // Caminho para o seu modelo .task
-            modelAssetPath: `/src/app/shared/models/pose_landmarker_full.task`, 
+            modelAssetPath: `/pose_landmarker_full.task`, 
             delegate: "GPU" // Usa GPU se disponível
           },
           runningMode: "VIDEO", // Essencial para processamento de vídeo

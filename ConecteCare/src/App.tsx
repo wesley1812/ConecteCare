@@ -51,9 +51,7 @@ function App() {
             } />
 
             <Route path="/teleconsulta/:consultaId" element={
-              <ProtectedRoute>
                 <Teleconsulta/>
-              </ProtectedRoute>
             } /> 
             </Routes>
         </Router>
