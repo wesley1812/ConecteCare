@@ -6,7 +6,7 @@ import { PoseLandmarker, FilesetResolver, DrawingUtils, type NormalizedLandmark 
 type PoseLandmarkerInstance = Awaited<ReturnType<typeof PoseLandmarker.createFromOptions>> | null;
 
 // Índices dos landmarks relevantes (baseado na documentação do MediaPipe Pose)
-const LEFT_SHOULDER = 11; 
+const LEFT_SHOULDER = 11;
 const RIGHT_SHOULDER = 12;
 const LEFT_HIP = 23;
 const RIGHT_HIP = 24;
@@ -37,7 +37,7 @@ export function Teleconsulta() {
   const [error, setError] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
-  // 1. Inicializa o PoseLandmarker (sem alterações)
+  // 1. Inicializa o PoseLandmarker
   useEffect(() => {
     const createPoseLandmarker = async () => {
       try {
@@ -57,40 +57,33 @@ export function Teleconsulta() {
         console.log("PoseLandmarker loaded successfully.");
       } catch (err) {
         console.error("Error loading PoseLandmarker:", err);
-        setError("Falha ao carregar o modelo de detecção de pose.");
+        setError("Falha ao carregar o modelo de deteção de pose.");
         setLoading(false);
       }
     };
     createPoseLandmarker();
   }, []);
 
-  // 2. Ajusta o tamanho do Canvas (sem alterações)
+  // 2. Ajusta o tamanho do Canvas
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
     const handleVideoPlay = () => {
       if (video && canvas) {
-        // Define o tamanho base do canvas
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         console.log(`Canvas base size set to ${video.videoWidth}x${video.videoHeight}`);
-
-        // Redimensiona o canvas para preencher o container mantendo o aspect ratio
-        // Isso é importante se o container tiver tamanho fixo (aspect-video)
         const container = canvas.parentElement;
         if (container) {
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;
             const videoRatio = video.videoWidth / video.videoHeight;
             const containerRatio = containerWidth / containerHeight;
-
             if (containerRatio > videoRatio) {
-                // Container mais largo que o vídeo, altura limita
                  canvas.style.height = `${containerHeight}px`;
                  canvas.style.width = `${containerHeight * videoRatio}px`;
             } else {
-                 // Container mais alto que o vídeo, largura limita
                  canvas.style.width = `${containerWidth}px`;
                  canvas.style.height = `${containerWidth / videoRatio}px`;
             }
@@ -101,52 +94,40 @@ export function Teleconsulta() {
 
     if (video) {
       video.addEventListener('loadedmetadata', handleVideoPlay);
-      // Recalcula ao redimensionar a janela
       window.addEventListener('resize', handleVideoPlay);
     }
-
     return () => {
-      if (video) {
-        video.removeEventListener('loadedmetadata', handleVideoPlay);
-      }
-       window.removeEventListener('resize', handleVideoPlay);
+      if (video) video.removeEventListener('loadedmetadata', handleVideoPlay);
+      window.removeEventListener('resize', handleVideoPlay);
     };
-  }, [webcamRunning]); // Roda quando a webcam é ativada/desativada e ajusta com resize
+  }, [webcamRunning]);
 
-  // 3. Função para Iniciar/Parar a Webcam (sem alterações)
+  // 3. Função para Iniciar/Parar a Webcam
    const enableCam = async () => {
      if (!poseLandmarker) {
        console.log("PoseLandmarker not ready yet.");
-       setError("Modelo de detecção ainda não está pronto.");
+       setError("Modelo de deteção ainda não está pronto.");
        return;
      }
-
-     if (webcamRunning) {
-       // Desativar
-       if (videoRef.current && videoRef.current.srcObject) {
+     if (webcamRunning) { // Desativar
+       if (videoRef.current?.srcObject) {
          (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
          videoRef.current.srcObject = null;
        }
-       if (animationFrameId.current) {
-         cancelAnimationFrame(animationFrameId.current);
-         animationFrameId.current = null;
-       }
+       if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+       animationFrameId.current = null;
        const canvasCtx = canvasRef.current?.getContext("2d");
-       if(canvasCtx && canvasRef.current){
-         canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-       }
+       if(canvasCtx && canvasRef.current) canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
        setWebcamRunning(false);
        setFeedbackMessage(null); // Limpa feedback ao parar
        console.log("Webcam stopped.");
-     } else {
-       // Ativar
+     } else { // Ativar
        setError(null);
        try {
          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
          if (videoRef.current) {
            videoRef.current.srcObject = stream;
-           // Não precisa mais do onloadedmetadata aqui se o outro useEffect já cuida disso
-           videoRef.current.play().then(() => { // Garante que play() foi chamado
+           videoRef.current.play().then(() => {
              setWebcamRunning(true);
              console.log("Webcam started, starting prediction loop.");
              predictWebcam(); // Inicia o loop após play
@@ -164,100 +145,90 @@ export function Teleconsulta() {
      }
    };
 
-  // *** FUNÇÃO DE FEEDBACK ATUALIZADA ***
+  // 4. Função de Feedback ATUALIZADA para retornar "Posição correta!"
   const checkPoseAndFeedback = (landmarks: NormalizedLandmark[], _videoWidth: number, _videoHeight: number): string | null => {
-    if (!landmarks || landmarks.length === 0) {
-      return "Nenhuma pessoa detectada. Posicione-se em frente à câmera.";
-    }
+    if (!landmarks || landmarks.length === 0) return "Nenhuma pessoa detetada. Posicione-se em frente à câmera.";
 
-    // --- Verificação 1: Corpo Fora da Câmera ---
     const bodyPoints = [landmarks[LEFT_SHOULDER], landmarks[RIGHT_SHOULDER], landmarks[LEFT_HIP], landmarks[RIGHT_HIP], landmarks[LEFT_KNEE], landmarks[RIGHT_KNEE]];
     let invisibleBodyPoints = 0;
     for (const point of bodyPoints) {
-      if (!point || point.visibility < VISIBILITY_THRESHOLD || point.x < FRAME_MARGIN || point.x > 1 - FRAME_MARGIN || point.y < FRAME_MARGIN || point.y > 1 - FRAME_MARGIN) {
-        invisibleBodyPoints++;
-      }
+      if (!point || point.visibility < VISIBILITY_THRESHOLD || point.x < FRAME_MARGIN || point.x > 1 - FRAME_MARGIN || point.y < FRAME_MARGIN || point.y > 1 - FRAME_MARGIN) invisibleBodyPoints++;
     }
-    if (invisibleBodyPoints >= BODY_OUT_THRESHOLD) {
-      return "Corpo parcialmente fora da câmera. Afaste-se um pouco.";
-    }
+    if (invisibleBodyPoints >= BODY_OUT_THRESHOLD) return "Corpo parcialmente fora da câmera. Afaste-se um pouco.";
 
-    // --- Verificação 2: Rosto Muito Próximo ---
-    const leftEar = landmarks[LEFT_EAR];
-    const rightEar = landmarks[RIGHT_EAR];
-    if (leftEar && rightEar && leftEar.visibility > VISIBILITY_THRESHOLD && rightEar.visibility > VISIBILITY_THRESHOLD) {
-      const faceWidth = Math.abs(leftEar.x - rightEar.x);
-      if (faceWidth > FACE_CLOSE_THRESHOLD) {
-        return "Rosto muito próximo da câmera. Afaste-se um pouco.";
-      }
+    const leftEar = landmarks[LEFT_EAR], rightEar = landmarks[RIGHT_EAR];
+    if (leftEar?.visibility > VISIBILITY_THRESHOLD && rightEar?.visibility > VISIBILITY_THRESHOLD) {
+      if (Math.abs(leftEar.x - rightEar.x) > FACE_CLOSE_THRESHOLD) return "Rosto muito próximo da câmera. Afaste-se um pouco.";
     } else {
-        const leftEye = landmarks[LEFT_EYE];
-        const rightEye = landmarks[RIGHT_EYE];
-        if(leftEye && rightEye && leftEye.visibility > VISIBILITY_THRESHOLD && rightEye.visibility > VISIBILITY_THRESHOLD){
-            const eyeDist = Math.abs(leftEye.x - rightEye.x);
-             // Ajuste o limiar se necessário, pode ser diferente da largura das orelhas
-             if (eyeDist > FACE_CLOSE_THRESHOLD / 1.8) {
-                 return "Rosto muito próximo da câmera. Afaste-se um pouco.";
-             }
+        const leftEye = landmarks[LEFT_EYE], rightEye = landmarks[RIGHT_EYE];
+        if(leftEye?.visibility > VISIBILITY_THRESHOLD && rightEye?.visibility > VISIBILITY_THRESHOLD){
+             // Ajuste o limiar se necessário
+             if (Math.abs(leftEye.x - rightEye.x) > FACE_CLOSE_THRESHOLD / 1.8) return "Rosto muito próximo da câmera. Afaste-se um pouco.";
         }
     }
 
-    // --- Verificação 3: Parte do Rosto Faltando ---
     const faceKeyPoints = [landmarks[LEFT_EYE], landmarks[RIGHT_EYE], landmarks[NOSE], landmarks[MOUTH_LEFT], landmarks[MOUTH_RIGHT]];
     for (const point of faceKeyPoints) {
-       if (!point || point.visibility < VISIBILITY_THRESHOLD || point.x < FRAME_MARGIN || point.x > 1 - FRAME_MARGIN || point.y < FRAME_MARGIN || point.y > 1 - FRAME_MARGIN) {
-         return "Parte do rosto fora da câmera. Centralize-se.";
-       }
+       if (!point || point.visibility < VISIBILITY_THRESHOLD || point.x < FRAME_MARGIN || point.x > 1 - FRAME_MARGIN || point.y < FRAME_MARGIN || point.y > 1 - FRAME_MARGIN) return "Parte do rosto fora da câmera. Centralize-se.";
     }
 
-    // *** RETORNO DE SUCESSO ***
-    // Se passou por todas as verificações
-    return "Posição correta!"; // Mensagem de sucesso
+    // Se passou por todas as verificações, retorna a mensagem de sucesso
+    return "Posição correta!";
   };
 
 
-  // 4. Loop de Predição (sem alterações na lógica principal)
+  // 5. Loop de Predição (Lógica de feedback ajustada)
   const predictWebcam = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const canvasCtx = canvas?.getContext("2d");
 
-    if (!video || !canvas || !canvasCtx || !poseLandmarker || !webcamRunning || video.readyState < 2) { // Adiciona verificação de readyState
-        // Se o vídeo não está pronto, tenta novamente em breve
-        if (webcamRunning && animationFrameId.current === null) { // Evita múltiplos loops
-             animationFrameId.current = requestAnimationFrame(predictWebcam);
+    // Adiciona verificação de readyState para garantir que o vídeo esteja pronto
+    if (!video || !canvas || !canvasCtx || !poseLandmarker || !webcamRunning || video.readyState < 2) {
+        // Se ainda estiver a correr e o loop não estiver ativo, tenta novamente
+        if (webcamRunning && animationFrameId.current === null) {
+            animationFrameId.current = requestAnimationFrame(predictWebcam);
         } else if (!webcamRunning && animationFrameId.current) {
+            // Cancela se a webcam foi parada
             cancelAnimationFrame(animationFrameId.current);
             animationFrameId.current = null;
         }
         return;
     }
 
-    // Reajusta tamanho caso tenha mudado dinamicamente
+    // Reajusta tamanho do canvas se necessário
     if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
     if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
 
     const startTimeMs = performance.now();
     poseLandmarker.detectForVideo(video, startTimeMs, (result) => {
-        if (!canvasCtx || !canvas) return; // Checagem extra de segurança
+        if (!canvasCtx || !canvas) return; // Segurança extra
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
         const drawingUtils = new DrawingUtils(canvasCtx);
 
-        let currentFeedback: string | null = "Nenhuma pessoa detectada.";
+        let currentFeedback: string | null = null; // Começa como null por defeito
 
         if (result.landmarks && result.landmarks.length > 0) {
+            // Se detetar landmarks
             for (const landmarks of result.landmarks) {
                 drawingUtils.drawLandmarks(landmarks, { radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1) });
                 drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS);
+                // Chama a função de verificação
                 currentFeedback = checkPoseAndFeedback(landmarks, video.videoWidth, video.videoHeight);
             }
+        } else {
+             // Se não detetar landmarks
+            currentFeedback = "Nenhuma pessoa detetada.";
         }
+        // Atualiza o estado da mensagem de feedback
         setFeedbackMessage(currentFeedback);
     });
 
+    // Continua o loop se a webcam estiver ativa
     if (webcamRunning) {
-      animationFrameId.current = requestAnimationFrame(predictWebcam);
+        animationFrameId.current = requestAnimationFrame(predictWebcam);
     } else {
+        // Garante que para se a webcam for desativada
        if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
        animationFrameId.current = null;
     }
@@ -268,7 +239,7 @@ export function Teleconsulta() {
      return (
        <Layout>
          <div className="text-center py-20 min-h-screen flex items-center justify-center bg-gray-50">
-           <p className="text-lg text-gray-600">Carregando modelo de detecção de pose...</p>
+           <p className="text-lg text-gray-600">A carregar modelo de deteção de pose...</p>
          </div>
        </Layout>
      );
@@ -278,10 +249,10 @@ export function Teleconsulta() {
     <Layout>
       <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8 flex flex-col items-center">
         <h1 className="text-3xl font-bold text-gray-900 text-center mb-4">
-          Monitoramento de Pontos Corporais
+          Monitorização de Pontos Corporais
         </h1>
         <p className="text-center text-gray-600 mb-6 max-w-xl">
-          Posicione-se em frente à câmera. O sistema detectará os pontos chave do seu corpo em tempo real.
+          Posicione-se em frente à câmera. O sistema detetará os pontos chave do seu corpo em tempo real.
           Certifique-se de que seu corpo esteja visível.
         </p>
 
@@ -292,32 +263,37 @@ export function Teleconsulta() {
            </div>
          )}
 
-        {/* Container com aspect ratio para manter proporção */}
+        {/* Container do Vídeo/Canvas */}
         <div className="relative w-full max-w-4xl aspect-video mx-auto mb-6 bg-gray-800 rounded-lg shadow-xl overflow-hidden">
           <video
             ref={videoRef}
-            // autoPlay // Autoplay pode ser problemático, melhor iniciar no enableCam
             playsInline
             muted
-            className="absolute top-0 left-0 w-full h-full object-contain" // object-contain para não cortar
+            // object-contain evita cortar a imagem do vídeo
+            className="absolute top-0 left-0 w-full h-full object-contain"
           ></video>
           <canvas
             ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full" // Canvas sobrepõe o vídeo
-            style={{ zIndex: 1 }} // Garante que o canvas fique por cima
+            className="absolute top-0 left-0 w-full h-full"
+            style={{ zIndex: 1 }} // Canvas sobrepõe o vídeo
            ></canvas>
 
-          {/* *** EXIBIÇÃO DA MENSAGEM DE FEEDBACK ATUALIZADA *** */}
+          {/* *** MENSAGEM DE FEEDBACK COM ESTILO CONDICIONAL E zIndex ALTO *** */}
           {webcamRunning && feedbackMessage && (
             <div className={`absolute top-4 left-1/2 -translate-x-1/2 font-semibold px-4 py-2 rounded-md shadow-lg text-center ${
               feedbackMessage === "Posição correta!"
-                ? 'bg-green-500 text-white' // Estilo de sucesso (verde)
-                : 'bg-yellow-400 text-yellow-900 animate-pulse' // Estilo de aviso (amarelo piscando)
-            }`} style={{ zIndex: 2 }}> {/* zIndex maior para ficar sobre o canvas */}
+                ? 'bg-green-500 text-white' // Verde para sucesso
+                : feedbackMessage === "Nenhuma pessoa detetada."
+                    ? 'bg-gray-500 text-white' // Cinzento para não detetado
+                    : 'bg-yellow-400 text-yellow-900 animate-pulse' // Amarelo a piscar para avisos
+            }`}
+            // zIndex alto para garantir que fica por cima de tudo
+            style={{ zIndex: 50 }}>
               {feedbackMessage}
             </div>
           )}
 
+           {/* Placeholder de Câmera Inativa */}
            {!webcamRunning && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                  <p className="text-white text-xl font-semibold">Câmera inativa</p>
@@ -325,9 +301,10 @@ export function Teleconsulta() {
             )}
         </div>
 
+        {/* Botão Ativar/Desativar Câmera */}
         <button
           onClick={enableCam}
-          disabled={loading}
+          disabled={loading} // Desativado enquanto o modelo carrega
           className={`px-8 py-3 rounded-lg font-semibold text-lg shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${webcamRunning ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500' : 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
           {webcamRunning ? 'Desativar Câmera' : 'Ativar Câmera'}
         </button>
