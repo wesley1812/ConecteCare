@@ -4,7 +4,7 @@
   import type { Cuidador, Paciente } from "../types/interfaces";
   import { useAuth } from "../context/auth-context.tsx";
   import { useCadastro } from "../context/cadastro-context.tsx";
-  import { UserCircleIcon, HeartIcon, VideoCameraIcon, ClipboardListIcon } from "../styles/icons.tsx";
+  import { UserCircleIcon, HeartIcon, VideoCameraIcon } from "../styles/icons.tsx";
 
   interface ActionCardProps {
     to: string;
@@ -131,13 +131,9 @@
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-              
-              {/* *
-                * ALTERAÇÃO FEITA AQUI 
-                *
-              */}
+        
               <Redirecionador
-                to="/perfil-cuidador/atualizar-perfil-cuidador" // Rota atualizada para a nova página
+                to="/perfil-cuidador/atualizar-perfil-cuidador"
                 icon={<UserCircleIcon />}
                 title="Meu Perfil"
                 description="Atualize seus dados pessoais e informações de contato."
@@ -153,20 +149,20 @@
               />
 
               <Redirecionador
-                to="/teleconsulta" // ID da consulta (ainda mocado)
+                to="/teleconsulta"
                 icon={<VideoCameraIcon />}
-                title="Acessar Teleconsulta"
-                description="Entre na sala de consulta virtual para o próximo agendamento."
+                title="Acessar Guia Teleconsulta"
+                description="Entre na sala de consulta virtual para orientações da consulta."
                 colorRing="focus:ring-blue-400"
               />
 
-              <Redirecionador
-                to="/processo" // Rota fictícia
+              {/* <Redirecionador
+                to="/processo"
                 icon={<ClipboardListIcon />}
                 title="Etapas do Processo"
                 description="Entenda como funciona o agendamento e a consulta."
                 colorRing="focus:ring-gray-400"
-              />
+              /> */}
 
             </div>
           </div>

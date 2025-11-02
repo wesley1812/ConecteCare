@@ -63,9 +63,9 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
 
   const updatePaciente = useCallback(async (paciente: Paciente) => {
     // A rota padrão REST para update é PUT ou PATCH com o ID
-    await fetch(`${API_CONECTE_CARE}/cuidador/${paciente.id}`, {
+    await fetch(`${API_CONECTE_CARE}/pacientes/${paciente.id}`, {
       method: "PUT", 
-      body: JSON.stringify(cuidador),
+      body: JSON.stringify(paciente),
       headers: {
         "Content-type": "application/json",
       },

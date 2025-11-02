@@ -6,62 +6,83 @@ import {
   useState,
 } from "react";
 
-import type { AppointmentType } from "../types/interfaces"; // Certifique-se que seu 'interfaces.ts' exporta AppointmentType
-import { API_CONECTE_CARE } from "../api/conecte-care-api"; // Sua URL da API
+import type { Consulta } from "../types/interfaces";
+import { API_CONECTE_CARE } from "../api/conecte-care-api";
 
 interface ConsultasContextProps {
-  consultas: AppointmentType[]; // Lista de TODAS as consultas
-  getConsultasPorPaciente: (cpfPaciente: string) => AppointmentType[]; // Função para filtrar
-  isLoading: boolean;
+  consulta: Consulta[];
+  agendarConsulta: (consulta: Consulta) => void;
+  desmarcarConsulta: (id: string ) => void;
+  remarcarConsulta: (consulta: Consulta) => void;
+  getConsultasPorPaciente: (cpfPaciente: string) => Consulta[];
 }
 
 const ConsultasContext = createContext<ConsultasContextProps | null>(null);
 
 export function ConsultasProvider({ children }: { children: React.ReactNode }) {
-  const [consultas, setConsultas] = useState<AppointmentType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [consulta, setConsultas] = useState<Consulta[]>([]);
 
-  // Função para buscar todas as consultas da API
   const fetchConsultas = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${API_CONECTE_CARE}/consultasHC`, { // Assumindo que o endpoint é '/consultas'
+    const response = await fetch(`${API_CONECTE_CARE}/consultasHC`, {
+      headers: {
+        "Content-type": "application/json",
+      },
+      method: "GET",
+    });
+
+    const data: Consulta[] = await response.json();
+
+    setConsultas(data);
+  }, []);
+
+  const agendarConsulta = useCallback(async (consulta: Consulta) => {
+    await fetch(`${API_CONECTE_CARE}/consultasHC`, {
+      method: "POST",
+      body: JSON.stringify(consulta),
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+
+    await fetchConsultas();
+  }, [fetchConsultas]);
+
+  const desmarcarConsulta = useCallback(async (id: string) => {
+    await fetch(`${API_CONECTE_CARE}/consultasHC/${id}`, {
+      method: "DELETE",
+    });
+
+    await fetchConsultas();
+  }, [fetchConsultas]);
+
+  const remarcarConsulta = useCallback(async (consulta: Consulta) => {
+      await fetch(`${API_CONECTE_CARE}/consultasHC/${consulta.id}`, {
+        method: "PUT", 
+        body: JSON.stringify(consulta),
         headers: {
           "Content-type": "application/json",
         },
-        method: "GET",
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data: AppointmentType[] = await response.json();
-      setConsultas(data);
-    } catch (error) {
-      console.error("Erro ao buscar consultas:", error);
-      // Você pode adicionar um estado de erro aqui se desejar
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  
+      await fetchConsultas();
+    }, [fetchConsultas]);
 
-  // Busca as consultas quando o provider é montado
   useEffect(() => {
     fetchConsultas();
   }, [fetchConsultas]);
 
-  // Função para filtrar as consultas pelo CPF do paciente
-  // (Assume que cada consulta no db.json tem uma propriedade 'cpfPaciente')
-  const getConsultasPorPaciente = useCallback((cpfPaciente: string): AppointmentType[] => {
-    return consultas.filter(consulta => consulta.cpfPaciente === cpfPaciente); // Ajuste 'cpfPaciente' se o nome da chave for diferente no db.json
-  }, [consultas]);
-
+  const getConsultasPorPaciente = useCallback((cpfPaciente: string): Consulta[] => {
+    return consulta.filter(consulta => consulta.cpfPaciente === cpfPaciente);
+  }, [consulta]);
 
   return (
     <ConsultasContext.Provider
       value={{
-        consultas,
-        getConsultasPorPaciente,
-        isLoading,
+        consulta,
+        agendarConsulta,
+        desmarcarConsulta,
+        remarcarConsulta,
+        getConsultasPorPaciente
       }}
     >
       {children}
@@ -69,7 +90,6 @@ export function ConsultasProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Hook customizado para usar o contexto
 export function useConsultas() {
   const ctx = useContext<ConsultasContextProps | null>(ConsultasContext);
 

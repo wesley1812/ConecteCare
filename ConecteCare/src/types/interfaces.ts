@@ -48,25 +48,22 @@ export interface HealthIndicatorType {
   color: string;
 }
 
-export interface AppointmentType {
-  id: number;
+export interface Consulta {
+  id: string;
   type: string;
   date: string;
   time: string;
-  cpfPaciente: string
+  cpfPaciente: string;
+  doctorName: string;
+  doctorSpecialty: string;
 }
 
-export interface Appointment {
-  id: number;
-  type: string;
-  date: string;
-  time: string;
+export interface Medico {
+    id: string;
+    nome: string;
+    especialidade: string;
 }
 
-export interface AgendamentoConsultaProps {
-  appointment: Appointment;
-  onContact: (appointmentId: number) => void;
-}
 
 export interface TeamMember {
   name: string;
