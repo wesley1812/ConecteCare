@@ -72,3 +72,21 @@ export const formSchemaPaciente = z.object({
 })
 
 export type FormSchemaPaciente = z.infer<typeof formSchemaPaciente>;
+
+export const formSchemaAtualizarPaciente = z.object({
+    nome: z
+        .string()
+        .min(3, "O nome é obrigatório."),
+    idade: z
+        .number()
+        .min(18, "Idade deve ser maior que 18.")
+        .max(120),
+    telefone: z
+        .string()
+        .min(10, "Telefone inválido."),
+    cpfPaciente: z
+        .string()
+        .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF do Paciente inválido")
+});
+
+export type FormSchemaAtualizarPaciente = z.infer<typeof formSchemaAtualizarPaciente>

@@ -14,6 +14,7 @@ interface CadastroContextProps {
   cuidador: Cuidador[]
   savePaciente: (paciente: Paciente) => void;
   removePaciente: (id: string) => void;
+  updatePaciente: (paciente: Paciente) => void; // <-- ADICIONADO
   saveCuidador: (cuidador: Cuidador) => void;
   removeCuidador: (id: string) => void;
   updateCuidador: (cuidador: Cuidador) => void; // <-- ADICIONADO
@@ -59,6 +60,22 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
 
     await fetchPacientes();
   }, [fetchPacientes]);
+
+  const updatePaciente = useCallback(async (paciente: Paciente) => {
+    // A rota padrão REST para update é PUT ou PATCH com o ID
+    await fetch(`${API_CONECTE_CARE}/cuidador/${paciente.id}`, {
+      method: "PUT", 
+      body: JSON.stringify(cuidador),
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+
+    // Re-busca os dados para manter o contexto atualizado
+    await fetchPacientes();
+  }, [fetchPacientes]);
+  // --- FIM DA ADIÇÃO ---
+
 
   const fetchCuidador = useCallback(async () => {
     const response = await fetch(`${API_CONECTE_CARE}/cuidador`, {
@@ -134,6 +151,7 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
         savePaciente,
         removePaciente,
         isCpfPacienteCadastrado,
+        updatePaciente,
         cuidador,
         saveCuidador,
         removeCuidador,

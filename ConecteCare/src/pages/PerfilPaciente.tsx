@@ -1,7 +1,7 @@
   import { useState, useEffect } from "react";
   import { Link } from "react-router-dom";
   import { Layout } from "../components/Layout";
-  import type { Cuidador, Paciente } from "../types/interfaces";
+  import type { Paciente } from "../types/interfaces";
   import { useAuth } from "../context/auth-context.tsx";
   import { useCadastro } from "../context/cadastro-context.tsx";
   import { UserCircleIcon, HeartIcon, VideoCameraIcon, ClipboardListIcon } from "../styles/icons.tsx";
@@ -39,46 +39,33 @@
     );
   }
 
-  export function PerfilCuidador() {
+  export function PerfilPaciente() {
     // Acessa os contextos
     const { user: loggedInUserEmail } = useAuth(); //
     const { cuidador: listaCuidadores, paciente: listaPacientes } = useCadastro(); //
 
     // Estados para o usuário logado e seu paciente
-    const [cuidadorAtual, setCuidadorAtual] = useState<Cuidador | null>(null);
-    const [pacienteVinculado, setPacienteVinculado] = useState<Paciente | null>(null);
+    const [pacienteAtual, setPacienteAtual] = useState<Paciente | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
       // Aguarda os contextos carregarem
-      if (loggedInUserEmail && listaCuidadores.length > 0 && listaPacientes.length > 0) {
+      if (loggedInUserEmail) {
         // 1. Encontra o cuidador logado (assumindo que 'user' é o email)
-        const foundCuidador = listaCuidadores.find(
-          c => c.email === loggedInUserEmail
+        const foundPaciente = listaPacientes.find(
+          p => p.email === loggedInUserEmail
         ); //
 
-        if (foundCuidador) {
-          setCuidadorAtual(foundCuidador);
-
-          // 2. Encontra o paciente vinculado a esse cuidador
-          const foundPaciente = listaPacientes.find(
-            p => p.cpfPaciente === foundCuidador.cpfPaciente
-          ); //
-
-          if (foundPaciente) {
-            setPacienteVinculado(foundPaciente);
-          } else {
-            console.error("Paciente vinculado não encontrado.");
-          }
+        if (foundPaciente) {
+          setPacienteAtual(foundPaciente);
         } else {
-          console.error("Usuário logado não encontrado na lista de cuidadores.");
+          console.error("Usuário logado não encontrado na lista de pacientes.");
         }
         setIsLoading(false);
       } else if (!loggedInUserEmail) {
         // Se não há usuário logado, para de carregar
         setIsLoading(false);
       }
-      // Roda o efeito se o usuário logado ou as listas da API mudarem
     }, [loggedInUserEmail, listaCuidadores, listaPacientes]);
 
     // --- Tela de Carregamento ---
@@ -93,16 +80,16 @@
     }
 
     // --- Tela de Erro (Usuário não encontrado ou sem paciente) ---
-    if (!cuidadorAtual || !pacienteVinculado) {
+    if (!pacienteAtual) {
       return (
         <Layout>
           <div className="py-20 bg-gray-100 min-h-screen flex items-center justify-center text-center">
             <div>
               <h1 className="text-2xl font-bold text-red-600">Acesso Negado</h1>
               <p className="text-lg text-gray-600 mt-2">
-                Não foi possível encontrar seus dados de cuidador ou paciente vinculado.
+                Não foi possível encontrar seus dados de paciente vinculado.
                 <br />
-                Por favor, <Link to="/perfil-cuidador/atualizar" className="text-blue-600 underline">verifique os dados de cadastro.</Link>
+                Por favor, <Link to="/perfil-paciente/atualizar-perfil-cuidador" className="text-blue-600 underline">verifique os dados de cadastro.</Link>
               </p>
             </div>
           </div>
@@ -118,11 +105,11 @@
             
             <div className="mb-12 text-center">
               <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-                Painel do Cuidador
+                Painel do Paciente
               </h1>
               <p className="mt-3 text-xl text-white">
                 {/* NOME DINÂMICO! */}
-                Bem-vinda de volta, <span className="font-bold text-white">{cuidadorAtual.nome}</span>!
+                Boas vindas, <span className="font-bold text-white">{pacienteAtual.nome}</span>!
               </p>
               {/* <p className="mt-1 text-lg text-white"></p> */}
               <p className="mt-1 text-lg text-white">
@@ -137,7 +124,7 @@
                 *
               */}
               <Redirecionador
-                to="/perfil-cuidador/atualizar-perfil-cuidador" // Rota atualizada para a nova página
+                to="/perfil-paciente/atualizar-perfil-paciente" // Rota atualizada para a nova página
                 icon={<UserCircleIcon />}
                 title="Meu Perfil"
                 description="Atualize seus dados pessoais e informações de contato."
@@ -145,15 +132,25 @@
               />
 
               <Redirecionador
-                to={`/dashboard/${pacienteVinculado.id}`} //
+                // LINK DINÂMICO! Baseado no ID do paciente encontrado
+                to={`/dashboard/${pacienteAtual.id}`} //
                 icon={<HeartIcon />}
-                title="Paciente Vinculado"
-                description={`Consultar dados de ${pacienteVinculado.nome}.`}
+                title="Meus Dados"
+                description={`Consultar dados de ${pacienteAtual.nome}.`}
                 colorRing="focus:ring-cyan-400"
               />
 
               <Redirecionador
-                to="/teleconsulta" // ID da consulta (ainda mocado)
+                // LINK DINÂMICO! Baseado no ID do paciente encontrado
+                to="/lista-cuidadores/"
+                icon={<HeartIcon />}
+                title="Lista de Cuidadores"
+                description={`Consultar lista de cuidadores de ${pacienteAtual.nome}.`}
+                colorRing="focus:ring-cyan-400"
+              />
+
+              <Redirecionador
+                to="/teleconsulta/123" // ID da consulta (ainda mocado)
                 icon={<VideoCameraIcon />}
                 title="Acessar Teleconsulta"
                 description="Entre na sala de consulta virtual para o próximo agendamento."
@@ -161,7 +158,7 @@
               />
 
               <Redirecionador
-                to="/processo" // Rota fictícia
+                to="/processo"
                 icon={<ClipboardListIcon />}
                 title="Etapas do Processo"
                 description="Entenda como funciona o agendamento e a consulta."
