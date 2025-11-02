@@ -17,7 +17,7 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
     const [message, setMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     
-    const [, setTermoType] = useState<'cuidador' | 'paciente'>('cuidador');
+    const [,setTermoType] = useState<'cuidador' | 'paciente'>('cuidador');
 
     const handleSuccess = (type: 'cuidador' | 'paciente') => {
         const typeLabel = type === 'cuidador' ? 'Cuidador' : 'Paciente';

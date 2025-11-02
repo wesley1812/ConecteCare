@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 // Importa CardConsulta e o tipo AppointmentType
-import { CardConsulta } from "../components/CardSaude";
-import type { Paciente, HealthIndicatorType, AppointmentType } from "../types/interfaces";
+import type { Paciente, HealthIndicatorType } from "../types/interfaces";
 import { useAuth } from "../context/auth-context";
 import { useCadastro } from "../context/cadastro-context";
 // Importa o novo hook
@@ -22,8 +21,7 @@ export function Dashboard() {
   const [paciente, setPaciente] = useState<Paciente | null>(null);
   const [healthIndicators, setHealthIndicators] = useState<HealthIndicatorType[]>([]);
   // O estado 'appointments' agora será preenchido pelo contexto
-  const [appointments, setAppointments] = useState<AppointmentType[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // Loading combinado (paciente + consultas)
+  const [, setIsLoading] = useState(true); // Loading combinado (paciente + consultas)
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,9 +76,6 @@ export function Dashboard() {
         setPaciente(pacienteParaMostrar);
 
         // --- BUSCA CONSULTAS DO CONTEXTO ---
-        const consultasDoPaciente = getConsultasPorPaciente(pacienteParaMostrar.cpfPaciente); // [cite: consultas-context.tsx]
-        setAppointments(consultasDoPaciente);
-        console.log(`Encontradas ${consultasDoPaciente.length} consultas para ${pacienteParaMostrar.nome}`);
         // --- FIM DA BUSCA DE CONSULTAS ---
 
         // --- DADOS MOCADOS (Health Indicators - permanecem iguais) ---
@@ -105,21 +100,10 @@ export function Dashboard() {
     // Adiciona isLoadingConsultas às dependências para reavaliar se as consultas carregarem depois
   }, [id, loggedInUserEmail, listaCuidadores, listaPacientes, getConsultasPorPaciente, isLoadingConsultas]);
 
-  const handleContactDoctor = (appointmentId: number) => {
-    alert(`Entrando em contacto sobre a consulta ID: ${appointmentId}`);
-  };
 
   // --- Telas de Carregamento e Erro ---
   // Mostra loading se isLoading (verificação de paciente/permissão) OU isLoadingConsultas (contexto a carregar)
-  if (isLoading || isLoadingConsultas) {
-    return (
-      <Layout>
-        <div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center">
-          <div className="text-center text-lg text-gray-600">A carregar dados...</div>
-        </div>
-      </Layout>
-    );
-  }
+
 
   if (error || !paciente) {
     // Mesma tela de erro de antes
@@ -139,6 +123,8 @@ export function Dashboard() {
        </Layout>
      );
    }
+
+
 
   // --- Página Principal ---
   return (
@@ -186,26 +172,6 @@ export function Dashboard() {
                  </div>
               ))}
             </div>
-          </section>
-
-          {/* Seção Próximas Consultas (Dados da API) */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Próximas Consultas</h2>
-            {appointments.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {appointments.map((appointment) => (
-                  <CardConsulta
-                    key={appointment.id} // Assumindo que consulta tem 'id'
-                    appointment={appointment}
-                    onContact={handleContactDoctor}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white p-6 rounded-lg shadow-md text-center text-gray-500">
-                Nenhuma consulta agendada para este paciente.
-              </div>
-            )}
           </section>
         </div>
       </div>

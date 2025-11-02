@@ -15,8 +15,8 @@ import { PerfilCuidador } from './pages/PerfilCuidador';
 import { AtualizarPerfilCuidador } from './pages/AtualizarPerfilCuidador';
 import { Dashboard } from './pages/Dashboard';
 import { PerfilPaciente } from './pages/PerfilPaciente';
-import { AtualizarPerfilPaciente } from './pages/AtualizarPerfilPaciente';
-import { ListaCuidadores } from './pages/ListaCuidadores';
+import { PerfilCompletoPaciente } from './pages/AtualizarPerfilPaciente';
+import { MinhasConsultas } from './pages/MinhasConsultas';
 
 
 function App() {
@@ -56,7 +56,7 @@ function App() {
 
               <Route path="/perfil-paciente/atualizar-perfil-paciente" element={
                 <ProtectedRoute>
-                  <AtualizarPerfilPaciente />
+                  <PerfilCompletoPaciente />
                 </ProtectedRoute>
               } />
 
@@ -66,18 +66,17 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              <Route path="/teleconsulta/:consultaId" element={
+              <Route path="/teleconsulta" element={
                 <ProtectedRoute>
                   <Teleconsulta />
                 </ProtectedRoute>
               } />
 
-              <Route path="/lista-cuidadores/" element={
+              <Route path="/minhas-consultas" element={
                 <ProtectedRoute>
-                  <ListaCuidadores/>
+                  <MinhasConsultas/>
                 </ProtectedRoute>
               } />
-
             </Routes>
           </Router>
         </ConsultasProvider>
