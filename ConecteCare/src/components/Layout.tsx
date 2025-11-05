@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react"; // Adicionado useEffect
+import { useState, useEffect } from "react"; 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
-// Importa useCadastro para verificar o tipo de utilizador
 import { useCadastro } from "../context/cadastro-context";
 import { PhoneIcon, MailIcon } from "../styles/icons";
 
 export function Header({ isMenuOpen, toggleMenu }: any) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth(); // Utilizador logado (email)
-  // Acede às listas de cuidadores e pacientes
-  const { cuidador: listaCuidadores, paciente: listaPacientes } = useCadastro(); // [cite: cadastro-context.tsx]
+  const { user, logout } = useAuth(); 
+  const { cuidador: listaCuidadores, paciente: listaPacientes } = useCadastro(); 
 
   const navigation = [
     { name: "Início", href: "/" },
@@ -25,47 +23,38 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
     { name: "Menu de Cadastro", href: "/cadastro", primary: true },
   ];
 
-  // Estado para guardar a URL correta do painel
   const [painelUrl, setPainelUrl] = useState<string | null>(null);
-  const [isLoadingUrl, setIsLoadingUrl] = useState<boolean>(true); // Estado de loading
+  const [isLoadingUrl, setIsLoadingUrl] = useState<boolean>(true); 
 
-  // Efeito para determinar a URL do painel com base no tipo de utilizador
   useEffect(() => {
-    // Só executa se o utilizador estiver logado e as listas carregadas
     if (user && listaCuidadores.length > 0 && listaPacientes.length > 0) {
-      setIsLoadingUrl(true); // Inicia loading
-      // Verifica se o email está na lista de cuidadores
-      const isCuidador = listaCuidadores.some(c => c.email === user); // [cite: cadastro-context.tsx, auth-context.tsx]
+      setIsLoadingUrl(true); 
+      const isCuidador = listaCuidadores.some(c => c.email === user); 
       if (isCuidador) {
-        setPainelUrl("/perfil-cuidador"); // Define a URL do cuidador
+        setPainelUrl("/perfil-cuidador");
         console.log("Utilizador é Cuidador, URL:", "/perfil-cuidador");
       } else {
-        // Verifica se o email está na lista de pacientes
-        const isPaciente = listaPacientes.some(p => p.email === user); // [cite: cadastro-context.tsx, auth-context.tsx]
+        const isPaciente = listaPacientes.some(p => p.email === user); 
         if (isPaciente) {
-          setPainelUrl("/perfil-paciente"); // Define a URL do paciente (!! Ajuste se a rota for diferente !!)
+          setPainelUrl("/perfil-paciente"); 
           console.log("Utilizador é Paciente, URL:", "/perfil-paciente");
         } else {
-          // Utilizador logado mas não encontrado em nenhuma lista (caso de erro?)
-          setPainelUrl(null); // Ou defina uma rota de erro/fallback
+          setPainelUrl(null); 
           console.warn("Utilizador logado não encontrado como Cuidador ou Paciente.");
         }
       }
-      setIsLoadingUrl(false); // Termina loading
+      setIsLoadingUrl(false);
     } else if (user) {
-      // Utilizador logado, mas listas ainda a carregar
       setIsLoadingUrl(true);
     } else {
-      // Utilizador não logado
       setPainelUrl(null);
       setIsLoadingUrl(false);
     }
-    // Depende do email do utilizador e das listas
   }, [user, listaCuidadores, listaPacientes]);
 
 
   const handleLogout = () => {
-    logout(); // [cite: auth-context.tsx]
+    logout(); 
     navigate('/login');
   };
 
@@ -73,7 +62,6 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
     <header className="bg-white sticky top-0 z-40 shadow-xl border-t-4 border-cyan-500">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
-          {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="text-3xl font-black text-blue-700 tracking-tighter hover:text-cyan-500 transition-colors">
               ConecteCare
@@ -170,7 +158,7 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
                 <Link
                   key={item.name}
                   to={item.href}
-                  onClick={toggleMenu} // Fecha o menu ao clicar
+                  onClick={toggleMenu} 
                   className={`block mx-4 px-3 py-2 rounded-lg text-base font-semibold transition-colors ${location.pathname === item.href ? "text-white bg-blue-600 shadow-md" : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"}`}
                 >
                   {item.name}
@@ -184,10 +172,10 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
                   {/* Link "Meu Painel" Dinâmico (Mobile) */}
                   <Link
                     key="meu-painel-mobile"
-                    to={painelUrl ?? '#'} // Usa a URL do estado
+                    to={painelUrl ?? '#'}
                     onClick={(e) => {
                       if (isLoadingUrl || !painelUrl) e.preventDefault();
-                      else toggleMenu(); // Fecha o menu se for válido
+                      else toggleMenu(); 
                     }}
                     className={`block mx-4 px-3 py-2 rounded-lg text-base font-semibold transition-colors
                                 text-white bg-cyan-500 shadow-md hover:bg-cyan-600
@@ -206,13 +194,12 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
                   </button>
                 </>
               ) : (
-                // Se NÃO estiver logado
                 <>
                   {actionNavigation.map(item => (
                     <Link
                       key={item.name}
                       to={item.href}
-                      onClick={toggleMenu} // Fecha o menu ao clicar
+                      onClick={toggleMenu} 
                       className={`block mx-4 px-3 py-2 rounded-lg text-base font-semibold transition-colors ${item.primary ? "text-white bg-cyan-500 shadow-md" : "text-blue-600 hover:bg-gray-100"}`}
                     >
                       {item.name}
@@ -228,13 +215,11 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
   );
 };
 
-// Footer (sem alterações)
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-white border-t-4 border-cyan-500">
       <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-          {/* Conteúdo do Footer */}
           <div>
             <h3 className="text-2xl font-black text-cyan-400 mb-3 tracking-tighter">ConecteCare</h3>
             <p className="text-gray-400 text-sm max-w-sm mx-auto md:mx-0">
@@ -257,9 +242,8 @@ export function Footer() {
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Acesso Rápido</h3>
             <ul className="space-y-2">
-              <li><Link to="/guia-usuario" className="text-gray-400 hover:text-cyan-400 transition-colors">Guia do Utilizador</Link></li>
+              <li><Link to="/guia-usuario" className="text-gray-400 hover:text-cyan-400 transition-colors">Guia do Usuário</Link></li>
               <li><Link to="/faq" className="text-gray-400 hover:text-cyan-400 transition-colors">Perguntas Frequentes</Link></li>
-              <li><Link to="/login" className="text-gray-400 hover:text-cyan-400 transition-colors">Área do Cliente</Link></li>
             </ul>
           </div>
         </div>
@@ -272,7 +256,6 @@ export function Footer() {
   );
 };
 
-// Layout (sem alterações na estrutura principal)
 export function Layout({ children }: any) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const toggleMenu = () => { setIsMenuOpen(!isMenuOpen); };

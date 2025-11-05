@@ -16,15 +16,15 @@ export interface TermoProps {
 }
 
 export interface VantagemProps {
-    title: string;
-    description: string;
-    icon: string;
+  title: string;
+  description: string;
+  icon: string;
 }
 
 
 export interface DepoimentoProps {
-    text: string;
-    author: string;
+  text: string;
+  author: string;
 }
 
 
@@ -59,11 +59,10 @@ export interface Consulta {
 }
 
 export interface Medico {
-    id: string;
-    nome: string;
-    especialidade: string;
+  id: string;
+  nome: string;
+  especialidade: string;
 }
-
 
 export interface TeamMember {
   name: string;
@@ -105,28 +104,31 @@ export interface TeleconsultaData {
 }
 
 export interface Cuidador {
-    id: string;
-    nome: string;
-    idade: number;
-    cpf: string;
-    cpfPaciente: string;
-    email: string;
-    senha: string;
-    telefone: string;
-    parentesco: string;
-    // residencia: File;
-    // foto: File;
-    aceitarTermo: boolean;
-  };
+  id: string;
+  nome: string;
+  idade: number;
+  cpf: string;
+  cpfPaciente: string;
+  cepCuidador: string;
+  cepPaciente: string;
+  email: string;
+  senha: string;
+  telefone: string;
+  parentesco: string;
+  // residencia: File;
+  // foto: File;
+  aceitarTermo: boolean;
+};
 
 export interface Paciente {
-    id: string;
-    nome: string;
-    idade: number;
-    cpfPaciente: string;
-    email: string;
-    senha: string;
-    telefone: string;
-    patologia: string;
-    aceitarTermo: boolean;
-  };
+  id: string;
+  nome: string;
+  idade: number;
+  cpfPaciente: string;
+  cepPaciente: string;
+  email: string;
+  senha: string;
+  telefone: string;
+  patologia: string;
+  aceitarTermo: boolean;
+};

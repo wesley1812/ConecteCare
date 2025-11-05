@@ -4,7 +4,7 @@
   import type { Cuidador, Paciente } from "../types/interfaces";
   import { useAuth } from "../context/auth-context.tsx";
   import { useCadastro } from "../context/cadastro-context.tsx";
-  import { UserCircleIcon, HeartIcon, VideoCameraIcon } from "../styles/icons.tsx";
+  import { UserCircleIcon, HeartIcon, VideoCameraIcon, ClipboardListIcon } from "../styles/icons.tsx";
 
   interface ActionCardProps {
     to: string;
@@ -86,7 +86,7 @@
       return (
         <Layout>
           <div className="py-20 bg-gray-100 min-h-screen flex items-center justify-center">
-            <p className="text-lg text-gray-600">Carregando dados do usuário...</p>
+            <p className="text-lg text-gray-600">Paciente vinculado sem cadastro ativo</p>
           </div>
         </Layout>
       );
@@ -156,13 +156,13 @@
                 colorRing="focus:ring-blue-400"
               />
 
-              {/* <Redirecionador
-                to="/processo"
+              <Redirecionador
+                to={`/minhas-consultas/${pacienteVinculado.id}`}
                 icon={<ClipboardListIcon />}
-                title="Etapas do Processo"
+                title="Organizar Consultas"
                 description="Entenda como funciona o agendamento e a consulta."
                 colorRing="focus:ring-gray-400"
-              /> */}
+              />
 
             </div>
           </div>

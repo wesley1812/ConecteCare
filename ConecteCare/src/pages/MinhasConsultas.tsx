@@ -1,110 +1,156 @@
 import { useState, useEffect, useCallback } from "react";
-import { CardConsulta } from "../components/CardSaude";
-import { Layout } from "../components/Layout";
-import { useAuth } from "../context/auth-context";
-import { useCadastro } from "../context/cadastro-context";
-import { useConsultas } from "../context/consultas-context";
+import { useParams } from "react-router-dom"; 
+import { CardConsulta } from "../components/CardConsulta.tsx";
+import { Layout } from "../components/Layout.tsx"; 
+import { useAuth } from "../context/auth-context.tsx"; 
+import { useCadastro } from "../context/cadastro-context.tsx"; 
+import { useConsultas } from "../context/consultas-context.tsx"; 
 import type { Consulta, Paciente } from "../types/interfaces";
-import { CalendarIcon, FormulariosConsulta, type ActiveForm } from "../components/FormulariosConsulta";
+import { FormulariosConsulta, type ActiveForm } from "../components/FormulariosConsulta.tsx"; 
+import { CalendarIcon } from "../styles/icons.tsx"; 
 
 export function MinhasConsultas() {
+    const { id: patientIdFromUrl } = useParams<{ id: string }>(); 
+    
     const { user: loggedInUserEmail } = useAuth();
     const { paciente: listaPacientes } = useCadastro();
-    const { getConsultasPorPaciente} = useConsultas();
+    const { getConsultasPorPaciente } = useConsultas();
 
     const [appointments, setAppointments] = useState<Consulta[]>([]);
-    const [isLoadingPatient, setIsLoadingPatient] = useState(true); 
+    const [isLoadingPatient, setIsLoadingPatient] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [pacienteLogado, setPacienteLogado] = useState<Paciente | null>(null);
+    const [pacienteExibido, setPacienteExibido] = useState<Paciente | null>(null);
 
     const [activeForm, setActiveForm] = useState<ActiveForm>(null);
     const [selectedConsulta, setSelectedConsulta] = useState<Consulta | null>(null);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
 
-    // Lógica de busca e carregamento (inalterada)
     useEffect(() => {
         setIsLoadingPatient(true);
         setError(null);
-        
+
         if (!loggedInUserEmail || listaPacientes.length === 0) {
-            if (!loggedInUserEmail) { setError("Utilizador não autenticado."); }
-            setIsLoadingPatient(false);
+            if (!patientIdFromUrl) {
+                setError("Por favor, faça login ou acesse a partir do Perfil.");
+                setIsLoadingPatient(false);
+            }
             return;
         }
-        
-        const foundPaciente = listaPacientes.find(p => p.email === loggedInUserEmail);
-        
-        if (!foundPaciente) { setError("Paciente logado não encontrado no sistema de cadastro."); setIsLoadingPatient(false); return; }
-        
-        setPacienteLogado(foundPaciente);
 
-        const consultasDoPaciente = getConsultasPorPaciente(foundPaciente.cpfPaciente);
-        setAppointments(consultasDoPaciente);
+        let pacienteEncontrado: Paciente | undefined;
 
+        if (patientIdFromUrl) {
+            // CUIDADOR: Busca o paciente pelo ID fornecido na URL
+            pacienteEncontrado = listaPacientes.find(p => p.id === patientIdFromUrl);
+            if (!pacienteEncontrado) {
+                setError("Paciente não encontrado com o ID fornecido.");
+            }
+        } else {
+            // PACIENTE: Busca o paciente pelo email logado (acesso direto)
+            pacienteEncontrado = listaPacientes.find(p => p.email === loggedInUserEmail);
+            if (!pacienteEncontrado) {
+                // Se o usuário logado não for paciente, mas for cuidador, pode não ter um ID na URL (erro no fluxo)
+                setError("Seu perfil de paciente não foi encontrado ou a rota está incorreta.");
+            }
+        }
+
+        if (pacienteEncontrado) {
+            setPacienteExibido(pacienteEncontrado);
+            // Busca as consultas se o paciente foi encontrado
+            setAppointments(getConsultasPorPaciente(pacienteEncontrado.cpfPaciente));
+        } else {
+            setPacienteExibido(null);
+            setAppointments([]);
+        }
+        
         setIsLoadingPatient(false);
-    }, [loggedInUserEmail, listaPacientes, getConsultasPorPaciente]);
-
-    const handleAction = useCallback((action: 'remarcar' | 'cancelar', consulta: Consulta) => {
-        setSelectedConsulta(consulta);
-        setActiveForm(action);
+        
+        // Limpa a mensagem ao carregar novas consultas/pacientes
         setMessage(null);
+
+    }, [loggedInUserEmail, listaPacientes, patientIdFromUrl, getConsultasPorPaciente]);
+
+
+    // Função de tratamento de sucesso após ação no formulário (agendar/remarcar/cancelar)
+    const handleSuccess = useCallback((text: string, type: 'success' | 'error' = 'success') => {
+        setMessage({ type, text });
+        setActiveForm(null); // Fecha o formulário após a ação bem-sucedida
+        setSelectedConsulta(null);
+
+        // Força a atualização da lista após o sucesso
+        if (pacienteExibido) {
+             setAppointments(getConsultasPorPaciente(pacienteExibido.cpfPaciente));
+        }
+    }, [pacienteExibido, getConsultasPorPaciente]);
+
+    // Função para lidar com cliques de ação (Remarcar/Cancelar) no CardConsulta
+    const handleAction = useCallback((type: 'remarcar' | 'cancelar', appointment: Consulta) => {
+        setActiveForm(type);
+        setSelectedConsulta(appointment);
+        setMessage(null); // Limpa a mensagem de status anterior
     }, []);
 
-    const handleFormSuccess = useCallback((msg: string, type: 'success' | 'error' = 'success') => {
-        setMessage({ type, text: msg });
-        setActiveForm(null); 
-        setSelectedConsulta(null); 
-    }, []);
+    const handleFormClose = () => {
+        setActiveForm(null);
+        setSelectedConsulta(null);
+    };
 
-    // --- Telas de Carregamento e Erro ---
+
+    // Renderização de carregamento e erro
     if (isLoadingPatient) {
-        return <Layout><div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center"><div className="text-center text-lg text-gray-600">A carregar suas consultas...</div></div></Layout>;
-    }
-    if (error || !pacienteLogado) {
-        return <Layout><div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center text-center"><div><h1 className="text-2xl font-bold text-red-600">Erro de Acesso</h1><p className="text-lg text-gray-600 mt-2">{error}</p></div></div></Layout>;
+        // Assume que o Layout está configurado para receber children sem title/icon, ou que CalendarIcon está no escopo
+        return <Layout title="Carregando Consultas..." icon={<CalendarIcon />}> 
+            <div className="text-center py-10 text-lg text-gray-500">
+                Aguarde, buscando dados do paciente...
+            </div>
+        </Layout>;
     }
 
-    // --- Página Principal ---
+    if (error || !pacienteExibido) {
+        return <Layout title="Minhas Consultas" icon={<CalendarIcon />}>
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md" role="alert">
+                <p className="font-bold">Erro ao Carregar Dados</p>
+                <p>{error || "Paciente não encontrado."}</p>
+            </div>
+        </Layout>;
+    }
+    
+    // Texto de cabeçalho para diferenciar o acesso
+    const isCaregiverAccess = !!patientIdFromUrl;
+    const headerTitle = isCaregiverAccess 
+        ? `Consultas de ${pacienteExibido.nome}` 
+        : `Minhas Consultas (${pacienteExibido.nome})`;
+
     return (
-        <Layout>
-            <div className="py-12 bg-gray-50 min-h-screen">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Layout 
+            title={headerTitle}
+            icon={<CalendarIcon />}
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="space-y-10">
 
-                    {/* CABEÇALHO E BOTÃO AGENDAR */}
-                    <div className="flex justify-between items-center mb-10 border-b pb-4">
-                        <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                            <CalendarIcon />
-                            Minhas Próximas Consultas
-                        </h1>
-                        <button 
-                            onClick={() => setActiveForm('agendar')}
-                            className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors"
-                        >
-                            + Agendar Nova
-                        </button>
-                    </div>
-
-                    {/* Feedback de Mensagem */}
+                    {/* Mensagem de Status (Sucesso/Erro) */}
                     {message && (
-                        <div className={`p-4 mb-6 rounded-lg shadow-md ${message.type === 'success' ? 'bg-green-100 border-l-4 border-green-600 text-green-800' : 'bg-red-100 border-l-4 border-red-600 text-red-800'}`}>
-                            <p className="font-bold">{message.text}</p>
+                        <div className={`p-4 rounded-lg shadow-md ${message.type === 'success' ? 'bg-green-100 border-l-4 border-green-600 text-green-800' : 'bg-red-100 border-l-4 border-red-600 text-red-800'}`} role="alert">
+                            <p className="font-bold">{message.type === 'success' ? 'Sucesso!' : 'Erro!'}</p>
+                            <p>{message.text}</p>
                         </div>
                     )}
 
-
-                    {/* 1. SEÇÃO FORMULÁRIO ATIVO (USANDO FormulariosConsulta) */}
-                    {activeForm && pacienteLogado && (
-                        <div className="mb-10">
-                            <button onClick={() => setActiveForm(null)} className="text-sm text-gray-500 hover:text-gray-800 mb-3 flex items-center">
-                                &larr; Fechar Formulário
+                    {/* Formulário Ativo (Agendar/Remarcar/Cancelar) */}
+                    {activeForm && (
+                        <div className="relative">
+                            <button onClick={handleFormClose} className="absolute top-0 right-0 p-2 text-gray-500 hover:text-gray-900 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                             </button>
-                            
-                            <FormulariosConsulta
+                            <FormulariosConsulta 
                                 formType={activeForm}
-                                cpfPaciente={pacienteLogado.cpfPaciente}
+                                cpfPaciente={pacienteExibido.cpfPaciente}
                                 selectedConsulta={selectedConsulta}
-                                onSuccess={handleFormSuccess}
+                                onSuccess={handleSuccess}
                             />
                         </div>
                     )}
@@ -112,7 +158,15 @@ export function MinhasConsultas() {
 
                     {/* 2. LISTA DE CONSULTAS */}
                     <section>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6">Consultas Agendadas</h2>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900">Consultas Agendadas</h2>
+                            {pacienteExibido && (
+                                <button onClick={() => { setActiveForm('agendar'); setSelectedConsulta(null); }} className="hover:cursor-pointer px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors text-sm">
+                                    + Agendar Nova
+                                </button>
+                            )}
+                        </div>
+                        
                         {appointments.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {appointments.map((appointment) => (
@@ -125,8 +179,8 @@ export function MinhasConsultas() {
                             </div>
                         ) : (
                             <div className="bg-white p-6 rounded-lg shadow-md text-center text-gray-500">
-                                <p className="text-lg mb-3">Nenhuma consulta agendada para este paciente.</p>
-                                <button onClick={() => setActiveForm('agendar')} className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors">
+                                <p className="text-lg mb-3">Nenhuma consulta agendada para {isCaregiverAccess ? pacienteExibido.nome : 'você'}.</p>
+                                <button onClick={() => setActiveForm('agendar')} className="hover:cursor-pointer px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors">
                                     Agendar Agora
                                 </button>
                             </div>

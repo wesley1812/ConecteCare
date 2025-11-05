@@ -1,22 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
-// Importa CardConsulta e o tipo AppointmentType
 import type { Paciente, HealthIndicatorType } from "../types/interfaces";
 import { useAuth } from "../context/auth-context";
 import { useCadastro } from "../context/cadastro-context";
-// Importa o novo hook
 import { useConsultas } from "../context/consultas-context";
-// Você pode remover CardIndicadorSaude se não for mais usar
-// import { CardIndicadorSaude } from "../components/CardSaude";
 
-// Renomeado para Dashboard
 export function Dashboard() {
   const { id } = useParams<{ id: string }>(); // ID do Paciente vindo da URL
   const { user: loggedInUserEmail } = useAuth(); // [cite: auth-context.tsx]
   const { cuidador: listaCuidadores, paciente: listaPacientes } = useCadastro(); // [cite: cadastro-context.tsx]
   // Usa o novo contexto de consultas
-  const { getConsultasPorPaciente, isLoading: isLoadingConsultas } = useConsultas(); // [cite: consultas-context.tsx]
+  const { getConsultasPorPaciente } = useConsultas(); // [cite: consultas-context.tsx]
 
   const [paciente, setPaciente] = useState<Paciente | null>(null);
   const [healthIndicators, setHealthIndicators] = useState<HealthIndicatorType[]>([]);
@@ -98,7 +93,7 @@ export function Dashboard() {
         setIsLoading(false);
     }
     // Adiciona isLoadingConsultas às dependências para reavaliar se as consultas carregarem depois
-  }, [id, loggedInUserEmail, listaCuidadores, listaPacientes, getConsultasPorPaciente, isLoadingConsultas]);
+  }, [id, loggedInUserEmail, listaCuidadores, listaPacientes, getConsultasPorPaciente]);
 
 
   // --- Telas de Carregamento e Erro ---

@@ -72,7 +72,7 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              <Route path="/minhas-consultas" element={
+              <Route path="/minhas-consultas/:id" element={
                 <ProtectedRoute>
                   <MinhasConsultas/>
                 </ProtectedRoute>

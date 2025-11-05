@@ -39,7 +39,9 @@ export function AtualizarPerfilCuidador() {
           idade: foundCuidador.idade,
           telefone: foundCuidador.telefone,
           parentesco: foundCuidador.parentesco,
-          cpfPaciente: foundCuidador.cpfPaciente
+          cpfPaciente: foundCuidador.cpfPaciente,
+          cepCuidador: foundCuidador.cepCuidador,
+          cepPaciente:foundCuidador.cepPaciente
         }); 
       }
     }
@@ -131,6 +133,11 @@ export function AtualizarPerfilCuidador() {
                   <label htmlFor="parentesco" className={labelClass}>Relação com Paciente</label>
                   <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} />
                   {errors.parentesco && <p className={errorClass}>{errors.parentesco.message}</p>}
+                </div>
+                <div>
+                  <label htmlFor="cep" className={labelClass}>CEP</label>
+                  <input type="text" id="cep" {...register("cep")} className={inputClass}/>
+                  {errors.cep && <p className={errorClass}>{errors.cep.message}</p>}
                 </div>
               </div>
 

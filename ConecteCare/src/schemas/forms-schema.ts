@@ -10,6 +10,12 @@ export const formSchemaCuidador = z.object({
         .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido"),
     cpfPaciente: z.string()
         .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF do Paciente inválido"),
+    cepCuidador: z.string()
+        .regex(/^\d{5}-\d{3}$/, "CEP inválido (Ex: 12345-678)")
+        .min(9, "CEP é obrigatório"),
+    cepPaciente: z.string()
+        .regex(/^\d{5}-\d{3}$/, "CEP inválido (Ex: 12345-678)")
+        .min(9, "CEP é obrigatório"),
     email: z.string()
         .email("Email inválido"),
     senha: z.string()
@@ -37,6 +43,11 @@ export const formSchemaAtualizarCuidador = z.object({
         .number()
         .min(18, "Idade deve ser maior que 18.")
         .max(120),
+    cepCuidador: z.string()
+        .regex(/^\d{5}-\d{3}$/, "CEP inválido (Ex: 12345-678)")
+        .min(9, "CEP é obrigatório"),
+    cepPaciente: z.string()
+        .regex(/^\d{5}-\d{3}$/, "CEP inválido (Ex: 12345-678)"),
     telefone: z
         .string()
         .min(10, "Telefone inválido."),
@@ -58,6 +69,9 @@ export const formSchemaPaciente = z.object({
         .min(0, "Idade deve ser um número positivo"),
     cpfPaciente: z.string()
         .regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF do Paciente inválido"),
+    cepPaciente: z.string()
+        .regex(/^\d{5}-\d{3}$/, "CEP inválido (Ex: 12345-678)")
+        .min(9, "CEP é obrigatório"),
     email: z.string()
         .email("Email inválido"),
     senha: z.string()
@@ -81,6 +95,9 @@ export const formSchemaAtualizarPaciente = z.object({
         .number()
         .min(18, "Idade deve ser maior que 18.")
         .max(120),
+    cepPaciente: z.string()
+        .regex(/^\d{5}-\d{3}$/, "CEP inválido (Ex: 12345-678)")
+        .min(9, "CEP é obrigatório"),
     telefone: z
         .string()
         .min(10, "Telefone inválido."),
