@@ -121,26 +121,22 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                 </div>
             </div>
 
-            {/* --- Seção 2: Dados Clínicos e de Acesso --- */}
             <div className="p-5 border border-gray-100 rounded-xl bg-teal-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>2. Dados Clínicos e de Acesso à Plataforma</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
-                    {/* Patologia Principal (Destacada) */}
                     <div className="md:col-span-2">
                         <label htmlFor="paciente-patologia" className={labelClass}>Patologia Principal ou Condição Crônica:</label>
                         <input type="text" id="paciente-patologia" {...register("patologia")} className={inputClass} placeholder="Ex: Doença de Alzheimer, Diabetes, Hipertensão" />
                         {errors.patologia && <p className={errorClass}>{errors.patologia.message}</p>}
                     </div>
 
-                    {/* Email (Login) */}
                     <div>
                         <label htmlFor="paciente-email" className={labelClass}>Email (Será o Login do Paciente):</label>
                         <input type="email" id="paciente-email" {...register("email")} className={inputClass} placeholder="email.de.acesso@exemplo.com" />
                         {errors.email && <p className={errorClass}>{errors.email.message}</p>}
                     </div>
 
-                    {/* Senha */}
                     <div>
                         <label htmlFor="paciente-senha" className={labelClass}>Senha:</label>
                         <input type="password" id="paciente-senha" {...register("senha")} className={inputClass} placeholder="Mínimo 6 caracteres" />
@@ -149,7 +145,6 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                 </div>
             </div>
 
-            {/* --- Seção 3: Termo de Consentimento --- */}
             <div className="pt-6 border-t border-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">3. Termo de Consentimento</h3>
                 
@@ -165,7 +160,6 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                         Ler Termo de Consentimento
                     </button>
                     
-                    {/* Checkbox e label alinhados verticalmente */}
                     <div className="flex items-center flex-shrink-0"> 
                         <input
                             type="checkbox"
@@ -181,7 +175,6 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                 {errors.aceitarTermo && <p className={`${errorClass} mt-2 text-sm`}>{errors.aceitarTermo.message}</p>}
             </div>
 
-            {/* --- Botão de Envio --- */}
             <button
                 type="submit"
                 className="hover:cursor-pointer w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-all text-xl shadow-xl hover:shadow-2xl tracking-wide transform hover:-translate-y-0.5"

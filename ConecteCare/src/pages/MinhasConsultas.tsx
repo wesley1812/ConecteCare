@@ -10,9 +10,9 @@ import { FormulariosConsulta, type ActiveForm } from "../components/FormulariosC
 import { CalendarIcon } from "../styles/icons.tsx"; 
 
 export function MinhasConsultas() {
-    const { id: patientIdFromUrl } = useParams<{ id: string }>(); 
+    const { id: pacienteIDURL } = useParams<{ id: string }>();
     
-    const { user: loggedInUserEmail } = useAuth();
+    const { user: emailUserLogado } = useAuth();
     const { paciente: listaPacientes } = useCadastro();
     const { getConsultasPorPaciente } = useConsultas();
 
@@ -30,8 +30,8 @@ export function MinhasConsultas() {
         setIsLoadingPatient(true);
         setError(null);
 
-        if (!loggedInUserEmail || listaPacientes.length === 0) {
-            if (!patientIdFromUrl) {
+        if (!emailUserLogado || listaPacientes.length === 0) {
+            if (!pacienteIDURL) {
                 setError("Por favor, faça login ou acesse a partir do Perfil.");
                 setIsLoadingPatient(false);
             }
@@ -40,15 +40,15 @@ export function MinhasConsultas() {
 
         let pacienteEncontrado: Paciente | undefined;
 
-        if (patientIdFromUrl) {
+        if (pacienteIDURL) {
             // CUIDADOR: Busca o paciente pelo ID fornecido na URL
-            pacienteEncontrado = listaPacientes.find(p => p.id === patientIdFromUrl);
+            pacienteEncontrado = listaPacientes.find(p => p.id === pacienteIDURL);
             if (!pacienteEncontrado) {
                 setError("Paciente não encontrado com o ID fornecido.");
             }
         } else {
             // PACIENTE: Busca o paciente pelo email logado (acesso direto)
-            pacienteEncontrado = listaPacientes.find(p => p.email === loggedInUserEmail);
+            pacienteEncontrado = listaPacientes.find(p => p.email === emailUserLogado);
             if (!pacienteEncontrado) {
                 // Se o usuário logado não for paciente, mas for cuidador, pode não ter um ID na URL (erro no fluxo)
                 setError("Seu perfil de paciente não foi encontrado ou a rota está incorreta.");
@@ -69,7 +69,7 @@ export function MinhasConsultas() {
         // Limpa a mensagem ao carregar novas consultas/pacientes
         setMessage(null);
 
-    }, [loggedInUserEmail, listaPacientes, patientIdFromUrl, getConsultasPorPaciente]);
+    }, [emailUserLogado, listaPacientes, pacienteIDURL, getConsultasPorPaciente]);
 
 
     // Função de tratamento de sucesso após ação no formulário (agendar/remarcar/cancelar)
@@ -117,7 +117,7 @@ export function MinhasConsultas() {
     }
     
     // Texto de cabeçalho para diferenciar o acesso
-    const isCaregiverAccess = !!patientIdFromUrl;
+    const isCaregiverAccess = !!pacienteIDURL;
     const headerTitle = isCaregiverAccess 
         ? `Consultas de ${pacienteExibido.nome}` 
         : `Minhas Consultas (${pacienteExibido.nome})`;

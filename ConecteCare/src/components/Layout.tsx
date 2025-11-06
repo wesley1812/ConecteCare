@@ -15,7 +15,7 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
     { name: "Guia do Usuário", href: "/guia-usuario" },
     { name: "Quem Somos", href: "/quem-somos" },
     { name: "FAQ", href: "/faq" },
-    { name: "Contatos", href: "/teleconsulta" }
+    { name: "Contatos", href: "/contato" }
   ];
 
   const actionNavigation = [
