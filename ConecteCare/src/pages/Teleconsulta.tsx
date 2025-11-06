@@ -185,6 +185,19 @@ export function Teleconsulta(): JSX.Element {
 
   }, [teleconsulta]);
 
+  useEffect(() => {
+    // 1. TENTATIVA DE ESTABILIZAÇÃO DO TENSORFLOW.JS (Crucial)
+    const initTfBackend = async () => {
+        try {
+            // Define o backend WebGL explicitamente para otimização e estabilidade
+            await tf.setBackend('webgl'); 
+            console.log("TensorFlow.js backend set to WebGL.");
+        } catch (e) {
+            console.warn("Falha ao definir o backend WebGL, usando o padrão (CPU).", e);
+        }
+    };
+    initTfBackend();
+  }, []);
 
   useEffect(() => {
     
