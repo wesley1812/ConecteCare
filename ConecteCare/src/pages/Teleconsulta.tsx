@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { useParams } from 'react-router-dom';
-import type { TeleconsultaData } from '../types/interfaces';
 import { Layout } from '../components/Layout';
 
 // =========================================================================================
@@ -76,7 +75,7 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
 };
 
 // Componente para exibir o painel de feedback
-const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, patientName: string }) => {
+const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
   let bgColor, borderColor, icon;
  
   switch (feedback.status) {
@@ -107,7 +106,7 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
     <div className={`p-6 rounded-xl shadow-xl border-l-4 ${bgColor} ${borderColor} h-full space-y-4`}>
       <h3 className="text-xl font-bold text-gray-800">Orientações de Postura</h3>
       <p className="text-sm text-gray-600">
-        Ajuste sua posição na câmera, {patientName}, para garantir que o médico tenha a melhor visibilidade.
+        Ajuste sua posição na câmera para garantir que o médico tenha a melhor visibilidade.
       </p>
      
       <div className={`p-4 rounded-lg font-semibold text-lg border ${
@@ -129,10 +128,10 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
-  const { consultaId } = useParams<{ consultaId: string }>();
-  const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
+  // const { consultaId } = useParams<{ consultaId: string }>();
+  // const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
   const [feedback, setFeedback] = useState<PostureFeedback>({ 
-    message: "Iniciando sistema...", 
+    message: "Iniciando sistema...",
     status: 'loading' 
   });
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -150,14 +149,6 @@ export function Teleconsulta(): JSX.Element {
   // =========================================================================================
 
   useEffect(() => {
-    // 1. Carregar dados da consulta
-    const fetchedData: TeleconsultaData = {
-      id: consultaId || '1',
-      patientName: "João da Silva",
-      patientAge: 75,
-    };
-    setTeleconsulta(fetchedData);
-
     let mediaPipeInitialized = false;
 
     // 2. Inicializar MediaPipe com IMAGE mode (mais estável)
@@ -202,13 +193,13 @@ export function Teleconsulta(): JSX.Element {
           streamRef.current.getTracks().forEach(track => track.stop());
         }
 
-        const stream = await navigator.mediaDevices.getUserMedia({ 
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
             width: { ideal: 640 },
             height: { ideal: 480 },
-            frameRate: { ideal: 15 } // Reduzir FPS para performance
-          }, 
-          audio: true 
+            frameRate: { ideal: 15 }
+          },
+          audio: true
         });
         
         streamRef.current = stream;
@@ -331,7 +322,7 @@ export function Teleconsulta(): JSX.Element {
         videoRef.current.srcObject = null;
       }
     };
-  }, [consultaId]);
+  }, []);
 
   // =========================================================================================
   // REINICIAR CÂMERA
@@ -358,7 +349,7 @@ export function Teleconsulta(): JSX.Element {
       <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-extrabold text-indigo-800 text-center mb-8 border-b pb-4">
-            Teleconsulta: {teleconsulta.patientName} ({teleconsulta.patientAge} anos)
+            Painel de Orientações Teleconsulta
           </h1>
         </div>
 
@@ -407,7 +398,6 @@ export function Teleconsulta(): JSX.Element {
           <div className="lg:flex-1 w-full lg:w-1/3">
             <FeedbackPanel
               feedback={feedback}
-              patientName={teleconsulta.patientName.split(' ')[0] || "paciente"}
             />
             
             <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
@@ -419,14 +409,16 @@ export function Teleconsulta(): JSX.Element {
               <p><strong>Detecção:</strong> {detectionActiveRef.current ? '✅ Ativa' : '⏸️ Pausada'}</p>
               <p><strong>Modo:</strong> IMAGE (Estável)</p>
               {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
-            </div>
-
-            <button 
+            
+            <div>
+              <button 
               onClick={restartCamera}
               className="w-full mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-medium"
             >
               🔄 Reiniciar Sistema
             </button>
+            </div>
+            </div>
           </div>
         </div>
       </div>
