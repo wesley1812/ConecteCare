@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type JSX, useCallback } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { useParams } from 'react-router-dom';
 import type { TeleconsultaData } from '../types/interfaces';
 import { Layout } from '../components/Layout';
@@ -33,8 +33,6 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
     const nose = landmarks[0];
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
-    const leftHip = landmarks[23];
-    const rightHip = landmarks[24];
     
     const shoulderDistance = Math.sqrt(
       Math.pow(leftShoulder.x - rightShoulder.x, 2) + 
@@ -42,10 +40,6 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
     );
 
     const noseVerticalPosition = nose.y;
-
-    const shoulderHipAlignment = Math.abs(
-      (leftShoulder.y + rightShoulder.y) / 2 - (leftHip.y + rightHip.y) / 2
-    );
 
     if (shoulderDistance < 0.15) {
       return {
@@ -60,11 +54,6 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
     } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.8) {
       return {
         message: "📏 Ajuste a altura: mantenha o rosto mais centralizado.",
-        status: 'warning'
-      };
-    } else if (shoulderHipAlignment > 0.3) {
-      return {
-        message: "⚡ Evite inclinar o tronco. Mantenha postura ereta.",
         status: 'warning'
       };
     } else {
@@ -83,14 +72,14 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
 
 const analyzePostureFallback = (): PostureFeedback => {
   const now = Date.now();
-  const cycle = now % 20000;
+  const cycle = now % 15000;
 
-  if (cycle < 8000) {
+  if (cycle < 7000) {
     return {
       message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
       status: 'ideal'
     };
-  } else if (cycle < 14000) {
+  } else if (cycle < 12000) {
     return {
       message: "⚠️ Ajuste sua posição para melhor visibilidade.",
       status: 'warning'
@@ -153,7 +142,7 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 4. COMPONENTE PRINCIPAL CORRIGIDO - SEM LOOP
+// 4. COMPONENTE PRINCIPAL SIMPLIFICADO
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
@@ -165,175 +154,18 @@ export function Teleconsulta(): JSX.Element {
   });
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [mediaPipeStatus, setMediaPipeStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [videoReady, setVideoReady] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
-  const lastAnalysisTimeRef = useRef<number>(0);
-  const analysisInterval = 150;
-  const mediaPipeInitializedRef = useRef(false);
-  const videoReadyRef = useRef(false); // Ref para controle interno
+  const detectionActiveRef = useRef(false);
 
   // =========================================================================================
-  // INICIALIZAÇÃO DO MEDIAPIPE OTIMIZADA
+  // INICIALIZAÇÃO SIMPLIFICADA
   // =========================================================================================
-  const initializeMediaPipe = useCallback(async () => {
-    if (mediaPipeInitializedRef.current) return;
-    mediaPipeInitializedRef.current = true;
 
-    try {
-      setMediaPipeStatus('loading');
-      console.log('🚀 Inicializando MediaPipe em background...');
-      
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
-      );
-
-      poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
-          delegate: "GPU"
-        },
-        runningMode: "VIDEO",
-        numPoses: 1
-      });
-
-      console.log('🎯 MediaPipe carregado com sucesso!');
-      setMediaPipeStatus('ready');
-      
-    } catch (error) {
-      console.error('❌ MediaPipe falhou, usando modo básico:', error);
-      setMediaPipeStatus('error');
-    }
-  }, []);
-
-  // =========================================================================================
-  // DETECÇÃO DE POSTURA CORRIGIDA
-  // =========================================================================================
-  const detectPosture = useCallback((timestamp: number) => {
-    // Verificar se o vídeo está realmente pronto usando a ref
-    if (!videoRef.current || !videoReadyRef.current) {
-      animationFrameRef.current = requestAnimationFrame(detectPosture);
-      return;
-    }
-
-    if (timestamp - lastAnalysisTimeRef.current < analysisInterval) {
-      animationFrameRef.current = requestAnimationFrame(detectPosture);
-      return;
-    }
-
-    lastAnalysisTimeRef.current = timestamp;
-
-    try {
-      if (poseLandmarkerRef.current && mediaPipeStatus === 'ready') {
-        poseLandmarkerRef.current.detectForVideo(videoRef.current!, timestamp, (result) => {
-          if (result.landmarks && result.landmarks.length > 0) {
-            const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
-            setFeedback(newFeedback);
-          } else {
-            setFeedback({
-              message: "👤 Posicione-se frente à câmera para análise",
-              status: 'warning'
-            });
-          }
-        });
-      } else {
-        const newFeedback = analyzePostureFallback();
-        setFeedback(newFeedback);
-      }
-    } catch (error) {
-      const newFeedback = analyzePostureFallback();
-      setFeedback(newFeedback);
-    }
-
-    animationFrameRef.current = requestAnimationFrame(detectPosture);
-  }, [mediaPipeStatus]);
-
-  // =========================================================================================
-  // INICIALIZAÇÃO DA CÂMERA CORRIGIDA - SEM LOOP
-  // =========================================================================================
-  const startWebcam = useCallback(async () => {
-    try {
-      // Cleanup completo
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-
-      // Reset states
-      setVideoReady(false);
-      videoReadyRef.current = false;
-      setFeedback({ message: "Iniciando câmera...", status: 'loading' });
-
-      console.log('📷 Solicitando acesso à câmera...');
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          frameRate: { ideal: 25 }
-        }, 
-        audio: true 
-      });
-      
-      streamRef.current = stream;
-      
-      if (videoRef.current) {
-        const video = videoRef.current;
-        
-        // SINGLE event listener - usando uma única vez
-        const handleVideoReady = () => {
-          // Verificar duplicação
-          if (videoReadyRef.current) {
-            console.log('⚠️ Evento duplicado ignorado');
-            return;
-          }
-          
-          console.log('✅ Vídeo pronto e estável - Iniciando detecção');
-          videoReadyRef.current = true;
-          setVideoReady(true);
-          setCameraError(null);
-          
-          // Iniciar detecção apenas uma vez
-          lastAnalysisTimeRef.current = performance.now();
-          if (!animationFrameRef.current) {
-            animationFrameRef.current = requestAnimationFrame(detectPosture);
-          }
-        };
-
-        // Configurar listener APENAS UMA VEZ
-        video.removeEventListener('loadeddata', handleVideoReady); // Limpar qualquer anterior
-        video.addEventListener('loadeddata', handleVideoReady, { once: true }); // APENAS UMA VEZ
-        
-        // Também verificar se já está ready
-        if (video.readyState >= 3) { // HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA
-          console.log('🎯 Vídeo já estava pronto');
-          handleVideoReady();
-        }
-        
-        // Atribuir stream POR ÚLTIMO
-        video.srcObject = stream;
-      }
-    } catch (err) {
-      console.error("❌ Erro na câmera:", err);
-      const errorMessage = "Câmera não acessível. Verifique as permissões.";
-      setFeedback({ message: errorMessage, status: 'error' });
-      setCameraError(errorMessage);
-    }
-  }, [detectPosture]);
-
-  // =========================================================================================
-  // EFFECTS SIMPLIFICADOS
-  // =========================================================================================
   useEffect(() => {
-    // Inicializar dados
+    // 1. Carregar dados da consulta
     const fetchedData: TeleconsultaData = {
       id: consultaId || '1',
       patientName: "João da Silva",
@@ -341,30 +173,160 @@ export function Teleconsulta(): JSX.Element {
     };
     setTeleconsulta(fetchedData);
 
-    // Iniciar MediaPipe imediatamente
-    initializeMediaPipe();
+    let mediaPipeInitialized = false;
 
-    // Iniciar câmera com pequeno delay para estabilidade
-    const cameraTimer = setTimeout(() => {
-      startWebcam();
-    }, 500); // Aumentei o delay para garantir estabilidade
+    // 2. Inicializar MediaPipe (não bloqueante)
+    const initMediaPipe = async () => {
+      if (mediaPipeInitialized) return;
+      mediaPipeInitialized = true;
 
-    return () => {
-      clearTimeout(cameraTimer);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
+      try {
+        setMediaPipeStatus('loading');
+        console.log('🚀 Inicializando MediaPipe...');
+        
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+        );
+
+        poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+            delegate: "GPU"
+          },
+          runningMode: "VIDEO",
+          numPoses: 1
+        });
+
+        console.log('🎯 MediaPipe carregado!');
+        setMediaPipeStatus('ready');
+      } catch (error) {
+        console.error('❌ MediaPipe falhou:', error);
+        setMediaPipeStatus('error');
       }
+    };
+
+    // 3. Inicializar câmera de forma simples
+    const initCamera = async () => {
+      try {
+        console.log('📷 Iniciando câmera...');
+        
+        // Parar stream anterior se existir
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            frameRate: { ideal: 25 }
+          }, 
+          audio: true 
+        });
+        
+        streamRef.current = stream;
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          
+          // Esperar o vídeo estar pronto de forma simples
+          const checkVideoReady = () => {
+            if (videoRef.current && videoRef.current.readyState >= 2) {
+              console.log('✅ Vídeo pronto!');
+              setCameraError(null);
+              startDetection();
+            } else {
+              setTimeout(checkVideoReady, 100);
+            }
+          };
+          
+          checkVideoReady();
+        }
+      } catch (err) {
+        console.error("❌ Erro na câmera:", err);
+        const errorMessage = "Câmera não acessível. Verifique as permissões.";
+        setFeedback({ message: errorMessage, status: 'error' });
+        setCameraError(errorMessage);
+      }
+    };
+
+    // 4. Sistema de detecção simplificado
+    const startDetection = () => {
+      if (detectionActiveRef.current) return;
+      detectionActiveRef.current = true;
+
+      console.log('🎯 Iniciando detecção...');
+
+      const detectFrame = () => {
+        if (!detectionActiveRef.current) return;
+
+        try {
+          if (poseLandmarkerRef.current && mediaPipeStatus === 'ready' && videoRef.current) {
+            poseLandmarkerRef.current.detectForVideo(videoRef.current, Date.now(), (result) => {
+              if (result.landmarks && result.landmarks.length > 0) {
+                const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
+                setFeedback(newFeedback);
+              } else {
+                setFeedback({
+                  message: "👤 Posicione-se frente à câmera",
+                  status: 'warning'
+                });
+              }
+            });
+          } else {
+            // Fallback enquanto MediaPipe carrega
+            const newFeedback = analyzePostureFallback();
+            setFeedback(newFeedback);
+          }
+        } catch (error) {
+          console.log('Erro na detecção, usando fallback');
+          const newFeedback = analyzePostureFallback();
+          setFeedback(newFeedback);
+        }
+
+        // Continuar loop apenas se ainda estiver ativo
+        if (detectionActiveRef.current) {
+          setTimeout(detectFrame, 200); // 5 FPS para performance
+        }
+      };
+
+      detectFrame();
+    };
+
+    // Iniciar tudo
+    initMediaPipe();
+    
+    // Iniciar câmera após um breve delay
+    setTimeout(() => {
+      initCamera();
+    }, 1000);
+
+    // Cleanup MUITO simples
+    return () => {
+      console.log('🧹 Fazendo cleanup...');
+      detectionActiveRef.current = false;
+      
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
       }
+      
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
-      videoReadyRef.current = false;
     };
-  }, [consultaId, initializeMediaPipe, startWebcam]);
+  }, [consultaId]); // Apenas consultaId como dependência
+
+  // =========================================================================================
+  // REINICIAR CÂMERA SIMPLES
+  // =========================================================================================
+  const restartCamera = async () => {
+    setCameraError(null);
+    setFeedback({ message: "Reiniciando câmera...", status: 'loading' });
+    
+    // Recarregar a página é a maneira mais simples de reiniciar tudo
+    window.location.reload();
+  };
 
   // =========================================================================================
   // RENDER
@@ -394,37 +356,16 @@ export function Teleconsulta(): JSX.Element {
               autoPlay
               playsInline
               muted
-              className={`w-full h-full object-cover rounded-2xl transform scale-x-[-1] transition-opacity duration-500 ${
-                videoReady ? 'opacity-100' : 'opacity-0'
-              }`}
+              className="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"
             />
-           
-            <canvas ref={canvasRef} className="hidden" />
 
-            {/* Overlay de loading */}
-            {!videoReady && !cameraError && (
-              <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                <div className="text-white text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                  <p>Iniciando câmera...</p>
-                </div>
-              </div>
-            )}
-
-            <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
-              <p>🎥 {videoReady ? 'Câmera Ativa' : 'Conectando...'}</p>
-              <p className="text-xs opacity-75">
-                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa' : 
-                 mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚡ Modo Básico'}
-              </p>
-            </div>
-           
+            {/* Overlay de loading apenas se houver erro */}
             {cameraError && (
               <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg p-6 text-center max-w-md">
                   <p className="font-semibold text-red-600 mb-4">{cameraError}</p>
                   <button 
-                    onClick={startWebcam}
+                    onClick={restartCamera}
                     className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
                   >
                     🔄 Tentar Novamente
@@ -432,6 +373,14 @@ export function Teleconsulta(): JSX.Element {
                 </div>
               </div>
             )}
+
+            <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
+              <p>🎥 Câmera {cameraError ? 'Erro' : 'Ativa'}</p>
+              <p className="text-xs opacity-75">
+                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa' : 
+                 mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚡ Modo Básico'}
+              </p>
+            </div>
           </div>
 
           <div className="lg:flex-1 w-full lg:w-1/3">
@@ -446,8 +395,16 @@ export function Teleconsulta(): JSX.Element {
                 mediaPipeStatus === 'loading' ? '🔄 Inicializando IA...' :
                 '⚡ Modo Básico'
               }</p>
-              <p><strong>Câmera:</strong> {videoReady ? '✅ Conectada' : '🔄 Conectando...'}</p>
+              <p><strong>Detecção:</strong> {detectionActiveRef.current ? '✅ Ativa' : '⏸️ Pausada'}</p>
+              {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
             </div>
+
+            <button 
+              onClick={restartCamera}
+              className="w-full mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-medium"
+            >
+              🔄 Reiniciar Sistema
+            </button>
           </div>
         </div>
       </div>
