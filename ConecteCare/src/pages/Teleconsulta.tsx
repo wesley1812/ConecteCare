@@ -5,9 +5,9 @@ import { useEffect, useRef, useState, type JSX } from 'react';
 // =========================================================================================
 // O componente original importava o Layout, aqui está uma versão simples
 // para garantir que o código seja self-contained e funcional.
-const Layout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen font-inter">{children}</div>
-);
+// NOTA: Os estilos globais de fonte são assumidos pelo ambiente Tailwind
+import { Layout } from "../components/Layout";
+
 
 // =========================================================================================
 // 1. IMPORTAÇÕES DO MEDIAPIPE
@@ -50,11 +50,6 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
     // Posição vertical do nariz para altura (vertical)
     const noseVerticalPosition = nose.y;
 
-    // console.log('📊 Métricas:', {
-    //   shoulderDistance: shoulderDistance.toFixed(3),
-    //   noseVertical: noseVerticalPosition.toFixed(3)
-    // });
-
     if (shoulderDistance < 0.15) {
       return {
         message: "⚠️ Muito longe! Aproxime-se para melhor enquadramento.",
@@ -71,15 +66,12 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
         status: 'warning'
       };
     } else {
-      // Regras mais específicas para a postura: pescoço reto (se a detecção de pescoço estiver disponível)
-      // Como não há landmarks de pescoço ou o cálculo de inclinação é complexo, mantenho o ideal no enquadramento.
       return {
         message: "⭐ Postura Perfeita! Enquadramento e posição de tronco ideais.",
         status: 'ideal'
       };
     }
   } catch (error) {
-    // console.error("Erro na análise dos landmarks:", error);
     return {
       message: "📊 Analisando sua postura...",
       status: 'loading'
@@ -88,12 +80,13 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
 };
 
 // =========================================================================================
-// COMPONENTES DE VISUALIZAÇÃO (DESIGN REVISADO)
+// COMPONENTES DE VISUALIZAÇÃO (DESIGN REVISADO PARA O TEMA AZUL/CIANO)
 // =========================================================================================
 
 const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
   let bgColor, ringColor, icon, statusText, ariaLabel;
   
+  // Cores ajustadas para o tema (blue-600 / cyan-500)
   switch (feedback.status) {
     case 'ideal':
       bgColor = 'bg-white';
@@ -119,7 +112,7 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
     case 'loading':
     default:
       bgColor = 'bg-white';
-      ringColor = 'ring-indigo-400';
+      ringColor = 'ring-blue-400'; // Alterado para blue
       icon = '🔄';
       statusText = 'Aguardando';
       ariaLabel = 'Sistema analisando postura';
@@ -128,23 +121,22 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
 
   return (
     <div 
-      className={`p-6 rounded-3xl shadow-2xl bg-white space-y-5 
-                  transition-all duration-500 transform border-t-8 border-indigo-500`}
+      className={`p-6 rounded-3xl shadow-2xl bg-white space-y-5 transition-all duration-500 transform border-t-8 border-cyan-500`} // Cor de destaque Cyan (Sintaxe corrigida)
       role="status"
       aria-live="polite"
       aria-label={ariaLabel}
     >
       <div className="flex items-center justify-between border-b pb-3 border-gray-100">
         <h2 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-          <span className="text-3xl text-indigo-600">🎯</span>
+          <span className="text-3xl text-blue-600">🎯</span> {/* Cor primária Blue */}
           Feedback Rápido
         </h2>
-        <span className={`px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase
-          ${feedback.status === 'ideal' ? 'bg-green-600 text-white shadow-md' :
+        <span className={`px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase ${
+            feedback.status === 'ideal' ? 'bg-green-600 text-white shadow-md' :
             feedback.status === 'warning' ? 'bg-yellow-400 text-gray-800 shadow-md' :
             feedback.status === 'error' ? 'bg-red-600 text-white shadow-md' :
-            'bg-indigo-100 text-indigo-700'
-          }`}
+            'bg-blue-100 text-blue-700' // Alterado para blue
+          }`} // Sintaxe corrigida
         >
           {statusText}
         </span>
@@ -163,7 +155,7 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
 
       <div className="space-y-2 pt-2">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <span className="text-xl text-purple-600">💡</span>
+          <span className="text-xl text-cyan-600">💡</span> {/* Cor de destaque Cyan */}
           Orientações
         </h3>
         <p className="text-sm text-gray-600 leading-relaxed">
@@ -188,7 +180,7 @@ const SystemStatus = ({
   return (
     <div className="bg-white rounded-3xl shadow-2xl p-6 space-y-5 border border-gray-100">
       <h3 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 border-b pb-3 border-gray-100">
-        <span className="text-3xl text-indigo-600">⚙️</span>
+        <span className="text-3xl text-blue-600">⚙️</span> {/* Cor primária Blue */}
         Detalhes Técnicos
       </h3>
       
@@ -196,12 +188,12 @@ const SystemStatus = ({
         {/* IA Status */}
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span className="text-purple-500">🧠</span>
+            <span className="text-cyan-500">🧠</span> {/* Cor de destaque Cyan */}
             Módulo de IA (MediaPipe)
           </span>
           <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
             mediaPipeStatus === 'ready' ? 'bg-green-500 text-white' :
-            mediaPipeStatus === 'loading' ? 'bg-blue-100 text-blue-700 animate-pulse' :
+            mediaPipeStatus === 'loading' ? 'bg-blue-100 text-blue-700 animate-pulse' : // Ajustado para blue
             'bg-red-100 text-red-700'
           }`}>
             {mediaPipeStatus === 'ready' ? '✅ Carregado' :
@@ -212,7 +204,7 @@ const SystemStatus = ({
         {/* Detecção Status */}
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span className="text-blue-500">👁️</span>
+            <span className="text-blue-500">👁️</span> {/* Cor primária Blue */}
             Detecção em Tempo Real
           </span>
           <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
@@ -225,10 +217,10 @@ const SystemStatus = ({
         {/* Modo Operação */}
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span className="text-yellow-500">🚀</span>
+            <span className="text-cyan-500">🚀</span> {/* Cor de destaque Cyan */}
             Modo de Execução
           </span>
-          <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider bg-purple-100 text-purple-700">
+          <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider bg-cyan-100 text-cyan-700"> {/* Ajustado para cyan */}
             IMAGE Mode
           </span>
         </div>
@@ -249,7 +241,7 @@ const SystemStatus = ({
 
       <button 
         onClick={onRestart}
-        className="w-full px-4 py-4 mt-2 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-indigo-200 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-300 flex items-center justify-center gap-3 text-lg"
+        className="w-full px-4 py-4 mt-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center gap-3 text-lg" // Gradiente de Blue para Cyan
         aria-label="Reiniciar sistema de câmera e detecção"
       >
         <span className="text-xl">🔄</span>
@@ -298,7 +290,6 @@ export function Teleconsulta(): JSX.Element {
 
       try {
         setMediaPipeStatus('loading');
-        console.log('🚀 Inicializando MediaPipe (IMAGE mode)...');
         
         const vision = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
@@ -313,18 +304,15 @@ export function Teleconsulta(): JSX.Element {
           numPoses: 1
         });
 
-        console.log('🎯 MediaPipe carregado (IMAGE mode)!');
         setMediaPipeStatus('ready');
         mediaPipeReadyRef.current = true;
       } catch (error) {
-        console.error('❌ MediaPipe falhou:', error);
         setMediaPipeStatus('error');
       }
     };
 
     const initCamera = async () => {
       try {
-        console.log('📷 Iniciando câmera...');
         
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
@@ -336,7 +324,7 @@ export function Teleconsulta(): JSX.Element {
             height: { ideal: 480 },
             frameRate: { ideal: 15 }
           },
-          audio: true // Mantenho audio: true como estava na lógica original
+          audio: true 
         });
         
         streamRef.current = stream;
@@ -351,7 +339,6 @@ export function Teleconsulta(): JSX.Element {
 
           const checkVideoReady = () => {
             if (videoRef.current && videoRef.current.readyState >= 2) {
-              console.log('✅ Vídeo pronto!');
               setCameraError(null);
               startDetection();
             } else {
@@ -362,7 +349,6 @@ export function Teleconsulta(): JSX.Element {
           checkVideoReady();
         }
       } catch (err) {
-        console.error("❌ Erro na câmera:", err);
         const errorMessage = "Câmera não acessível. Verifique as permissões do navegador (código: " + (err as Error).name + ").";
         setFeedback({ message: errorMessage, status: 'error' });
         setCameraError(errorMessage);
@@ -372,8 +358,6 @@ export function Teleconsulta(): JSX.Element {
     const startDetection = () => {
       if (detectionActiveRef.current) return;
       detectionActiveRef.current = true;
-
-      console.log('🎯 Iniciando detecção (IMAGE mode)...');
 
       let lastVideoTime = -1;
       let lastDetectionTime = 0;
@@ -398,17 +382,13 @@ export function Teleconsulta(): JSX.Element {
                 // Desenha o frame no canvas (necessário para o detect IMAGE mode)
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                // console.log('🔍 Detectando pose...');
-                
                 // O detect() aceita CanvasElement (como esperado no Image mode)
                 const result = poseLandmarkerRef.current.detect(canvas);
                 
                 if (result.landmarks && result.landmarks.length > 0) {
-                  // console.log('👤 Pessoa detectada! Landmarks:', result.landmarks[0].length);
                   const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
                   setFeedback(newFeedback);
                 } else {
-                  // console.log('❌ Nenhum landmark detectado');
                   setFeedback({
                     message: "👤 Posicione-se frente à câmera para análise (tronco e cabeça visíveis)",
                     status: 'warning'
@@ -416,12 +396,10 @@ export function Teleconsulta(): JSX.Element {
                 }
               }
             } catch (error) {
-              console.error('💥 Erro na detecção:', error);
-              // Não paro a RAF, apenas reporto o erro de detecção
+              // Erro silencioso na detecção para não interromper a RAF
             }
           }
         } else if (!mediaPipeReadyRef.current) {
-          // console.log('⏳ Aguardando inicialização...');
           setFeedback({
             message: "🔄 Inicializando sistema de detecção...",
             status: 'loading'
@@ -445,7 +423,6 @@ export function Teleconsulta(): JSX.Element {
     }, 500);
 
     return () => {
-      console.log('🧹 Fazendo cleanup...');
       detectionActiveRef.current = false;
       mediaPipeReadyRef.current = false;
       
@@ -473,10 +450,11 @@ export function Teleconsulta(): JSX.Element {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 lg:p-10">
+      {/* Alterado de bg-gray-50 para usar o fundo da marca (se houver, senão branco/cinza claro) */}
+      <div className="min-h-screen bg-white font-sans p-4 sm:p-6 lg:p-10">
         <div className="max-w-7xl mx-auto">
           <header className="text-center mb-10 space-y-4">
-            <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-700 to-purple-600 bg-clip-text text-transparent tracking-tight">
+            <h1 className="text-5xl font-extrabold bg-gradient-to-r from-blue-700 to-cyan-500 bg-clip-text text-transparent tracking-tight">
               Assistente de Postura | Teleconsulta
             </h1>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
@@ -487,7 +465,7 @@ export function Teleconsulta(): JSX.Element {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {/* Área da Câmera (2/3 da tela em desktop) */}
             <div className="lg:col-span-2 space-y-4">
-              <div className="bg-white rounded-3xl shadow-2xl shadow-indigo-100 border border-gray-100 overflow-hidden transition-shadow duration-300 hover:shadow-indigo-300/50">
+              <div className="bg-white rounded-3xl shadow-2xl shadow-blue-100 border border-gray-100 overflow-hidden transition-shadow duration-300 hover:shadow-cyan-300/50"> {/* Sombra azul */}
                 <div className="relative aspect-video bg-gray-900 rounded-t-3xl">
                   {/* Container da Câmera */}
                   <div className="w-full h-full">
@@ -538,7 +516,7 @@ export function Teleconsulta(): JSX.Element {
                       <span className="flex items-center gap-2">
                         <span className={
                           mediaPipeStatus === 'ready' ? 'text-green-400' :
-                          mediaPipeStatus === 'loading' ? 'text-yellow-400 animate-spin' : 'text-red-400'
+                          mediaPipeStatus === 'loading' ? 'text-cyan-400 animate-spin' : 'text-red-400' // Ajustado para cyan
                         }>
                           {mediaPipeStatus === 'ready' ? '🧠' : mediaPipeStatus === 'loading' ? '⏳' : '❌'}
                         </span>
@@ -549,9 +527,9 @@ export function Teleconsulta(): JSX.Element {
                   </div>
                 </div>
 
-                <div className="p-6 bg-gradient-to-r from-gray-50 to-white rounded-b-3xl">
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-white rounded-b-3xl"> {/* Gradiente suave com Blue */}
                   <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                    <span className="text-indigo-600">✨</span>
+                    <span className="text-blue-600">✨</span> {/* Cor primária Blue */}
                     Sua Visualização de Teleconsulta
                   </h3>
                   <p className="text-sm text-gray-600">
@@ -576,26 +554,26 @@ export function Teleconsulta(): JSX.Element {
 
           {/* Rodapé Informativo (Melhorado) */}
           <footer className="mt-16 text-center">
-            <div className="bg-white rounded-3xl shadow-xl p-8 max-w-5xl mx-auto border-t-4 border-purple-200">
+            <div className="bg-white rounded-3xl shadow-xl p-8 max-w-5xl mx-auto border-t-4 border-cyan-500"> {/* Borda Cyan */}
               <h3 className="text-2xl font-extrabold text-gray-900 mb-5 flex items-center justify-center gap-3">
-                <span className="text-purple-600 text-3xl">🩺</span>
+                <span className="text-blue-600 text-3xl">🩺</span> {/* Cor primária Blue */}
                 Prepare-se para Sua Consulta
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm text-gray-700">
-                <div className="p-3 bg-purple-50 rounded-xl shadow-inner font-semibold">
-                  <span className="text-purple-500 block mb-1">1. 💡</span>
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">1. 💡</span> {/* Texto Cyan */}
                   Boa Iluminação
                 </div>
-                <div className="p-3 bg-purple-50 rounded-xl shadow-inner font-semibold">
-                  <span className="text-purple-500 block mb-1">2. 🖼️</span>
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">2. 🖼️</span> {/* Texto Cyan */}
                   Fundo Neutro
                 </div>
-                <div className="p-3 bg-purple-50 rounded-xl shadow-inner font-semibold">
-                  <span className="text-purple-500 block mb-1">3. 📶</span>
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">3. 📶</span> {/* Texto Cyan */}
                   Internet Estável
                 </div>
-                <div className="p-3 bg-purple-50 rounded-xl shadow-inner font-semibold">
-                  <span className="text-purple-500 block mb-1">4. 🔇</span>
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">4. 🔇</span> {/* Texto Cyan */}
                   Sem Interrupções
                 </div>
               </div>
