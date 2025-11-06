@@ -166,96 +166,96 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
   );
 };
 
-const SystemStatus = ({ 
-  mediaPipeStatus, 
-  detectionActive, 
-  cameraError,
-  onRestart 
-}: { 
-  mediaPipeStatus: string;
-  detectionActive: boolean;
-  cameraError: string | null;
-  onRestart: () => void;
-}) => {
-  return (
-    <div className="bg-white rounded-3xl shadow-2xl p-6 space-y-5 border border-gray-100">
-      <h3 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 border-b pb-3 border-gray-100">
-        <span className="text-3xl text-blue-600">⚙️</span> {/* Cor primária Blue */}
-        Detalhes Técnicos
-      </h3>
+// const SystemStatus = ({ 
+//   mediaPipeStatus, 
+//   detectionActive, 
+//   cameraError,
+//   onRestart 
+// }: { 
+//   mediaPipeStatus: string;
+//   detectionActive: boolean;
+//   cameraError: string | null;
+//   onRestart: () => void;
+// }) => {
+//   return (
+//     <div className="bg-white rounded-3xl shadow-2xl p-6 space-y-5 border border-gray-100">
+//       <h3 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 border-b pb-3 border-gray-100">
+//         <span className="text-3xl text-blue-600">⚙️</span> {/* Cor primária Blue */}
+//         Detalhes Técnicos
+//       </h3>
       
-      <div className="space-y-4">
-        {/* IA Status */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
-          <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span className="text-cyan-500">🧠</span> {/* Cor de destaque Cyan */}
-            Módulo de IA (MediaPipe)
-          </span>
-          <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
-            mediaPipeStatus === 'ready' ? 'bg-green-500 text-white' :
-            mediaPipeStatus === 'loading' ? 'bg-blue-100 text-blue-700 animate-pulse' : // Ajustado para blue
-            'bg-red-100 text-red-700'
-          }`}>
-            {mediaPipeStatus === 'ready' ? '✅ Carregado' :
-             mediaPipeStatus === 'loading' ? '🔄 Carregando...' : '❌ Falhou'}
-          </span>
-        </div>
+//       <div className="space-y-4">
+//         {/* IA Status */}
+//         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
+//           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+//             <span className="text-cyan-500">🧠</span> {/* Cor de destaque Cyan */}
+//             Módulo de IA (MediaPipe)
+//           </span>
+//           <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
+//             mediaPipeStatus === 'ready' ? 'bg-green-500 text-white' :
+//             mediaPipeStatus === 'loading' ? 'bg-blue-100 text-blue-700 animate-pulse' : // Ajustado para blue
+//             'bg-red-100 text-red-700'
+//           }`}>
+//             {mediaPipeStatus === 'ready' ? '✅ Carregado' :
+//              mediaPipeStatus === 'loading' ? '🔄 Carregando...' : '❌ Falhou'}
+//           </span>
+//         </div>
 
-        {/* Detecção Status */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
-          <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span className="text-blue-500">👁️</span> {/* Cor primária Blue */}
-            Detecção em Tempo Real
-          </span>
-          <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
-            detectionActive ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
-          }`}>
-            {detectionActive ? '▶️ Ativa' : '⏸️ Pausada'}
-          </span>
-        </div>
+//         {/* Detecção Status */}
+//         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
+//           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+//             <span className="text-blue-500">👁️</span> {/* Cor primária Blue */}
+//             Detecção em Tempo Real
+//           </span>
+//           <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
+//             detectionActive ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+//           }`}>
+//             {detectionActive ? '▶️ Ativa' : '⏸️ Pausada'}
+//           </span>
+//         </div>
 
-        {/* Modo Operação */}
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
-          <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span className="text-cyan-500">🚀</span> {/* Cor de destaque Cyan */}
-            Modo de Execução
-          </span>
-          <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider bg-cyan-100 text-cyan-700"> {/* Ajustado para cyan */}
-            IMAGE Mode
-          </span>
-        </div>
-      </div>
+//         {/* Modo Operação */}
+//         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
+//           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+//             <span className="text-cyan-500">🚀</span> {/* Cor de destaque Cyan */}
+//             Modo de Execução
+//           </span>
+//           <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider bg-cyan-100 text-cyan-700"> {/* Ajustado para cyan */}
+//             IMAGE Mode
+//           </span>
+//         </div>
+//       </div>
 
-      {cameraError && (
-        <div 
-          className="p-4 bg-red-100 border-2 border-red-300 rounded-xl shadow-md"
-          role="alert"
-          aria-live="assertive"
-        >
-          <p className="text-sm text-red-800 font-semibold flex items-center gap-2">
-            <span>❌ ERRO:</span>
-            {cameraError}
-          </p>
-        </div>
-      )}
+//       {cameraError && (
+//         <div 
+//           className="p-4 bg-red-100 border-2 border-red-300 rounded-xl shadow-md"
+//           role="alert"
+//           aria-live="assertive"
+//         >
+//           <p className="text-sm text-red-800 font-semibold flex items-center gap-2">
+//             <span>❌ ERRO:</span>
+//             {cameraError}
+//           </p>
+//         </div>
+//       )}
 
-      <button 
-        onClick={onRestart}
-        className="w-full px-4 py-4 mt-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center gap-3 text-lg" // Gradiente de Blue para Cyan
-        aria-label="Reiniciar sistema de câmera e detecção"
-      >
-        <span className="text-xl">🔄</span>
-        Reiniciar Sistema
-      </button>
+//       <button 
+//         onClick={onRestart}
+//         className="w-full px-4 py-4 mt-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center gap-3 text-lg" // Gradiente de Blue para Cyan
+//         aria-label="Reiniciar sistema de câmera e detecção"
+//       >
+//         <span className="text-xl">🔄</span>
+//         Reiniciar Sistema
+//       </button>
 
-      <div className="pt-3 border-t border-gray-100 text-center">
-        <p className="text-xs text-gray-500">
-          Versão 1.0 - Monitoramento de Postura com MediaPipe Pose Landmarker
-        </p>
-      </div>
-    </div>
-  );
-};
+//       <div className="pt-3 border-t border-gray-100 text-center">
+//         <p className="text-xs text-gray-500">
+//           Versão 1.0 - Monitoramento de Postura com MediaPipe Pose Landmarker
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
 
 
 // =========================================================================================
@@ -540,16 +540,16 @@ export function Teleconsulta(): JSX.Element {
             </div>
 
             {/* Painel de Orientações e Status (1/3 da tela em desktop) */}
-            {/* <div className="space-y-8">
+            <div className="space-y-8">
               <FeedbackPanel feedback={feedback} />
               
-              <SystemStatus 
+              {/* <SystemStatus 
                 mediaPipeStatus={mediaPipeStatus}
                 detectionActive={detectionActiveRef.current}
                 cameraError={cameraError}
                 onRestart={restartCamera}
-              />
-            </div> */}
+              /> */}
+            </div>
           </div>
 
           {/* Rodapé Informativo (Melhorado) */}
