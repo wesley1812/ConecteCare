@@ -41,6 +41,11 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
 
     const noseVerticalPosition = nose.y;
 
+    console.log('📊 Métricas:', {
+      shoulderDistance: shoulderDistance.toFixed(3),
+      noseVertical: noseVerticalPosition.toFixed(3)
+    });
+
     if (shoulderDistance < 0.15) {
       return {
         message: "⚠️ Muito longe! Aproxime-se para melhor enquadramento.",
@@ -120,7 +125,7 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 4. COMPONENTE PRINCIPAL SIMPLIFICADO
+// 4. COMPONENTE PRINCIPAL CORRIGIDO
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
@@ -137,6 +142,7 @@ export function Teleconsulta(): JSX.Element {
   const streamRef = useRef<MediaStream | null>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const detectionActiveRef = useRef(false);
+  const mediaPipeReadyRef = useRef(false); // Ref para controle interno
 
   // =========================================================================================
   // INICIALIZAÇÃO SIMPLIFICADA
@@ -177,6 +183,7 @@ export function Teleconsulta(): JSX.Element {
 
         console.log('🎯 MediaPipe carregado!');
         setMediaPipeStatus('ready');
+        mediaPipeReadyRef.current = true; // Atualizar a ref também
       } catch (error) {
         console.error('❌ MediaPipe falhou:', error);
         setMediaPipeStatus('error');
@@ -228,7 +235,7 @@ export function Teleconsulta(): JSX.Element {
       }
     };
 
-    // 4. Sistema de detecção simplificado
+    // 4. Sistema de detecção CORRIGIDO
     const startDetection = () => {
       if (detectionActiveRef.current) return;
       detectionActiveRef.current = true;
@@ -238,19 +245,38 @@ export function Teleconsulta(): JSX.Element {
       const detectFrame = () => {
         if (!detectionActiveRef.current) return;
 
-          if (poseLandmarkerRef.current && mediaPipeStatus === 'ready' && videoRef.current) {
+        try {
+          // Usar a ref em vez do state para evitar problemas de closure
+          if (poseLandmarkerRef.current && mediaPipeReadyRef.current && videoRef.current) {
+            console.log('🔍 Usando MediaPipe para detecção...');
             poseLandmarkerRef.current.detectForVideo(videoRef.current, Date.now(), (result) => {
               if (result.landmarks && result.landmarks.length > 0) {
+                console.log('👤 Pessoa detectada!');
                 const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
                 setFeedback(newFeedback);
               } else {
+                console.log('❌ Nenhum landmark detectado');
                 setFeedback({
                   message: "👤 Posicione-se frente à câmera",
                   status: 'warning'
                 });
               }
             });
-          } 
+          } else {
+            console.log('⏳ MediaPipe não está pronto ainda...');
+            setFeedback({
+              message: "🔄 Inicializando sistema de detecção...",
+              status: 'loading'
+            });
+          }
+        } catch (error) {
+          console.error('💥 Erro na detecção:', error);
+          setFeedback({
+            message: "⚠️ Sistema temporariamente indisponível",
+            status: 'warning'
+          });
+        }
+
         // Continuar loop apenas se ainda estiver ativo
         if (detectionActiveRef.current) {
           setTimeout(detectFrame, 200); // 5 FPS para performance
@@ -272,6 +298,7 @@ export function Teleconsulta(): JSX.Element {
     return () => {
       console.log('🧹 Fazendo cleanup...');
       detectionActiveRef.current = false;
+      mediaPipeReadyRef.current = false;
       
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -363,6 +390,7 @@ export function Teleconsulta(): JSX.Element {
                 '⚡ Modo Básico'
               }</p>
               <p><strong>Detecção:</strong> {detectionActiveRef.current ? '✅ Ativa' : '⏸️ Pausada'}</p>
+              <p><strong>MediaPipe:</strong> {mediaPipeReadyRef.current ? '✅ Pronto' : '🔄 Carregando'}</p>
               {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
             </div>
 
