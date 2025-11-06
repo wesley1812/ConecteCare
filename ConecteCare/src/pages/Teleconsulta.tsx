@@ -540,7 +540,7 @@ export function Teleconsulta(): JSX.Element {
             </div>
 
             {/* Painel de Orientações e Status (1/3 da tela em desktop) */}
-            <div className="space-y-8">
+            {/* <div className="space-y-8">
               <FeedbackPanel feedback={feedback} />
               
               <SystemStatus 
@@ -549,7 +549,7 @@ export function Teleconsulta(): JSX.Element {
                 cameraError={cameraError}
                 onRestart={restartCamera}
               />
-            </div>
+            </div> */}
           </div>
 
           {/* Rodapé Informativo (Melhorado) */}
