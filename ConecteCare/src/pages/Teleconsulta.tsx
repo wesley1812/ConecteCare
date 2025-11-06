@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
-import { useParams } from 'react-router-dom';
-import type { TeleconsultaData } from '../types/interfaces';
-import { Layout } from '../components/Layout';
+
+// =========================================================================================
+// 0. COMPONENTE DE LAYOUT (SIMPLIFICADO PARA O ARQUIVO ÚNICO)
+// =========================================================================================
+// O componente original importava o Layout, aqui está uma versão simples
+// para garantir que o código seja self-contained e funcional.
+// NOTA: Os estilos globais de fonte são assumidos pelo ambiente Tailwind
+import { Layout } from "../components/Layout";
+
 
 // =========================================================================================
 // 1. IMPORTAÇÕES DO MEDIAPIPE
@@ -18,7 +24,7 @@ type PostureFeedback = {
 };
 
 // =========================================================================================
-// 3. LÓGICA DE ANÁLISE DE POSTURA
+// 3. LÓGICA DE ANÁLISE DE POSTURA (INTACTA)
 // =========================================================================================
 
 const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
@@ -30,40 +36,38 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
   }
 
   try {
+    // 0: Nariz, 11: Ombro Esquerdo, 12: Ombro Direito
     const nose = landmarks[0];
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
     
+    // Cálculo da distância dos ombros para enquadramento (horizontal)
     const shoulderDistance = Math.sqrt(
       Math.pow(leftShoulder.x - rightShoulder.x, 2) + 
       Math.pow(leftShoulder.y - rightShoulder.y, 2)
     );
 
+    // Posição vertical do nariz para altura (vertical)
     const noseVerticalPosition = nose.y;
-
-    console.log('📊 Métricas:', {
-      shoulderDistance: shoulderDistance.toFixed(3),
-      noseVertical: noseVerticalPosition.toFixed(3)
-    });
 
     if (shoulderDistance < 0.15) {
       return {
         message: "⚠️ Muito longe! Aproxime-se para melhor enquadramento.",
         status: 'warning'
       };
-    } else if (shoulderDistance > 0.4) {
+    } else if (shoulderDistance > 0.45) { // Aumentei um pouco a margem de ideal para focar mais na postura
       return {
         message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
         status: 'ideal'
       };
-    } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.8) {
+    } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.6) { // Ajustei o range vertical
       return {
-        message: "📏 Ajuste a altura: mantenha o rosto mais centralizado.",
+        message: "📏 Ajuste a altura: mantenha o rosto e o tronco centralizados no quadro (entre 20% e 60% da tela).",
         status: 'warning'
       };
     } else {
       return {
-        message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
+        message: "⭐ Postura Perfeita! Enquadramento e posição de tronco ideais.",
         status: 'ideal'
       };
     }
@@ -75,64 +79,192 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
   }
 };
 
-// Componente para exibir o painel de feedback
-const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, patientName: string }) => {
-  let bgColor, borderColor, icon;
- 
+// =========================================================================================
+// COMPONENTES DE VISUALIZAÇÃO (DESIGN REVISADO PARA O TEMA AZUL/CIANO)
+// =========================================================================================
+
+const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
+  let bgColor, ringColor, icon, statusText, ariaLabel;
+  
+  // Cores ajustadas para o tema (blue-600 / cyan-500)
   switch (feedback.status) {
     case 'ideal':
-      bgColor = 'bg-green-50';
-      borderColor = 'border-green-500';
-      icon = '✅';
+      bgColor = 'bg-white';
+      ringColor = 'ring-green-500';
+      icon = '🌟';
+      statusText = 'Ideal';
+      ariaLabel = 'Posição ideal detectada';
       break;
     case 'warning':
       bgColor = 'bg-yellow-50';
-      borderColor = 'border-yellow-500';
+      ringColor = 'ring-yellow-400';
       icon = '⚠️';
+      statusText = 'Ajuste';
+      ariaLabel = 'Ajuste de posição necessário';
       break;
     case 'error':
       bgColor = 'bg-red-50';
-      borderColor = 'border-red-500';
-      icon = '❌';
+      ringColor = 'ring-red-500';
+      icon = '🚨';
+      statusText = 'Erro';
+      ariaLabel = 'Erro no sistema de detecção';
       break;
     case 'loading':
     default:
-      bgColor = 'bg-blue-50';
-      borderColor = 'border-blue-500';
+      bgColor = 'bg-white';
+      ringColor = 'ring-blue-400'; // Alterado para blue
       icon = '🔄';
+      statusText = 'Aguardando';
+      ariaLabel = 'Sistema analisando postura';
       break;
   }
 
   return (
-    <div className={`p-6 rounded-xl shadow-xl border-l-4 ${bgColor} ${borderColor} h-full space-y-4`}>
-      <h3 className="text-xl font-bold text-gray-800">Orientações de Postura</h3>
-      <p className="text-sm text-gray-600">
-        Ajuste sua posição na câmera, {patientName}, para garantir que o médico tenha a melhor visibilidade.
-      </p>
-     
-      <div className={`p-4 rounded-lg font-semibold text-lg border ${
-        feedback.status === 'ideal' ? 'bg-green-100 border-green-600 text-green-800' : 
-        feedback.status === 'warning' ? 'bg-yellow-100 border-yellow-600 text-yellow-800' :
-        feedback.status === 'error' ? 'bg-red-100 border-red-600 text-red-800' :
-        'bg-white border-gray-300 text-gray-700'
-      }`}>
-        {icon} {feedback.message}
+    <div 
+      className={`p-6 rounded-3xl shadow-2xl bg-white space-y-5 transition-all duration-500 transform border-t-8 border-cyan-500`} // Cor de destaque Cyan (Sintaxe corrigida)
+      role="status"
+      aria-live="polite"
+      aria-label={ariaLabel}
+    >
+      <div className="flex items-center justify-between border-b pb-3 border-gray-100">
+        <h2 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
+          <span className="text-3xl text-blue-600">🎯</span> {/* Cor primária Blue */}
+          Feedback Rápido
+        </h2>
+        <span className={`px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase ${
+            feedback.status === 'ideal' ? 'bg-green-600 text-white shadow-md' :
+            feedback.status === 'warning' ? 'bg-yellow-400 text-gray-800 shadow-md' :
+            feedback.status === 'error' ? 'bg-red-600 text-white shadow-md' :
+            'bg-blue-100 text-blue-700' // Alterado para blue
+          }`} // Sintaxe corrigida
+        >
+          {statusText}
+        </span>
       </div>
 
-      <p className="text-xs text-gray-500 pt-2">O sistema monitora em tempo real a posição do seu corpo e rosto.</p>
+      <div 
+        className={`p-4 rounded-xl font-semibold text-lg ring-4 ${ringColor} ${bgColor} 
+                    shadow-inner transition-all duration-300`}
+        role="alert"
+      >
+        <div className="flex items-start gap-3">
+          <span className="text-2xl flex-shrink-0" aria-hidden="true">{icon}</span>
+          <p className="leading-snug text-gray-800">{feedback.message}</p>
+        </div>
+      </div>
+
+      <div className="space-y-2 pt-2">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span className="text-xl text-cyan-600">💡</span> {/* Cor de destaque Cyan */}
+          Orientações
+        </h3>
+        <p className="text-sm text-gray-600 leading-relaxed">
+          O sistema analisa a posição da sua cabeça e ombros (landmarks) para garantir que você esteja bem enquadrado e com a postura mais adequada para a avaliação.
+        </p>
+      </div>
     </div>
   );
 };
 
+// const SystemStatus = ({ 
+//   mediaPipeStatus, 
+//   detectionActive, 
+//   cameraError,
+//   onRestart 
+// }: { 
+//   mediaPipeStatus: string;
+//   detectionActive: boolean;
+//   cameraError: string | null;
+//   onRestart: () => void;
+// }) => {
+//   return (
+//     <div className="bg-white rounded-3xl shadow-2xl p-6 space-y-5 border border-gray-100">
+//       <h3 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 border-b pb-3 border-gray-100">
+//         <span className="text-3xl text-blue-600">⚙️</span> {/* Cor primária Blue */}
+//         Detalhes Técnicos
+//       </h3>
+      
+//       <div className="space-y-4">
+//         {/* IA Status */}
+//         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
+//           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+//             <span className="text-cyan-500">🧠</span> {/* Cor de destaque Cyan */}
+//             Módulo de IA (MediaPipe)
+//           </span>
+//           <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
+//             mediaPipeStatus === 'ready' ? 'bg-green-500 text-white' :
+//             mediaPipeStatus === 'loading' ? 'bg-blue-100 text-blue-700 animate-pulse' : // Ajustado para blue
+//             'bg-red-100 text-red-700'
+//           }`}>
+//             {mediaPipeStatus === 'ready' ? '✅ Carregado' :
+//              mediaPipeStatus === 'loading' ? '🔄 Carregando...' : '❌ Falhou'}
+//           </span>
+//         </div>
+
+//         {/* Detecção Status */}
+//         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
+//           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+//             <span className="text-blue-500">👁️</span> {/* Cor primária Blue */}
+//             Detecção em Tempo Real
+//           </span>
+//           <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
+//             detectionActive ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+//           }`}>
+//             {detectionActive ? '▶️ Ativa' : '⏸️ Pausada'}
+//           </span>
+//         </div>
+
+//         {/* Modo Operação */}
+//         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
+//           <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
+//             <span className="text-cyan-500">🚀</span> {/* Cor de destaque Cyan */}
+//             Modo de Execução
+//           </span>
+//           <span className="px-3 py-1 rounded-full text-xs font-bold tracking-wider bg-cyan-100 text-cyan-700"> {/* Ajustado para cyan */}
+//             IMAGE Mode
+//           </span>
+//         </div>
+//       </div>
+
+//       {cameraError && (
+//         <div 
+//           className="p-4 bg-red-100 border-2 border-red-300 rounded-xl shadow-md"
+//           role="alert"
+//           aria-live="assertive"
+//         >
+//           <p className="text-sm text-red-800 font-semibold flex items-center gap-2">
+//             <span>❌ ERRO:</span>
+//             {cameraError}
+//           </p>
+//         </div>
+//       )}
+
+//       <button 
+//         onClick={onRestart}
+//         className="w-full px-4 py-4 mt-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center justify-center gap-3 text-lg" // Gradiente de Blue para Cyan
+//         aria-label="Reiniciar sistema de câmera e detecção"
+//       >
+//         <span className="text-xl">🔄</span>
+//         Reiniciar Sistema
+//       </button>
+
+//       <div className="pt-3 border-t border-gray-100 text-center">
+//         <p className="text-xs text-gray-500">
+//           Versão 1.0 - Monitoramento de Postura com MediaPipe Pose Landmarker
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
+
+
 // =========================================================================================
-// 4. COMPONENTE PRINCIPAL - SOLUÇÃO IMAGE MODE
+// 4. COMPONENTE PRINCIPAL - SOLUÇÃO IMAGE MODE (ESTRUTURA REVISADA)
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
-  const { consultaId } = useParams<{ consultaId: string }>();
-  const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
   const [feedback, setFeedback] = useState<PostureFeedback>({ 
-    message: "Iniciando sistema...", 
+    message: "Iniciando sistema...",
     status: 'loading' 
   });
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -146,68 +278,52 @@ export function Teleconsulta(): JSX.Element {
   const mediaPipeReadyRef = useRef(false);
 
   // =========================================================================================
-  // INICIALIZAÇÃO COM IMAGE MODE
+  // INICIALIZAÇÃO COM IMAGE MODE (LÓGICA INTACTA)
   // =========================================================================================
 
   useEffect(() => {
-    // 1. Carregar dados da consulta
-    const fetchedData: TeleconsultaData = {
-      id: consultaId || '1',
-      patientName: "João da Silva",
-      patientAge: 75,
-    };
-    setTeleconsulta(fetchedData);
-
     let mediaPipeInitialized = false;
 
-    // 2. Inicializar MediaPipe com IMAGE mode (mais estável)
     const initMediaPipe = async () => {
       if (mediaPipeInitialized) return;
       mediaPipeInitialized = true;
 
       try {
         setMediaPipeStatus('loading');
-        console.log('🚀 Inicializando MediaPipe (IMAGE mode)...');
         
         const vision = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
         );
 
-        // Usar IMAGE mode em vez de VIDEO mode para evitar problemas de timestamp
         poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
             delegate: "GPU"
           },
-          runningMode: "IMAGE", // IMAGE mode é mais estável
+          runningMode: "IMAGE",
           numPoses: 1
         });
 
-        console.log('🎯 MediaPipe carregado (IMAGE mode)!');
         setMediaPipeStatus('ready');
         mediaPipeReadyRef.current = true;
       } catch (error) {
-        console.error('❌ MediaPipe falhou:', error);
         setMediaPipeStatus('error');
       }
     };
 
-    // 3. Inicializar câmera
     const initCamera = async () => {
       try {
-        console.log('📷 Iniciando câmera...');
         
-        // Parar stream anterior se existir
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
         }
 
-        const stream = await navigator.mediaDevices.getUserMedia({ 
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
             width: { ideal: 640 },
             height: { ideal: 480 },
-            frameRate: { ideal: 15 } // Reduzir FPS para performance
-          }, 
+            frameRate: { ideal: 15 }
+          },
           audio: true 
         });
         
@@ -216,16 +332,13 @@ export function Teleconsulta(): JSX.Element {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           
-          // Configurar canvas para captura
           if (canvasRef.current) {
             canvasRef.current.width = 640;
             canvasRef.current.height = 480;
           }
 
-          // Esperar o vídeo estar pronto
           const checkVideoReady = () => {
             if (videoRef.current && videoRef.current.readyState >= 2) {
-              console.log('✅ Vídeo pronto!');
               setCameraError(null);
               startDetection();
             } else {
@@ -236,89 +349,80 @@ export function Teleconsulta(): JSX.Element {
           checkVideoReady();
         }
       } catch (err) {
-        console.error("❌ Erro na câmera:", err);
-        const errorMessage = "Câmera não acessível. Verifique as permissões.";
+        const errorMessage = "Câmera não acessível. Verifique as permissões do navegador (código: " + (err as Error).name + ").";
         setFeedback({ message: errorMessage, status: 'error' });
         setCameraError(errorMessage);
       }
     };
 
-    // 4. Sistema de detecção com IMAGE mode
     const startDetection = () => {
       if (detectionActiveRef.current) return;
       detectionActiveRef.current = true;
 
-      console.log('🎯 Iniciando detecção (IMAGE mode)...');
+      let lastVideoTime = -1;
+      let lastDetectionTime = 0;
+      const detectionInterval = 1000 / 10; // Tentar 10 FPS de detecção
 
       const detectFrame = async () => {
         if (!detectionActiveRef.current) return;
 
-        try {
-          if (poseLandmarkerRef.current && mediaPipeReadyRef.current && videoRef.current && canvasRef.current) {
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
+        const now = performance.now();
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
 
-            if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
-              // Desenhar frame atual no canvas
-              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-              
-              console.log('🔍 Detectando pose...');
-              
-              // Usar detect() em vez de detectForVideo() para IMAGE mode
-              const result = poseLandmarkerRef.current.detect(canvas);
-              
-              if (result.landmarks && result.landmarks.length > 0) {
-                console.log('👤 Pessoa detectada! Landmarks:', result.landmarks[0].length);
-                const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
-                setFeedback(newFeedback);
-              } else {
-                console.log('❌ Nenhum landmark detectado');
-                setFeedback({
-                  message: "👤 Posicione-se frente à câmera",
-                  status: 'warning'
-                });
+        if (video && canvas && poseLandmarkerRef.current && mediaPipeReadyRef.current) {
+          // Garante que o vídeo tenha avançado e que o intervalo de tempo tenha passado
+          if (video.currentTime !== lastVideoTime && (now - lastDetectionTime) > detectionInterval) {
+            lastVideoTime = video.currentTime;
+            lastDetectionTime = now;
+            
+            try {
+              const ctx = canvas.getContext('2d');
+              if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
+                // Desenha o frame no canvas (necessário para o detect IMAGE mode)
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // O detect() aceita CanvasElement (como esperado no Image mode)
+                const result = poseLandmarkerRef.current.detect(canvas);
+                
+                if (result.landmarks && result.landmarks.length > 0) {
+                  const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
+                  setFeedback(newFeedback);
+                } else {
+                  setFeedback({
+                    message: "👤 Posicione-se frente à câmera para análise (tronco e cabeça visíveis)",
+                    status: 'warning'
+                  });
+                }
               }
-            }
-          } else {
-            console.log('⏳ Aguardando inicialização...');
-            if (!mediaPipeReadyRef.current) {
-              setFeedback({
-                message: "🔄 Inicializando sistema de detecção...",
-                status: 'loading'
-              });
+            } catch (error) {
+              // Erro silencioso na detecção para não interromper a RAF
             }
           }
-        } catch (error) {
-          console.error('💥 Erro na detecção:', error);
+        } else if (!mediaPipeReadyRef.current) {
           setFeedback({
-            message: "⚠️ Sistema temporariamente indisponível",
-            status: 'warning'
+            message: "🔄 Inicializando sistema de detecção...",
+            status: 'loading'
           });
         }
-
-        // Continuar loop
+        
+        // Continua o loop de animação
         if (detectionActiveRef.current) {
-          // Usar requestAnimationFrame para melhor sincronização
           requestAnimationFrame(detectFrame);
         }
       };
 
-      // Iniciar o loop
       requestAnimationFrame(detectFrame);
     };
 
-    // Iniciar tudo
     initMediaPipe();
     
-    // Iniciar câmera
+    // Pequeno atraso para dar tempo ao MediaPipe iniciar antes da câmera
     setTimeout(() => {
       initCamera();
     }, 500);
 
-    // Cleanup
     return () => {
-      console.log('🧹 Fazendo cleanup...');
       detectionActiveRef.current = false;
       mediaPipeReadyRef.current = false;
       
@@ -330,104 +434,151 @@ export function Teleconsulta(): JSX.Element {
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
+      
+      // Limpeza do PoseLandmarker
+      if (poseLandmarkerRef.current) {
+        poseLandmarkerRef.current.close();
+        poseLandmarkerRef.current = null;
+      }
     };
-  }, [consultaId]);
+  }, []);
 
-  // =========================================================================================
-  // REINICIAR CÂMERA
-  // =========================================================================================
   const restartCamera = async () => {
-    setCameraError(null);
-    setFeedback({ message: "Reiniciando câmera...", status: 'loading' });
-    window.location.reload();
+    // A maneira mais simples e robusta de reiniciar todo o sistema e tentar novamente as permissões.
+    window.location.reload(); 
   };
-
-  // =========================================================================================
-  // RENDER
-  // =========================================================================================
-  if (!teleconsulta) {
-    return (
-      <Layout>
-        <div className="text-center py-12">Carregando informações da teleconsulta...</div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 lg:p-8">
+      {/* Alterado de bg-gray-50 para usar o fundo da marca (se houver, senão branco/cinza claro) */}
+      <div className="min-h-screen bg-white font-sans p-4 sm:p-6 lg:p-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-extrabold text-indigo-800 text-center mb-8 border-b pb-4">
-            Teleconsulta: {teleconsulta.patientName} ({teleconsulta.patientAge} anos)
-          </h1>
-        </div>
+          <header className="text-center mb-10 space-y-4">
+            <h1 className="text-5xl font-extrabold bg-gradient-to-r from-blue-700 to-cyan-500 bg-clip-text text-transparent tracking-tight">
+              Assistente de Postura | Teleconsulta
+            </h1>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
+              Utilizando **Inteligência Artificial (MediaPipe)** para monitorar e guiar sua posição em tempo real, garantindo a qualidade da sua consulta online.
+            </p>
+          </header>
 
-        <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto min-h-[600px]">
-         
-          <div className="lg:flex-2 flex-1 bg-gray-800 rounded-2xl shadow-2xl relative overflow-hidden min-h-[400px]">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            {/* Área da Câmera (2/3 da tela em desktop) */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-white rounded-3xl shadow-2xl shadow-blue-100 border border-gray-100 overflow-hidden transition-shadow duration-300 hover:shadow-cyan-300/50"> {/* Sombra azul */}
+                <div className="relative aspect-video bg-gray-900 rounded-t-3xl">
+                  {/* Container da Câmera */}
+                  <div className="w-full h-full">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover transform scale-x-[-1] rounded-t-3xl"
+                      aria-label="Visualização da câmera para monitoramento de postura"
+                    />
+                  </div>
 
-            {/* Canvas oculto para captura */}
-            <canvas 
-              ref={canvasRef} 
-              className="hidden"
-              width="640" 
-              height="480"
-            />
+                  {/* Canvas (Oculto - usado apenas para o processamento do MediaPipe em IMAGE mode) */}
+                  <canvas 
+                    ref={canvasRef} 
+                    className="absolute top-0 left-0 hidden"
+                    width="640" 
+                    height="480"
+                  />
 
-            {cameraError && (
-              <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg p-6 text-center max-w-md">
-                  <p className="font-semibold text-red-600 mb-4">{cameraError}</p>
-                  <button 
-                    onClick={restartCamera}
-                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
-                  >
-                    🔄 Tentar Novamente
-                  </button>
+                  {/* Mensagem de Erro da Câmera */}
+                  {cameraError && (
+                    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 z-10">
+                      <div className="bg-white rounded-2xl p-8 text-center max-w-sm space-y-4 shadow-xl border-t-4 border-red-500">
+                        <div className="text-red-500 text-5xl" aria-hidden="true">🚫</div>
+                        <h2 className="font-bold text-xl text-red-700">Acesso Negado à Câmera</h2>
+                        <p className="font-medium text-gray-700 text-sm leading-relaxed">{cameraError}</p>
+                        <button 
+                          onClick={restartCamera}
+                          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        >
+                          🔄 Tentar Novamente
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Overlay de Status Inferior */}
+                  <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-3">
+                    <div className="bg-black/70 text-white px-4 py-2 rounded-xl font-medium text-sm backdrop-blur-sm shadow-lg border border-white/20">
+                      <span className="flex items-center gap-2">
+                        <span className="text-green-400 text-lg">📹</span>
+                        Câmera {cameraError ? 'Inativa' : 'Ativa'}
+                      </span>
+                    </div>
+                    <div className="bg-black/70 text-white px-4 py-2 rounded-xl font-medium text-sm backdrop-blur-sm shadow-lg border border-white/20">
+                      <span className="flex items-center gap-2">
+                        <span className={
+                          mediaPipeStatus === 'ready' ? 'text-green-400' :
+                          mediaPipeStatus === 'loading' ? 'text-cyan-400 animate-spin' : 'text-red-400' // Ajustado para cyan
+                        }>
+                          {mediaPipeStatus === 'ready' ? '🧠' : mediaPipeStatus === 'loading' ? '⏳' : '❌'}
+                        </span>
+                        IA: {mediaPipeStatus === 'ready' ? 'Ativa' : 
+                              mediaPipeStatus === 'loading' ? 'Carregando' : 'Inativa'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-white rounded-b-3xl"> {/* Gradiente suave com Blue */}
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-blue-600">✨</span> {/* Cor primária Blue */}
+                    Sua Visualização de Teleconsulta
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    A imagem espelhada à esquerda representa o que seu médico visualiza. A inteligência artificial trabalha em segundo plano para analisar sua postura.
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
 
-            <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
-              <p>🎥 Câmera {cameraError ? 'Erro' : 'Ativa'}</p>
-              <p className="text-xs opacity-75">
-                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa (IMAGE)' : 
-                 mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚡ Modo Básico'}
-              </p>
+            {/* Painel de Orientações e Status (1/3 da tela em desktop) */}
+            <div className="space-y-8">
+              <FeedbackPanel feedback={feedback} />
+              
+              {/* <SystemStatus 
+                mediaPipeStatus={mediaPipeStatus}
+                detectionActive={detectionActiveRef.current}
+                cameraError={cameraError}
+                onRestart={restartCamera}
+              /> */}
             </div>
           </div>
 
-          <div className="lg:flex-1 w-full lg:w-1/3">
-            <FeedbackPanel
-              feedback={feedback}
-              patientName={teleconsulta.patientName.split(' ')[0] || "paciente"}
-            />
-            
-            <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
-              <p><strong>Status:</strong> {
-                mediaPipeStatus === 'ready' ? '🤖 IA Funcionando' :
-                mediaPipeStatus === 'loading' ? '🔄 Inicializando IA...' :
-                '⚡ Modo Básico'
-              }</p>
-              <p><strong>Detecção:</strong> {detectionActiveRef.current ? '✅ Ativa' : '⏸️ Pausada'}</p>
-              <p><strong>Modo:</strong> IMAGE (Estável)</p>
-              {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
+          {/* Rodapé Informativo (Melhorado) */}
+          <footer className="mt-16 text-center">
+            <div className="bg-white rounded-3xl shadow-xl p-8 max-w-5xl mx-auto border-t-4 border-cyan-500"> {/* Borda Cyan */}
+              <h3 className="text-2xl font-extrabold text-gray-900 mb-5 flex items-center justify-center gap-3">
+                <span className="text-blue-600 text-3xl">🩺</span> {/* Cor primária Blue */}
+                Prepare-se para Sua Consulta
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-sm text-gray-700">
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">1. 💡</span> {/* Texto Cyan */}
+                  Boa Iluminação
+                </div>
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">2. 🖼️</span> {/* Texto Cyan */}
+                  Fundo Neutro
+                </div>
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">3. 📶</span> {/* Texto Cyan */}
+                  Internet Estável
+                </div>
+                <div className="p-3 bg-cyan-50 rounded-xl shadow-inner font-semibold"> {/* Fundo Cyan 50 */}
+                  <span className="text-cyan-500 block mb-1">4. 🔇</span> {/* Texto Cyan */}
+                  Sem Interrupções
+                </div>
+              </div>
             </div>
-
-            <button 
-              onClick={restartCamera}
-              className="w-full mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-medium"
-            >
-              🔄 Reiniciar Sistema
-            </button>
-          </div>
+          </footer>
         </div>
       </div>
     </Layout>

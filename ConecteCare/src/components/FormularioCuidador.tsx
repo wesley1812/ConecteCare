@@ -74,7 +74,6 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
         >
             <script src="https://cdn.tailwindcss.com"></script>
             <style>
-                {/* Definindo a fonte Inter globalmente */}
                 {`
                     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
                     .font-inter {
@@ -87,41 +86,35 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                 Cadastro de Cuidador
             </h2>
 
-            {/* --- Seção 1: Dados Pessoais, Contato e Endereço do Cuidador --- */}
             <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>1. Dados Pessoais, Contato e Endereço</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
-                    {/* Nome Completo (Ocupa 2 colunas) */}
                     <div className="md:col-span-2">
                         <label htmlFor="nome" className={labelClass}>Nome Completo:</label>
                         <input type="text" id="nome" {...register("nome")} className={inputClass} placeholder="Seu nome completo" />
                         {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
                     </div>
 
-                    {/* CPF do Cuidador */}
                     <div>
                         <label htmlFor="cpf" className={labelClass}>CPF do Cuidador:</label>
                         <input type="text" id="cpf" {...register("cpf")} placeholder="000.000.000-00" className={inputClass} />
                         {errors.cpf && <p className={errorClass}>{errors.cpf.message}</p>}
                     </div>
 
-                    {/* Idade */}
                     <div>
                         <label htmlFor="idade" className={labelClass}>Idade:</label>
                         <input type="number" id="idade" {...register("idade", { valueAsNumber: true })} className={inputClass} placeholder="Ex: 35" />
                         {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
                     </div>
                     
-                    {/* Telefone para Contato */}
                     <div>
                         <label htmlFor="telefone" className={labelClass}>Telefone para Contato:</label>
                         <input type="tel" id="telefone" {...register("telefone")} placeholder="(99) 99999-9999" className={inputClass} />
                         {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
                     </div>
 
-                    {/* CEP do Cuidador */}
                     <div>
                         <label htmlFor="cepCuidador" className={labelClass}>CEP da Sua Residência:</label>
                         <input type="text" id="cepCuidador" {...register("cepCuidador")} placeholder="00000-000" className={inputClass} />
@@ -130,19 +123,16 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                 </div>
             </div>
 
-            {/* --- Seção 2: Dados de Acesso (Login) --- */}
             <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>2. Dados de Acesso à Plataforma</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
-                    {/* Email */}
                     <div>
                         <label htmlFor="email" className={labelClass}>Email (Será seu Login):</label>
                         <input type="email" id="email" {...register("email")} className={inputClass} placeholder="seu.email@exemplo.com" />
                         {errors.email && <p className={errorClass}>{errors.email.message}</p>}
                     </div>
 
-                    {/* Senha */}
                     <div>
                         <label htmlFor="senha" className={labelClass}>Senha:</label>
                         <input type="password" id="senha" {...register("senha")} className={inputClass} placeholder="Mínimo 6 caracteres" />
@@ -151,27 +141,23 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                 </div>
             </div>
 
-            {/* --- Seção 3: Dados do Paciente Associado --- */}
             <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>3. Paciente Associado</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
-                    {/* CPF do Paciente */}
                     <div>
                         <label htmlFor="cpfPaciente" className={labelClass}>CPF do Paciente Cuidado:</label>
                         <input type="text" id="cpfPaciente" {...register("cpfPaciente")} placeholder="000.000.000-00" className={inputClass} />
                         {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
                     </div>
 
-                    {/* CEP do Paciente */}
                     <div>
                         <label htmlFor="cepPaciente" className={labelClass}>CEP da Residência do Paciente:</label>
                         <input type="text" id="cepPaciente" {...register("cepPaciente")} placeholder="00000-000" className={inputClass} />
                         {errors.cepPaciente && <p className={errorClass}>{errors.cepPaciente.message}</p>}
                     </div>
                     
-                    {/* Parentesco (Ocupa 2 colunas) */}
                     <div className="md:col-span-2">
                         <label htmlFor="parentesco" className={labelClass}>Relação com o Paciente (Ex: Filho, Cônjuge, Amigo):</label>
                         <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} placeholder="Qual seu grau de parentesco ou relação?" />
@@ -181,7 +167,6 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
             </div>
 
 
-            {/* --- Seção 4: Termo de Compromisso (Mantido) --- */}
             <div className="pt-6 border-t border-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">4. Termo de Compromisso</h3>
                 
@@ -197,7 +182,6 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                         Ler Termo de Compromisso
                     </button>
                     
-                    {/* Checkbox e label alinhados verticalmente */}
                     <div className="flex items-center flex-shrink-0"> 
                         <input
                             type="checkbox"
@@ -213,7 +197,6 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                 {errors.aceitarTermo && <p className={`${errorClass} mt-2 text-sm`}>{errors.aceitarTermo.message}</p>}
             </div>
 
-            {/* --- Botão de Envio --- */}
             <button
                 type="submit"
                 className="hover:cursor-pointer w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-all text-xl shadow-xl hover:shadow-2xl tracking-wide transform hover:-translate-y-0.5"
