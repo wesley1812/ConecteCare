@@ -53,8 +53,8 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
       };
     } else if (shoulderDistance > 0.4) {
       return {
-        message: "⚠️ Muito próximo! Recue um pouco.",
-        status: 'warning'
+        message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
+        status: 'ideal'
       };
     } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.8) {
       return {
