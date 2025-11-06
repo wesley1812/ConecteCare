@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, } from "react-router-dom";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
 import { Layout } from "../components/Layout";
 import type { Paciente, Cuidador } from "../types/interfaces";
 import { useAuth } from "../context/auth-context";
 import { useCadastro } from "../context/cadastro-context";
 import { formSchemaAtualizarPaciente, type FormSchemaAtualizarPaciente } from "../schemas/forms-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // Ícone simples para o cartão do cuidador
 const UserIcon = () => (
