@@ -15,7 +15,7 @@ import { PerfilCuidador } from './pages/PerfilCuidador';
 import { AtualizarPerfilCuidador } from './pages/AtualizarPerfilCuidador';
 import { Dashboard } from './pages/Dashboard';
 import { PerfilPaciente } from './pages/PerfilPaciente';
-import { PerfilCompletoPaciente } from './pages/AtualizarPerfilPaciente';
+import { AtualizarPerfilPaciente } from './pages/AtualizarPerfilPaciente';
 import { MinhasConsultas } from './pages/MinhasConsultas';
 
 
@@ -56,7 +56,7 @@ function App() {
 
               <Route path="/perfil-paciente/atualizar-perfil-paciente" element={
                 <ProtectedRoute>
-                  <PerfilCompletoPaciente />
+                  <AtualizarPerfilPaciente/>
                 </ProtectedRoute>
               } />
 
@@ -77,6 +77,7 @@ function App() {
                   <MinhasConsultas/>
                 </ProtectedRoute>
               } />
+
             </Routes>
           </Router>
         </ConsultasProvider>

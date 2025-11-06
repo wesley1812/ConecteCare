@@ -64,14 +64,18 @@ export function AtualizarPerfilCuidador() {
     }, 2000);
   };
 
-  const inputClass = "w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition";
+  // Classes adaptadas do FormularioCuidador
+  const inputClass = "w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 transition duration-200 ease-in-out shadow-sm text-base bg-white";
+  const inputReadOnlyClass = `${inputClass} bg-gray-100 cursor-not-allowed text-gray-500`;
   const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
-  const errorClass = "text-red-600 text-xs mt-1";
+  const errorClass = "text-red-600 text-xs mt-1 font-medium";
+  const sectionTitleClass = "text-xl font-bold text-indigo-700 border-b pb-2 mb-4";
+
 
   if (!cuidadorAtual) {
     return (
       <Layout>
-        <div className="py-20 bg-gray-100 min-h-screen flex items-center justify-center">
+        <div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center">
           <p className="text-lg text-gray-600">Carregando perfil...</p>
         </div>
       </Layout>
@@ -80,22 +84,32 @@ export function AtualizarPerfilCuidador() {
 
   return (
     <Layout>
-      <div className="py-12 bg-gray-100 min-h-screen">
+      <div className="py-12 bg-gray-50 min-h-screen font-inter">
+        <style>
+            {/* Definindo a fonte Inter globalmente */}
+            {`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+                .font-inter {
+                    font-family: 'Inter', sans-serif;
+                }
+            `}
+        </style>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="mb-4">
+          {/* Botão Voltar Aprimorado */}
+          <div className="mb-6">
             <Link
               to="/perfil-cuidador"
-              className="hover:cursor-pointer text-gray-600 hover:text-indigo-600 flex items-center transition-colors text-base font-medium group"
+              className="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors text-base font-semibold group"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
               Voltar ao Painel
             </Link>
           </div>
 
-          <section className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6 border-b pb-4">
-              Atualizar Perfil
+          <section className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl space-y-8 border border-indigo-200">
+            <h1 className="text-4xl font-extrabold text-indigo-800 text-center mb-8 border-b pb-4">
+              Atualizar Perfil do Cuidador
             </h1>
 
             {mensagemSucesso && (
@@ -104,59 +118,88 @@ export function AtualizarPerfilCuidador() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="nome" className={labelClass}>Nome Completo</label>
-                  <input type="text" id="nome" {...register("nome")} className={inputClass} />
-                  {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
-                </div>
-                <div>
-                  <label htmlFor="idade" className={labelClass}>Idade</label>
-                  <input type="number" id="idade" {...register("idade", { valueAsNumber: true })} className={inputClass} />
-                  {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+              
+              {/* --- Seção 1: Dados Pessoais e Contato do Cuidador --- */}
+              <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
+                <h3 className={sectionTitleClass}>1. Dados Pessoais e Contato</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Nome Completo (Ocupa 2 colunas) */}
+                  <div className="md:col-span-2">
+                    <label htmlFor="nome" className={labelClass}>Nome Completo:</label>
+                    <input type="text" id="nome" {...register("nome")} className={inputClass} />
+                    {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
+                  </div>
+                  
+                  {/* Email (Não editável) */}
+                  <div className="md:col-span-2">
+                    <label htmlFor="email" className={labelClass}>Email (Login - Não editável)</label>
+                    <input type="email" id="email" value={cuidadorAtual.email} className={inputReadOnlyClass} readOnly/>
+                  </div>
+
+                  {/* CPF (Não editável) */}
+                  <div>
+                    <label htmlFor="cpf" className={labelClass}>CPF (Não editável)</label>
+                    <input type="text" id="cpf" value={cuidadorAtual.cpf} className={inputReadOnlyClass} readOnly />
+                  </div>
+                  
+                  {/* Idade */}
+                  <div>
+                    <label htmlFor="idade" className={labelClass}>Idade:</label>
+                    <input type="number" id="idade" {...register("idade", { valueAsNumber: true })} className={inputClass} />
+                    {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
+                  </div>
+
+                  {/* Telefone */}
+                  <div>
+                    <label htmlFor="telefone" className={labelClass}>Telefone:</label>
+                    <input type="tel" id="telefone" {...register("telefone")} className={inputClass} />
+                    {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
+                  </div>
+                  
+                  {/* CEP Cuidador */}
+                  <div>
+                    <label htmlFor="cepCuidador" className={labelClass}>CEP da Sua Residência:</label>
+                    <input type="text" id="cepCuidador" {...register("cepCuidador")} className={inputClass}/>
+                    {errors.cepCuidador && <p className={errorClass}>{errors.cepCuidador.message}</p>}
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="email" className={labelClass}>Email (Não editável)</label>
-                <input type="email" id="email" value={cuidadorAtual.email} className={`${inputClass} bg-gray-200 cursor-not-allowed`} readOnly/>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="telefone" className={labelClass}>Telefone</label>
-                  <input type="tel" id="telefone" {...register("telefone")} className={inputClass} />
-                  {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
-                </div>
-                <div>
-                  <label htmlFor="parentesco" className={labelClass}>Relação com Paciente</label>
-                  <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} />
-                  {errors.parentesco && <p className={errorClass}>{errors.parentesco.message}</p>}
-                </div>
-                <div>
-                  <label htmlFor="cep" className={labelClass}>CEP</label>
-                  <input type="text" id="cep" {...register("cep")} className={inputClass}/>
-                  {errors.cep && <p className={errorClass}>{errors.cep.message}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="cpf" className={labelClass}>CPF (Não editável)</label>
-                  <input type="text" id="cpf" value={cuidadorAtual.cpf} className={`${inputClass} bg-gray-200 cursor-not-allowed`} readOnly />
-                </div>
-                <div>
-                  <label htmlFor="cpfPaciente" className={labelClass}>CPF Paciente</label>
-                  <input type="text" id="cpfPaciente" {...register("cpfPaciente")} className={inputClass}/>
-                  {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
+              {/* --- Seção 2: Dados do Paciente Associado --- */}
+              <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
+                <h3 className={sectionTitleClass}>2. Dados do Paciente Associado</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* CPF Paciente */}
+                  <div>
+                    <label htmlFor="cpfPaciente" className={labelClass}>CPF Paciente</label>
+                    <input type="text" id="cpfPaciente" {...register("cpfPaciente")} className={inputClass}/>
+                    {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
+                  </div>
+                  
+                  {/* CEP Paciente */}
+                  <div>
+                    <label htmlFor="cepPaciente" className={labelClass}>CEP da Residência do Paciente:</label>
+                    <input type="text" id="cepPaciente" {...register("cepPaciente")} className={inputClass}/>
+                    {errors.cepPaciente && <p className={errorClass}>{errors.cepPaciente.message}</p>}
+                  </div>
+                  
+                  {/* Relação com Paciente (Ocupa 2 colunas) */}
+                  <div className="md:col-span-2">
+                    <label htmlFor="parentesco" className={labelClass}>Relação com Paciente:</label>
+                    <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} placeholder="Ex: Filho, Cônjuge, Amigo" />
+                    {errors.parentesco && <p className={errorClass}>{errors.parentesco.message}</p>}
+                  </div>
                 </div>
               </div>
 
+              {/* --- Botão de Envio --- */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="hover:cursor-pointer w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-lg shadow-xl focus:outline-none focus:ring-4 focus:ring-green-300 disabled:bg-gray-400"
+                className="hover:cursor-pointer w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-all text-xl shadow-xl hover:shadow-2xl tracking-wide transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:hover:translate-y-0 disabled:shadow-md"
               >
                 {isSubmitting ? "Salvando..." : "Salvar Alterações"}
               </button>
