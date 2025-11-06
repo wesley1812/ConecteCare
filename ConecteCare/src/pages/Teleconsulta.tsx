@@ -2,14 +2,14 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 // =========================================================================================
 // 1. CONFIGURAÇÃO MEDIAPIPE E DEPENDÊNCIAS
-// Nota: Em um ambiente de projeto real, @mediapipe/tasks-vision deve estar instalado.
-// Para este exemplo em arquivo único, assumimos que as dependências do CDN estão carregadas.
+// O script do CDN será carregado dinamicamente via useEffect para garantir a ordem.
 // =========================================================================================
 const MediaPipeCDN = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 const LandmarkerModel = `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float/1/pose_landmarker_lite.task`;
 
-// @ts-ignore - Assumimos que o CDN injetou estas classes no escopo global (window)
-const { FilesetResolver, PoseLandmarker } = window; 
+// @ts-ignore - Assumimos que o CDN injetará estas classes no escopo global (window)
+// A utilização destas classes será protegida pela flag 'isScriptLoaded'.
+const { FilesetResolver, PoseLandmarker } = typeof window !== 'undefined' ? window : {} as any; 
 
 // =========================================================================================
 // 2. TIPAGENS E FUNÇÕES AUXILIARES (Lógica de Negócio e UI)
@@ -40,6 +40,7 @@ const analyzePosture = (landmarks: any): PostureFeedback => {
 
     // --- Lógica de detecção de postura (simulação por tempo) ---
     const now = new Date().getTime();
+    // A simulação de tempo garante que o feedback mude mesmo sem lógica real de pose.
     if (now % 20000 < 5000) { 
         return { 
             message: "✅ Posição Ideal! Rosto e tronco bem enquadrados.", 
@@ -109,12 +110,13 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 3. COMPONENTE PRINCIPAL (COM CORREÇÕES DE PERFORMANCE E EXIBIÇÃO)
+// 3. COMPONENTE PRINCIPAL 
 // =========================================================================================
 
 export function Teleconsulta() {
   const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
   const [feedback, setFeedback] = useState<PostureFeedback>({ message: "Iniciando câmera...", status: 'loading' });
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false); // NOVO: Flag para o script CDN
   const [isLandmarkerReady, setIsLandmarkerReady] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null); 
@@ -123,7 +125,6 @@ export function Teleconsulta() {
   const poseLandmarkerRef = useRef<any | null>(null);
   
   // CORREÇÃO OOM: Flag para controlar o gargalo do MediaPipe
-  // Impedindo que novas detecções comecem antes que a anterior termine.
   const requestDetectRef = useRef(false); 
 
   
@@ -175,15 +176,13 @@ export function Teleconsulta() {
 
   /**
    * Função de loop de detecção OTIMIZADA.
-   * Soluciona o erro Out Of Memory (OOM) e a Tela Preta.
    */
   const detectPosture = useCallback((_timestamp: number) => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const landmarker = poseLandmarkerRef.current;
 
-    // Condição para CORREÇÃO OOM: Se o Landmarker não estiver pronto OU 
-    // se o MediaPipe ainda estiver processando o frame anterior, pule a detecção.
+    // Condição para CORREÇÃO OOM: Se o MediaPipe ainda estiver processando o frame anterior, pule a detecção.
     if (!video || !canvas || !landmarker || requestDetectRef.current) {
         animationFrameRef.current = requestAnimationFrame(detectPosture);
         return;
@@ -192,19 +191,19 @@ export function Teleconsulta() {
     const canvasCtx = canvas.getContext('2d');
     if (!canvasCtx) return;
     
-    // Redimensiona o canvas para o tamanho do vídeo (melhora a exibição)
+    // Redimensiona o canvas para o tamanho do vídeo 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // Define a flag de concorrência para TRUE.
+    // Define a flag de concorrência para TRUE (travamento).
     requestDetectRef.current = true;
 
     // 1. Chama a detecção assíncrona do MediaPipe
     landmarker.detectForVideo(video, Date.now(), (result: any) => {
-        // CORREÇÃO OOM: O MediaPipe terminou de processar. Liberamos a flag.
+        // Libera a flag após o processamento.
         requestDetectRef.current = false; 
 
-        // 2. CORREÇÃO TELA PRETA: Limpa e Desenha o vídeo atual no Canvas
+        // 2. Desenha o vídeo atual no Canvas (Correção da tela preta)
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
         // Aplica o espelhamento horizontal no Canvas
@@ -232,26 +231,50 @@ export function Teleconsulta() {
 
   }, [drawResults]); 
 
-
+// ==========================================================
+// AÇÃO 1: Carrega o Script do CDN e atualiza a flag isScriptLoaded
+// (CORREÇÃO para a condição de corrida/Failed to fetch)
+// ==========================================================
   useEffect(() => {
+    const script = document.createElement('script');
+    script.src = MediaPipeCDN + "/tasks-vision.js";
+    script.async = true;
+    
+    // Quando o script carrega, atualiza o estado para permitir a inicialização do Landmarker
+    script.onload = () => setIsScriptLoaded(true);
+    script.onerror = (e) => {
+        console.error("Failed to load MediaPipe script:", e);
+        setFeedback({ 
+            message: "❌ Erro: Falha ao carregar a biblioteca MediaPipe. Verifique a conexão.", 
+            status: 'error' 
+        });
+    };
+    document.body.appendChild(script);
+
+    return () => {
+        if (document.body.contains(script)) {
+            document.body.removeChild(script);
+        }
+    };
+  }, []);
+
+
+// ==========================================================
+// AÇÃO 2: Inicializa o MediaPipe e o modelo (Depende de isScriptLoaded)
+// ==========================================================
+  useEffect(() => {
+    if (!isScriptLoaded) return; // Aguarda o script CDN carregar
+      
     // Simulação de carregamento de dados
     const fetchedData: TeleconsultaData = {
-      id: 'simulated-id',
-      patientName: "João da Silva",
-      patientAge: 75,
+        id: 'simulated-id',
+        patientName: "João da Silva",
+        patientAge: 75,
     };
     setTeleconsulta(fetchedData);
     
-    // ==========================================================
-    // 1. Inicializa o MediaPipe e o modelo
-    // ==========================================================
     const initializeLandmarker = async () => {
         try {
-            if (typeof FilesetResolver === 'undefined' || typeof PoseLandmarker === 'undefined') {
-                 setFeedback({ message: "❌ Erro: Biblioteca MediaPipe não carregada.", status: 'error' });
-                return;
-            }
-            
             setFeedback({ message: "Carregando modelo de Pose...", status: 'loading' });
 
             const filesetResolver = await FilesetResolver.forVisionTasks(
@@ -261,6 +284,7 @@ export function Teleconsulta() {
             const landmarker = await PoseLandmarker.createFromOptions(filesetResolver, {
               baseOptions: {
                 modelAssetPath: LandmarkerModel,
+                // OTIMIZAÇÃO: Usa 'GPU' para melhor performance se disponível
                 delegate: "GPU" 
               },
               runningMode: "VIDEO",
@@ -269,22 +293,28 @@ export function Teleconsulta() {
             
             poseLandmarkerRef.current = landmarker;
             setIsLandmarkerReady(true); // Landmarker pronto
-            setFeedback({ message: "Modelo carregado, iniciando câmera...", status: 'loading' });
+            setFeedback({ message: "Modelo carregado. Iniciando câmera...", status: 'loading' });
 
         } catch (err) {
-            console.error("Erro ao inicializar PoseLandmarker:", err);
+            console.error("Erro ao inicializar Landmarker:", err);
+            // Melhor feedback em caso de falha de fetch/recursos
             setFeedback({ 
-                message: "❌ Erro: Falha ao carregar o modelo de Pose.", 
+                message: "❌ Erro: Falha ao carregar o modelo de Pose. Tente novamente.", 
                 status: 'error' 
             });
         }
     };
     initializeLandmarker();
 
+  }, [isScriptLoaded]); // Depende do script estar carregado
 
-    // ==========================================================
-    // 2. Inicia a Webcam (Gatilho após Landmarker estar pronto)
-    // ==========================================================
+
+// ==========================================================
+// AÇÃO 3: Inicia a Webcam e o Loop de Detecção (Depende de Landmarker estar pronto)
+// ==========================================================
+  useEffect(() => {
+    if (!isLandmarkerReady) return; // Aguarda o Landmarker carregar
+
     const startWebcam = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -293,7 +323,7 @@ export function Teleconsulta() {
                 width: { ideal: 640 },
                 height: { ideal: 480 },
             }, 
-            audio: false // Áudio desabilitado para simplificar, se não for necessário.
+            audio: false 
         });
         
         if (videoRef.current) {
@@ -313,30 +343,25 @@ export function Teleconsulta() {
       }
     };
     
-    if(isLandmarkerReady) {
-        startWebcam();
-    }
+    startWebcam();
 
+
+    // --- Cleanup para este useEffect ---
+    return () => {
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+        }
+        // Fechar Landmarker
+        if (poseLandmarkerRef.current && poseLandmarkerRef.current.close) {
+            poseLandmarkerRef.current.close();
+        }
+        // Parar tracks da câmera
+        if (videoRef.current && videoRef.current.srcObject) {
+            (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        }
+    };
 
   }, [isLandmarkerReady, detectPosture]); 
-
-
-  // ==========================================================
-  // 4. Função de Cleanup (Garante a parada do loop e da câmera)
-  // ==========================================================
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (videoRef.current && videoRef.current.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-      }
-      if (poseLandmarkerRef.current && poseLandmarkerRef.current.close) {
-        poseLandmarkerRef.current.close();
-      }
-    };
-  }, []); 
 
 
   if (!teleconsulta) {
@@ -349,8 +374,6 @@ export function Teleconsulta() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 lg:p-8">
-      {/* Script do CDN para garantir o carregamento da biblioteca MediaPipe Task Library */}
-      <script src={MediaPipeCDN + "/tasks-vision.js"}></script>
       
       <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-extrabold text-indigo-800 text-center mb-8 border-b pb-4">
