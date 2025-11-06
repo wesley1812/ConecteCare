@@ -70,28 +70,6 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
   }
 };
 
-const analyzePostureFallback = (): PostureFeedback => {
-  const now = Date.now();
-  const cycle = now % 15000;
-
-  if (cycle < 7000) {
-    return {
-      message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
-      status: 'ideal'
-    };
-  } else if (cycle < 12000) {
-    return {
-      message: "⚠️ Ajuste sua posição para melhor visibilidade.",
-      status: 'warning'
-    };
-  } else {
-    return {
-      message: "📊 Analisando sua postura...",
-      status: 'loading'
-    };
-  }
-};
-
 // Componente para exibir o painel de feedback
 const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, patientName: string }) => {
   let bgColor, borderColor, icon;
@@ -260,7 +238,6 @@ export function Teleconsulta(): JSX.Element {
       const detectFrame = () => {
         if (!detectionActiveRef.current) return;
 
-        try {
           if (poseLandmarkerRef.current && mediaPipeStatus === 'ready' && videoRef.current) {
             poseLandmarkerRef.current.detectForVideo(videoRef.current, Date.now(), (result) => {
               if (result.landmarks && result.landmarks.length > 0) {
@@ -273,17 +250,7 @@ export function Teleconsulta(): JSX.Element {
                 });
               }
             });
-          } else {
-            // Fallback enquanto MediaPipe carrega
-            const newFeedback = analyzePostureFallback();
-            setFeedback(newFeedback);
-          }
-        } catch (error) {
-          console.log('Erro na detecção, usando fallback');
-          const newFeedback = analyzePostureFallback();
-          setFeedback(newFeedback);
-        }
-
+          } 
         // Continuar loop apenas se ainda estiver ativo
         if (detectionActiveRef.current) {
           setTimeout(detectFrame, 200); // 5 FPS para performance
