@@ -18,7 +18,7 @@ type PostureFeedback = {
 };
 
 // =========================================================================================
-// 3. LÓGICA DE ANÁLISE DE POSTURA
+// 3. LÓGICA DE ANÁLISE DE POSTURA MELHORADA
 // =========================================================================================
 
 const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
@@ -33,36 +33,122 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
     const nose = landmarks[0];
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
+    const leftEye = landmarks[2];
+    const rightEye = landmarks[5];
+    const leftHip = landmarks[23];
+    const rightHip = landmarks[24];
     
+    // 1. Distância entre ombros (enquadramento)
     const shoulderDistance = Math.sqrt(
       Math.pow(leftShoulder.x - rightShoulder.x, 2) + 
       Math.pow(leftShoulder.y - rightShoulder.y, 2)
     );
 
+    // 2. Posição vertical do rosto (centralização)
     const noseVerticalPosition = nose.y;
 
-    if (shoulderDistance < 0.15) {
+    // 3. Posição horizontal do rosto (centralização)
+    const noseHorizontalPosition = nose.x;
+
+    // 4. Inclinação dos ombros (postura ereta)
+    const shoulderTilt = Math.abs(leftShoulder.y - rightShoulder.y);
+
+    // 5. Alinhamento ombro-quadril
+    const leftAlignment = Math.abs(leftShoulder.y - leftHip.y);
+    const rightAlignment = Math.abs(rightShoulder.y - rightHip.y);
+    const bodyAlignment = (leftAlignment + rightAlignment) / 2;
+
+    // 6. Visibilidade dos olhos (rosto frontal)
+    const eyeDistance = Math.sqrt(
+      Math.pow(leftEye.x - rightEye.x, 2) + 
+      Math.pow(leftEye.y - rightEye.y, 2)
+    );
+
+    console.log('📊 Métricas de postura:', {
+      shoulderDistance: shoulderDistance.toFixed(3),
+      noseVertical: noseVerticalPosition.toFixed(3),
+      noseHorizontal: noseHorizontalPosition.toFixed(3),
+      shoulderTilt: shoulderTilt.toFixed(3),
+      bodyAlignment: bodyAlignment.toFixed(3),
+      eyeDistance: eyeDistance.toFixed(3)
+    });
+
+    // LÓGICA DE DETECÇÃO MELHORADA
+
+    // Critérios para POSTURA INCORRETA
+    const warnings = [];
+
+    if (shoulderDistance < 0.12) {
+      warnings.push("muito longe da câmera");
+    } else if (shoulderDistance > 0.35) {
+      warnings.push("muito próximo da câmera");
+    }
+
+    if (noseVerticalPosition < 0.15 || noseVerticalPosition > 0.85) {
+      warnings.push("rosto muito alto/baixo");
+    }
+
+    if (noseHorizontalPosition < 0.2 || noseHorizontalPosition > 0.8) {
+      warnings.push("rosto muito para os lados");
+    }
+
+    if (shoulderTilt > 0.08) {
+      warnings.push("ombros desnivelados");
+    }
+
+    if (bodyAlignment > 0.25) {
+      warnings.push("tronco inclinado");
+    }
+
+    if (eyeDistance < 0.05) {
+      warnings.push("rosto muito lateral");
+    }
+
+    // SE HOUVER ALGUM AVISO, retorna warning
+    if (warnings.length > 0) {
+      const mainWarning = warnings[0];
+      let message = "⚠️ ";
+      
+      switch (mainWarning) {
+        case "muito longe da câmera":
+          message += "Aproxime-se mais da câmera para melhor enquadramento.";
+          break;
+        case "muito próximo da câmera":
+          message += "Recue um pouco para caber todo o tronco na tela.";
+          break;
+        case "rosto muito alto/baixo":
+          message += "Centralize seu rosto na altura média da tela.";
+          break;
+        case "rosto muito para os lados":
+          message += "Posicione-se mais ao centro da câmera.";
+          break;
+        case "ombros desnivelados":
+          message += "Mantenha os ombros nivelados e relaxados.";
+          break;
+        case "tronco inclinado":
+          message += "Sente-se ereto com as costas retas.";
+          break;
+        case "rosto muito lateral":
+          message += "Vire-se mais de frente para a câmera.";
+          break;
+        default:
+          message += "Ajuste sua posição para melhor visibilidade.";
+      }
+
       return {
-        message: "⚠️ Muito longe! Aproxime-se para melhor enquadramento.",
+        message,
         status: 'warning'
-      };
-    } else if (shoulderDistance > 0.4) {
-      return {
-        message: "⚠️ Muito próximo! Recue um pouco.",
-        status: 'warning'
-      };
-    } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.8) {
-      return {
-        message: "📏 Ajuste a altura: mantenha o rosto mais centralizado.",
-        status: 'warning'
-      };
-    } else {
-      return {
-        message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
-        status: 'ideal'
       };
     }
+
+    // SE NÃO HOUVER AVISOS, postura está IDEAL
+    return {
+      message: "✅ Posição Ideal! Postura correta e bem enquadrada. Continue assim!",
+      status: 'ideal'
+    };
+
   } catch (error) {
+    console.error('Erro na análise de landmarks:', error);
     return {
       message: "📊 Analisando sua postura...",
       status: 'loading'
@@ -142,7 +228,7 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 4. COMPONENTE PRINCIPAL SIMPLIFICADO
+// 4. COMPONENTE PRINCIPAL (MANTIDO OTIMIZADO)
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
@@ -161,7 +247,7 @@ export function Teleconsulta(): JSX.Element {
   const detectionActiveRef = useRef(false);
 
   // =========================================================================================
-  // INICIALIZAÇÃO SIMPLIFICADA
+  // INICIALIZAÇÃO SIMPLIFICADA (MANTIDA)
   // =========================================================================================
 
   useEffect(() => {
@@ -268,7 +354,7 @@ export function Teleconsulta(): JSX.Element {
                 setFeedback(newFeedback);
               } else {
                 setFeedback({
-                  message: "👤 Posicione-se frente à câmera",
+                  message: "👤 Posicione-se frente à câmera para análise",
                   status: 'warning'
                 });
               }
@@ -315,7 +401,7 @@ export function Teleconsulta(): JSX.Element {
         videoRef.current.srcObject = null;
       }
     };
-  }, [consultaId]); // Apenas consultaId como dependência
+  }, [consultaId]);
 
   // =========================================================================================
   // REINICIAR CÂMERA SIMPLES
