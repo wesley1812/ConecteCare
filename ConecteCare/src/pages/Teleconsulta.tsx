@@ -2,10 +2,14 @@ import { useEffect, useRef, useState, type JSX, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import type { TeleconsultaData } from '../types/interfaces';
 import { Layout } from '../components/Layout';
-// import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 
 // =========================================================================================
-// 1. TIPOS E CONFIGURAÇÕES
+// 1. IMPORTAÇÕES DO MEDIAPIPE
+// =========================================================================================
+import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+
+// =========================================================================================
+// 2. TIPOS E INTERFACES
 // =========================================================================================
 
 type PostureFeedback = {
@@ -14,10 +18,58 @@ type PostureFeedback = {
 };
 
 // =========================================================================================
-// 2. LÓGICA DE ANÁLISE DE POSTURA (SIMULADA)
+// 3. LÓGICA DE ANÁLISE DE POSTURA COM MEDIAPIPE
 // =========================================================================================
 
-const analyzePosture = (): PostureFeedback => {
+const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
+  if (!landmarks || landmarks.length === 0) {
+    return {
+      message: "🔍 Nenhuma pessoa detectada. Certifique-se de estar visível na câmera.",
+      status: 'warning'
+    };
+  }
+
+  // Exemplo de análise simplificada baseada em landmarks
+  // Landmarks importantes: 0-nariz, 11-ombro esquerdo, 12-ombro direito, 23-24 quadril
+  const nose = landmarks[0];
+  const leftShoulder = landmarks[11];
+  const rightShoulder = landmarks[12];
+  
+  // Calcular distância entre ombros para verificar enquadramento
+  const shoulderDistance = Math.sqrt(
+    Math.pow(leftShoulder.x - rightShoulder.x, 2) + 
+    Math.pow(leftShoulder.y - rightShoulder.y, 2)
+  );
+
+  // Calcular posição vertical do nariz (para verificar se está centralizado)
+  const noseVerticalPosition = nose.y;
+
+  // Lógica de análise baseada nas coordenadas
+  if (shoulderDistance < 0.2) {
+    return {
+      message: "⚠️ Por favor, afaste-se um pouco mais para enquadrar o corpo superior.",
+      status: 'warning'
+    };
+  } else if (shoulderDistance > 0.4) {
+    return {
+      message: "⚠️ Muito próximo! Recue um pouco para melhor enquadramento.",
+      status: 'warning'
+    };
+  } else if (noseVerticalPosition < 0.3 || noseVerticalPosition > 0.7) {
+    return {
+      message: "📏 Ajuste a posição: mantenha o rosto mais centralizado na tela.",
+      status: 'warning'
+    };
+  } else {
+    return {
+      message: "✅ Posição Ideal! Rosto e tronco bem enquadrados.",
+      status: 'ideal'
+    };
+  }
+};
+
+// Fallback para quando o MediaPipe não está disponível
+const analyzePostureFallback = (): PostureFeedback => {
   const now = Date.now();
   const cycle = now % 20000;
 
@@ -94,61 +146,135 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 3. COMPONENTE PRINCIPAL
+// 4. COMPONENTE PRINCIPAL
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
   const { consultaId } = useParams<{ consultaId: string }>();
   const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
   const [feedback, setFeedback] = useState<PostureFeedback>({ 
-    message: "Iniciando câmera...", 
+    message: "Iniciando câmera e modelo de IA...", 
     status: 'loading' 
   });
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [mediaPipeStatus, setMediaPipeStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const lastAnalysisTimeRef = useRef<number>(0);
-  const analysisInterval = 1000; // Analisar a cada 1 segundo
+  const analysisInterval = 100; // Analisar a cada 100ms para resposta rápida
 
-  /**
-   * Função de loop para detecção de postura com throttling
-   */
-  const detectPosture = useCallback((timestamp: number) => {
-    // Throttling: só analisa a cada X milissegundos
-    if (timestamp - lastAnalysisTimeRef.current > analysisInterval) {
-      lastAnalysisTimeRef.current = timestamp;
+  // =========================================================================================
+  // INICIALIZAÇÃO DO MEDIAPIPE
+  // =========================================================================================
+  const initializeMediaPipe = useCallback(async () => {
+    try {
+      setMediaPipeStatus('loading');
+      setFeedback({ message: "Carregando modelo de detecção corporal...", status: 'loading' });
+
+      console.log('Inicializando MediaPipe...');
       
-      // Análise de postura simulada
-      const newFeedback = analyzePosture();
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+      );
+
+      console.log('FilesetResolver carregado, criando PoseLandmarker...');
+
+      poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+          delegate: "GPU"
+        },
+        runningMode: "VIDEO",
+        numPoses: 1
+      });
+
+      console.log('PoseLandmarker inicializado com sucesso!');
+      setMediaPipeStatus('ready');
+      setFeedback({ message: "Modelo carregado! Iniciando análise...", status: 'loading' });
+
+    } catch (error) {
+      console.error('Erro ao inicializar MediaPipe:', error);
+      setMediaPipeStatus('error');
+      setFeedback({ 
+        message: "⚠️ Modo simulação ativado (IA não disponível)", 
+        status: 'warning' 
+      });
+    }
+  }, []);
+
+  // =========================================================================================
+  // DETECÇÃO DE POSTURA COM MEDIAPIPE
+  // =========================================================================================
+  const detectPosture = useCallback((timestamp: number) => {
+    if (!videoRef.current || videoRef.current.readyState < 2) {
+      animationFrameRef.current = requestAnimationFrame(detectPosture);
+      return;
+    }
+
+    // Throttling para performance
+    if (timestamp - lastAnalysisTimeRef.current < analysisInterval) {
+      animationFrameRef.current = requestAnimationFrame(detectPosture);
+      return;
+    }
+
+    lastAnalysisTimeRef.current = timestamp;
+
+    try {
+      // Usar MediaPipe se estiver disponível
+      if (poseLandmarkerRef.current && mediaPipeStatus === 'ready') {
+        poseLandmarkerRef.current.detectForVideo(videoRef.current, timestamp, (result) => {
+          if (result.landmarks && result.landmarks.length > 0) {
+            const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
+            setFeedback(newFeedback);
+          } else {
+            // Nenhuma pessoa detectada
+            setFeedback({
+              message: "🔍 Nenhuma pessoa detectada. Certifique-se de estar visível na câmera.",
+              status: 'warning'
+            });
+          }
+        });
+      } else {
+        // Fallback para análise simulada
+        const newFeedback = analyzePostureFallback();
+        setFeedback(newFeedback);
+      }
+    } catch (error) {
+      console.error('Erro na detecção:', error);
+      // Fallback em caso de erro
+      const newFeedback = analyzePostureFallback();
       setFeedback(newFeedback);
     }
 
-    // Continua o loop no próximo frame
     animationFrameRef.current = requestAnimationFrame(detectPosture);
-  }, []);
+  }, [mediaPipeStatus]);
 
-  // Inicializar câmera
+  // =========================================================================================
+  // INICIALIZAÇÃO DA CÂMERA
+  // =========================================================================================
   const startWebcam = useCallback(async () => {
     try {
-      // Cleanup da stream anterior
+      // Cleanup anterior
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
       }
 
-      // Limpar animation frame anterior
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
 
+      console.log('Solicitando acesso à câmera...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: { ideal: 640 },
           height: { ideal: 480 },
-          frameRate: { ideal: 15 }
+          frameRate: { ideal: 30 }
         }, 
         audio: true 
       });
@@ -158,16 +284,11 @@ export function Teleconsulta(): JSX.Element {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         
-        // Espera o vídeo estar pronto
+        // Esperar o vídeo estar pronto
         const waitForVideo = () => {
           if (videoRef.current && videoRef.current.readyState >= 2) {
+            console.log('Vídeo pronto, iniciando detecção...');
             setCameraError(null);
-            setFeedback({ 
-              message: "Câmera ativa - Analisando postura...", 
-              status: 'loading' 
-            });
-            
-            // Inicia o loop de detecção
             lastAnalysisTimeRef.current = performance.now();
             animationFrameRef.current = requestAnimationFrame(detectPosture);
           } else {
@@ -178,7 +299,7 @@ export function Teleconsulta(): JSX.Element {
         waitForVideo();
       }
     } catch (err) {
-      console.error("Erro ao acessar câmera/microfone:", err);
+      console.error("Erro ao acessar câmera:", err);
       const errorMessage = "❌ Não foi possível acessar a câmera. Verifique as permissões.";
       setFeedback({
         message: errorMessage,
@@ -188,7 +309,9 @@ export function Teleconsulta(): JSX.Element {
     }
   }, [detectPosture]);
 
-  // Efeito principal
+  // =========================================================================================
+  // EFFECT PRINCIPAL
+  // =========================================================================================
   useEffect(() => {
     // Carregar dados da teleconsulta
     const fetchedData: TeleconsultaData = {
@@ -198,11 +321,17 @@ export function Teleconsulta(): JSX.Element {
     };
     setTeleconsulta(fetchedData);
 
-    // Iniciar câmera
-    startWebcam();
+    // Inicializar MediaPipe e depois a câmera
+    const initializeAll = async () => {
+      await initializeMediaPipe();
+      await startWebcam();
+    };
+
+    initializeAll();
 
     // Cleanup completo
     return () => {
+      console.log('Fazendo cleanup...');
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -215,14 +344,24 @@ export function Teleconsulta(): JSX.Element {
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
+      
+      // Limpar MediaPipe
+      poseLandmarkerRef.current = null;
     };
-  }, [consultaId, startWebcam]);
+  }, [consultaId, initializeMediaPipe, startWebcam]);
 
-  // Função para reiniciar a câmera
-  const restartCamera = () => {
+  // =========================================================================================
+  // FUNÇÃO PARA REINICIAR
+  // =========================================================================================
+  const restartCamera = async () => {
     setFeedback({ message: "Reiniciando câmera...", status: 'loading' });
     setCameraError(null);
-    startWebcam();
+    await startWebcam();
+  };
+
+  const restartMediaPipe = async () => {
+    setFeedback({ message: "Reiniciando modelo de IA...", status: 'loading' });
+    await initializeMediaPipe();
   };
 
   if (!teleconsulta) {
@@ -254,9 +393,15 @@ export function Teleconsulta(): JSX.Element {
               className="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"
             />
            
+            <canvas ref={canvasRef} className="hidden" />
+
             {/* Overlay com informação básica */}
             <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
               <p>Sua Câmera Ativa</p>
+              <p className="text-xs opacity-75">
+                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa' : 
+                 mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚠️ Modo Simulação'}
+              </p>
             </div>
            
             {/* Feedback flutuante em caso de erro */}
@@ -270,17 +415,14 @@ export function Teleconsulta(): JSX.Element {
                   >
                     Tentar Novamente
                   </button>
-                  <p className="text-xs text-gray-500 mt-3">
-                    Certifique-se de que a câmera não está sendo usada por outro aplicativo
-                  </p>
                 </div>
               </div>
             )}
 
-            {/* Indicador de loading quando não há erro mas ainda está carregando */}
+            {/* Indicador de status */}
             {!cameraError && feedback.status === 'loading' && (
               <div className="absolute top-4 right-4 p-2 bg-black bg-opacity-50 text-white rounded-lg text-sm">
-                🔄 Analisando...
+                {mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '🔍 Analisando...'}
               </div>
             )}
           </div>
@@ -292,14 +434,30 @@ export function Teleconsulta(): JSX.Element {
               patientName={teleconsulta.patientName.split(' ')[0] || "paciente"}
             />
             
-            {/* Botão de ações */}
-            <div className="mt-4 flex gap-2">
+            {/* Botões de controle */}
+            <div className="mt-4 flex gap-2 flex-wrap">
               <button 
                 onClick={restartCamera}
                 className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-medium"
               >
-                🔄 Reiniciar Câmera
+                🔄 Câmera
               </button>
+              <button 
+                onClick={restartMediaPipe}
+                className="flex-1 px-4 py-2 bg-blue-200 hover:bg-blue-300 text-blue-800 rounded-lg transition-colors font-medium"
+              >
+                {mediaPipeStatus === 'ready' ? '🔄 IA' : '🤖 IA'}
+              </button>
+            </div>
+
+            {/* Status do sistema */}
+            <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
+              <p><strong>Status:</strong> {
+                mediaPipeStatus === 'ready' ? 'IA funcionando normalmente' :
+                mediaPipeStatus === 'loading' ? 'Carregando modelo de IA...' :
+                'Usando análise simulada'
+              }</p>
+              {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
             </div>
           </div>
         </div>
