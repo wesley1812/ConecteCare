@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
-import { useParams } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 
 // =========================================================================================
@@ -336,14 +335,6 @@ export function Teleconsulta(): JSX.Element {
   // =========================================================================================
   // RENDER
   // =========================================================================================
-  if (!teleconsulta) {
-    return (
-      <Layout>
-        <div className="text-center py-12">Carregando informações da teleconsulta...</div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 lg:p-8">
