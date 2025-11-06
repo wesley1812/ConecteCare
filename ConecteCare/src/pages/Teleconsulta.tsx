@@ -18,7 +18,7 @@ type PostureFeedback = {
 };
 
 // =========================================================================================
-// 3. LÓGICA DE ANÁLISE DE POSTURA MELHORADA
+// 3. LÓGICA DE ANÁLISE DE POSTURA
 // =========================================================================================
 
 const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
@@ -228,7 +228,7 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 4. COMPONENTE PRINCIPAL (MANTIDO OTIMIZADO)
+// 4. COMPONENTE PRINCIPAL SIMPLIFICADO
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
@@ -247,7 +247,7 @@ export function Teleconsulta(): JSX.Element {
   const detectionActiveRef = useRef(false);
 
   // =========================================================================================
-  // INICIALIZAÇÃO SIMPLIFICADA (MANTIDA)
+  // INICIALIZAÇÃO SIMPLIFICADA
   // =========================================================================================
 
   useEffect(() => {
@@ -354,7 +354,7 @@ export function Teleconsulta(): JSX.Element {
                 setFeedback(newFeedback);
               } else {
                 setFeedback({
-                  message: "👤 Posicione-se frente à câmera para análise",
+                  message: "👤 Posicione-se frente à câmera",
                   status: 'warning'
                 });
               }
@@ -401,7 +401,7 @@ export function Teleconsulta(): JSX.Element {
         videoRef.current.srcObject = null;
       }
     };
-  }, [consultaId]);
+  }, [consultaId]); // Apenas consultaId como dependência
 
   // =========================================================================================
   // REINICIAR CÂMERA SIMPLES
@@ -496,4 +496,4 @@ export function Teleconsulta(): JSX.Element {
       </div>
     </Layout>
   );
-}
+} 
