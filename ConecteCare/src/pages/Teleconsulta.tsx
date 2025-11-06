@@ -125,7 +125,7 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 4. COMPONENTE PRINCIPAL CORRIGIDO - TIMESTAMP FIX
+// 4. COMPONENTE PRINCIPAL - SOLUÇÃO IMAGE MODE
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
@@ -139,14 +139,14 @@ export function Teleconsulta(): JSX.Element {
   const [mediaPipeStatus, setMediaPipeStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   const detectionActiveRef = useRef(false);
   const mediaPipeReadyRef = useRef(false);
-  const lastTimestampRef = useRef<number>(0); // Para controlar timestamps
 
   // =========================================================================================
-  // INICIALIZAÇÃO SIMPLIFICADA
+  // INICIALIZAÇÃO COM IMAGE MODE
   // =========================================================================================
 
   useEffect(() => {
@@ -160,39 +160,39 @@ export function Teleconsulta(): JSX.Element {
 
     let mediaPipeInitialized = false;
 
-    // 2. Inicializar MediaPipe (não bloqueante)
+    // 2. Inicializar MediaPipe com IMAGE mode (mais estável)
     const initMediaPipe = async () => {
       if (mediaPipeInitialized) return;
       mediaPipeInitialized = true;
 
       try {
         setMediaPipeStatus('loading');
-        console.log('🚀 Inicializando MediaPipe...');
+        console.log('🚀 Inicializando MediaPipe (IMAGE mode)...');
         
         const vision = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
         );
 
+        // Usar IMAGE mode em vez de VIDEO mode para evitar problemas de timestamp
         poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
             delegate: "GPU"
           },
-          runningMode: "VIDEO",
+          runningMode: "IMAGE", // IMAGE mode é mais estável
           numPoses: 1
         });
 
-        console.log('🎯 MediaPipe carregado!');
+        console.log('🎯 MediaPipe carregado (IMAGE mode)!');
         setMediaPipeStatus('ready');
         mediaPipeReadyRef.current = true;
-        lastTimestampRef.current = Date.now(); // Inicializar timestamp
       } catch (error) {
         console.error('❌ MediaPipe falhou:', error);
         setMediaPipeStatus('error');
       }
     };
 
-    // 3. Inicializar câmera de forma simples
+    // 3. Inicializar câmera
     const initCamera = async () => {
       try {
         console.log('📷 Iniciando câmera...');
@@ -206,7 +206,7 @@ export function Teleconsulta(): JSX.Element {
           video: { 
             width: { ideal: 640 },
             height: { ideal: 480 },
-            frameRate: { ideal: 25 }
+            frameRate: { ideal: 15 } // Reduzir FPS para performance
           }, 
           audio: true 
         });
@@ -216,7 +216,13 @@ export function Teleconsulta(): JSX.Element {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           
-          // Esperar o vídeo estar pronto de forma simples
+          // Configurar canvas para captura
+          if (canvasRef.current) {
+            canvasRef.current.width = 640;
+            canvasRef.current.height = 480;
+          }
+
+          // Esperar o vídeo estar pronto
           const checkVideoReady = () => {
             if (videoRef.current && videoRef.current.readyState >= 2) {
               console.log('✅ Vídeo pronto!');
@@ -237,27 +243,31 @@ export function Teleconsulta(): JSX.Element {
       }
     };
 
-    // 4. Sistema de detecção CORRIGIDO - TIMESTAMP FIX
+    // 4. Sistema de detecção com IMAGE mode
     const startDetection = () => {
       if (detectionActiveRef.current) return;
       detectionActiveRef.current = true;
 
-      console.log('🎯 Iniciando detecção...');
+      console.log('🎯 Iniciando detecção (IMAGE mode)...');
 
-      const detectFrame = () => {
+      const detectFrame = async () => {
         if (!detectionActiveRef.current) return;
 
         try {
-          // Usar a ref em vez do state para evitar problemas de closure
-          if (poseLandmarkerRef.current && mediaPipeReadyRef.current && videoRef.current) {
-            // Gerar timestamp monotonicamente crescente
-            const currentTime = performance.now();
-            const timestamp = Math.max(lastTimestampRef.current + 1, currentTime);
-            lastTimestampRef.current = timestamp;
+          if (poseLandmarkerRef.current && mediaPipeReadyRef.current && videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
 
-            console.log('🔍 Usando MediaPipe para detecção...', { timestamp });
-            
-            poseLandmarkerRef.current.detectForVideo(videoRef.current, timestamp, (result) => {
+            if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
+              // Desenhar frame atual no canvas
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              console.log('🔍 Detectando pose...');
+              
+              // Usar detect() em vez de detectForVideo() para IMAGE mode
+              const result = poseLandmarkerRef.current.detect(canvas);
+              
               if (result.landmarks && result.landmarks.length > 0) {
                 console.log('👤 Pessoa detectada! Landmarks:', result.landmarks[0].length);
                 const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
@@ -269,9 +279,9 @@ export function Teleconsulta(): JSX.Element {
                   status: 'warning'
                 });
               }
-            });
+            }
           } else {
-            console.log('⏳ MediaPipe não está pronto ainda...');
+            console.log('⏳ Aguardando inicialização...');
             if (!mediaPipeReadyRef.current) {
               setFeedback({
                 message: "🔄 Inicializando sistema de detecção...",
@@ -281,37 +291,32 @@ export function Teleconsulta(): JSX.Element {
           }
         } catch (error) {
           console.error('💥 Erro na detecção:', error);
-          // Em caso de erro, tentar reinicializar o MediaPipe
-          if (mediaPipeReadyRef.current) {
-            console.log('🔄 Tentando recuperar MediaPipe...');
-            mediaPipeReadyRef.current = false;
-            setMediaPipeStatus('loading');
-            initMediaPipe();
-          }
           setFeedback({
             message: "⚠️ Sistema temporariamente indisponível",
             status: 'warning'
           });
         }
 
-        // Continuar loop apenas se ainda estiver ativo
+        // Continuar loop
         if (detectionActiveRef.current) {
-          setTimeout(detectFrame, 200); // 5 FPS para performance
+          // Usar requestAnimationFrame para melhor sincronização
+          requestAnimationFrame(detectFrame);
         }
       };
 
-      detectFrame();
+      // Iniciar o loop
+      requestAnimationFrame(detectFrame);
     };
 
     // Iniciar tudo
     initMediaPipe();
     
-    // Iniciar câmera após um breve delay
+    // Iniciar câmera
     setTimeout(() => {
       initCamera();
-    }, 1000);
+    }, 500);
 
-    // Cleanup MUITO simples
+    // Cleanup
     return () => {
       console.log('🧹 Fazendo cleanup...');
       detectionActiveRef.current = false;
@@ -326,16 +331,14 @@ export function Teleconsulta(): JSX.Element {
         videoRef.current.srcObject = null;
       }
     };
-  }, [consultaId]); // Apenas consultaId como dependência
+  }, [consultaId]);
 
   // =========================================================================================
-  // REINICIAR CÂMERA SIMPLES
+  // REINICIAR CÂMERA
   // =========================================================================================
   const restartCamera = async () => {
     setCameraError(null);
     setFeedback({ message: "Reiniciando câmera...", status: 'loading' });
-    
-    // Recarregar a página é a maneira mais simples de reiniciar tudo
     window.location.reload();
   };
 
@@ -370,7 +373,14 @@ export function Teleconsulta(): JSX.Element {
               className="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"
             />
 
-            {/* Overlay de loading apenas se houver erro */}
+            {/* Canvas oculto para captura */}
+            <canvas 
+              ref={canvasRef} 
+              className="hidden"
+              width="640" 
+              height="480"
+            />
+
             {cameraError && (
               <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg p-6 text-center max-w-md">
@@ -388,7 +398,7 @@ export function Teleconsulta(): JSX.Element {
             <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
               <p>🎥 Câmera {cameraError ? 'Erro' : 'Ativa'}</p>
               <p className="text-xs opacity-75">
-                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa' : 
+                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa (IMAGE)' : 
                  mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚡ Modo Básico'}
               </p>
             </div>
@@ -407,7 +417,7 @@ export function Teleconsulta(): JSX.Element {
                 '⚡ Modo Básico'
               }</p>
               <p><strong>Detecção:</strong> {detectionActiveRef.current ? '✅ Ativa' : '⏸️ Pausada'}</p>
-              <p><strong>MediaPipe:</strong> {mediaPipeReadyRef.current ? '✅ Pronto' : '🔄 Carregando'}</p>
+              <p><strong>Modo:</strong> IMAGE (Estável)</p>
               {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
             </div>
 
