@@ -153,7 +153,7 @@ const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, p
 };
 
 // =========================================================================================
-// 4. COMPONENTE PRINCIPAL OTIMIZADO
+// 4. COMPONENTE PRINCIPAL CORRIGIDO - SEM LOOP
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
@@ -175,12 +175,12 @@ export function Teleconsulta(): JSX.Element {
   const lastAnalysisTimeRef = useRef<number>(0);
   const analysisInterval = 150;
   const mediaPipeInitializedRef = useRef(false);
+  const videoReadyRef = useRef(false); // Ref para controle interno
 
   // =========================================================================================
-  // INICIALIZAÇÃO DO MEDIAPIPE OTIMIZADA - CARREGAMENTO EM BACKGROUND
+  // INICIALIZAÇÃO DO MEDIAPIPE OTIMIZADA
   // =========================================================================================
   const initializeMediaPipe = useCallback(async () => {
-    // Evitar inicialização duplicada
     if (mediaPipeInitializedRef.current) return;
     mediaPipeInitializedRef.current = true;
 
@@ -188,7 +188,6 @@ export function Teleconsulta(): JSX.Element {
       setMediaPipeStatus('loading');
       console.log('🚀 Inicializando MediaPipe em background...');
       
-      // Inicialização não-bloqueante - não atualiza estado até estar pronto
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
       );
@@ -212,10 +211,11 @@ export function Teleconsulta(): JSX.Element {
   }, []);
 
   // =========================================================================================
-  // DETECÇÃO DE POSTURA OTIMIZADA
+  // DETECÇÃO DE POSTURA CORRIGIDA
   // =========================================================================================
   const detectPosture = useCallback((timestamp: number) => {
-    if (!videoRef.current || !videoReady) {
+    // Verificar se o vídeo está realmente pronto usando a ref
+    if (!videoRef.current || !videoReadyRef.current) {
       animationFrameRef.current = requestAnimationFrame(detectPosture);
       return;
     }
@@ -241,7 +241,6 @@ export function Teleconsulta(): JSX.Element {
           }
         });
       } else {
-        // Modo fallback imediato enquanto MediaPipe carrega
         const newFeedback = analyzePostureFallback();
         setFeedback(newFeedback);
       }
@@ -251,25 +250,30 @@ export function Teleconsulta(): JSX.Element {
     }
 
     animationFrameRef.current = requestAnimationFrame(detectPosture);
-  }, [mediaPipeStatus, videoReady]);
+  }, [mediaPipeStatus]);
 
   // =========================================================================================
-  // INICIALIZAÇÃO DA CÂMERA OTIMIZADA - SEM FLICKER
+  // INICIALIZAÇÃO DA CÂMERA CORRIGIDA - SEM LOOP
   // =========================================================================================
   const startWebcam = useCallback(async () => {
     try {
-      // Cleanup limpo
+      // Cleanup completo
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
+      
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
 
+      // Reset states
       setVideoReady(false);
+      videoReadyRef.current = false;
       setFeedback({ message: "Iniciando câmera...", status: 'loading' });
 
-      console.log('📷 Iniciando câmera...');
+      console.log('📷 Solicitando acesso à câmera...');
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: { ideal: 640 },
@@ -282,30 +286,39 @@ export function Teleconsulta(): JSX.Element {
       streamRef.current = stream;
       
       if (videoRef.current) {
-        // Prevenir flicker - configurar callbacks antes de atribuir srcObject
         const video = videoRef.current;
         
+        // SINGLE event listener - usando uma única vez
         const handleVideoReady = () => {
-          console.log('✅ Vídeo pronto e estável');
+          // Verificar duplicação
+          if (videoReadyRef.current) {
+            console.log('⚠️ Evento duplicado ignorado');
+            return;
+          }
+          
+          console.log('✅ Vídeo pronto e estável - Iniciando detecção');
+          videoReadyRef.current = true;
           setVideoReady(true);
           setCameraError(null);
+          
+          // Iniciar detecção apenas uma vez
           lastAnalysisTimeRef.current = performance.now();
-          animationFrameRef.current = requestAnimationFrame(detectPosture);
+          if (!animationFrameRef.current) {
+            animationFrameRef.current = requestAnimationFrame(detectPosture);
+          }
         };
 
-        const handleVideoError = () => {
-          console.error('❌ Erro no elemento de vídeo');
-          setCameraError("Erro na transmissão de vídeo");
-        };
-
-        // Remover listeners anteriores e adicionar novos
-        video.removeEventListener('loadeddata', handleVideoReady);
-        video.removeEventListener('error', handleVideoError);
+        // Configurar listener APENAS UMA VEZ
+        video.removeEventListener('loadeddata', handleVideoReady); // Limpar qualquer anterior
+        video.addEventListener('loadeddata', handleVideoReady, { once: true }); // APENAS UMA VEZ
         
-        video.addEventListener('loadeddata', handleVideoReady, { once: true });
-        video.addEventListener('error', handleVideoError, { once: true });
+        // Também verificar se já está ready
+        if (video.readyState >= 3) { // HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA
+          console.log('🎯 Vídeo já estava pronto');
+          handleVideoReady();
+        }
         
-        // Atribuir stream apenas depois de configurar os listeners
+        // Atribuir stream POR ÚLTIMO
         video.srcObject = stream;
       }
     } catch (err) {
@@ -317,10 +330,10 @@ export function Teleconsulta(): JSX.Element {
   }, [detectPosture]);
 
   // =========================================================================================
-  // EFFECTS OTIMIZADOS
+  // EFFECTS SIMPLIFICADOS
   // =========================================================================================
   useEffect(() => {
-    // Inicializar dados imediatamente
+    // Inicializar dados
     const fetchedData: TeleconsultaData = {
       id: consultaId || '1',
       patientName: "João da Silva",
@@ -328,30 +341,33 @@ export function Teleconsulta(): JSX.Element {
     };
     setTeleconsulta(fetchedData);
 
-    // Iniciar MediaPipe imediatamente (não bloqueante)
+    // Iniciar MediaPipe imediatamente
     initializeMediaPipe();
 
-    // Iniciar câmera após um breve delay para priorizar feedback visual
+    // Iniciar câmera com pequeno delay para estabilidade
     const cameraTimer = setTimeout(() => {
       startWebcam();
-    }, 100);
+    }, 500); // Aumentei o delay para garantir estabilidade
 
     return () => {
       clearTimeout(cameraTimer);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
+      videoReadyRef.current = false;
     };
   }, [consultaId, initializeMediaPipe, startWebcam]);
 
   // =========================================================================================
-  // RENDER OTIMIZADO
+  // RENDER
   // =========================================================================================
   if (!teleconsulta) {
     return (
@@ -378,14 +394,14 @@ export function Teleconsulta(): JSX.Element {
               autoPlay
               playsInline
               muted
-              className={`w-full h-full object-cover rounded-2xl transform scale-x-[-1] transition-opacity duration-300 ${
+              className={`w-full h-full object-cover rounded-2xl transform scale-x-[-1] transition-opacity duration-500 ${
                 videoReady ? 'opacity-100' : 'opacity-0'
               }`}
             />
            
             <canvas ref={canvasRef} className="hidden" />
 
-            {/* Overlay de loading suave */}
+            {/* Overlay de loading */}
             {!videoReady && !cameraError && (
               <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
                 <div className="text-white text-center">
@@ -396,7 +412,7 @@ export function Teleconsulta(): JSX.Element {
             )}
 
             <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
-              <p>🎥 Câmera {videoReady ? 'Ativa' : 'Conectando...'}</p>
+              <p>🎥 {videoReady ? 'Câmera Ativa' : 'Conectando...'}</p>
               <p className="text-xs opacity-75">
                 {mediaPipeStatus === 'ready' ? '🤖 IA Ativa' : 
                  mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚡ Modo Básico'}
