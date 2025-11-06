@@ -75,49 +75,170 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
 
 // Componente para exibir o painel de feedback
 const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
-  let bgColor, borderColor, icon;
+  let bgColor, borderColor, icon, statusText, ariaLabel;
  
   switch (feedback.status) {
     case 'ideal':
       bgColor = 'bg-green-50';
       borderColor = 'border-green-500';
       icon = '✅';
+      statusText = 'Posição Ideal';
+      ariaLabel = 'Posição ideal detectada';
       break;
     case 'warning':
       bgColor = 'bg-yellow-50';
       borderColor = 'border-yellow-500';
       icon = '⚠️';
+      statusText = 'Ajuste Necessário';
+      ariaLabel = 'Ajuste de posição necessário';
       break;
     case 'error':
       bgColor = 'bg-red-50';
       borderColor = 'border-red-500';
       icon = '❌';
+      statusText = 'Erro no Sistema';
+      ariaLabel = 'Erro no sistema de detecção';
       break;
     case 'loading':
     default:
       bgColor = 'bg-blue-50';
       borderColor = 'border-blue-500';
       icon = '🔄';
+      statusText = 'Analisando';
+      ariaLabel = 'Sistema analisando postura';
       break;
   }
 
   return (
-    <div className={`p-6 rounded-xl shadow-xl border-l-4 ${bgColor} ${borderColor} h-full space-y-4`}>
-      <h3 className="text-xl font-bold text-gray-800">Orientações de Postura</h3>
-      <p className="text-sm text-gray-600">
-        Ajuste sua posição na câmera para garantir que o médico tenha a melhor visibilidade.
-      </p>
-     
-      <div className={`p-4 rounded-lg font-semibold text-lg border ${
-        feedback.status === 'ideal' ? 'bg-green-100 border-green-600 text-green-800' : 
-        feedback.status === 'warning' ? 'bg-yellow-100 border-yellow-600 text-yellow-800' :
-        feedback.status === 'error' ? 'bg-red-100 border-red-600 text-red-800' :
-        'bg-white border-gray-300 text-gray-700'
-      }`}>
-        {icon} {feedback.message}
+    <div 
+      className={`p-6 rounded-2xl shadow-lg border-l-4 ${bgColor} ${borderColor} h-full space-y-4 transition-all duration-300`}
+      role="status"
+      aria-live="polite"
+      aria-label={ariaLabel}
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Monitor de Postura</h2>
+        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+          feedback.status === 'ideal' ? 'bg-green-100 text-green-800' :
+          feedback.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+          feedback.status === 'error' ? 'bg-red-100 text-red-800' :
+          'bg-blue-100 text-blue-800'
+        }`}>
+          {statusText}
+        </span>
       </div>
 
-      <p className="text-xs text-gray-500 pt-2">O sistema monitora em tempo real a posição do seu corpo e rosto.</p>
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span className="text-xl">🎯</span>
+          Orientações em Tempo Real
+        </h3>
+        <p className="text-sm text-gray-600 leading-relaxed">
+          Ajuste sua posição na câmera para garantir a melhor visibilidade durante a teleconsulta.
+        </p>
+      </div>
+     
+      <div 
+        className={`p-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 ${
+          feedback.status === 'ideal' ? 'bg-green-100 border-green-400 text-green-900 shadow-sm' : 
+          feedback.status === 'warning' ? 'bg-yellow-100 border-yellow-400 text-yellow-900 shadow-sm' :
+          feedback.status === 'error' ? 'bg-red-100 border-red-400 text-red-900 shadow-sm' :
+          'bg-white border-blue-300 text-gray-700'
+        }`}
+        role="alert"
+      >
+        <div className="flex items-start gap-3">
+          <span className="text-xl flex-shrink-0" aria-hidden="true">{icon}</span>
+          <span className="leading-relaxed">{feedback.message}</span>
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-gray-200">
+        <p className="text-xs text-gray-500 flex items-center gap-1">
+          <span className="text-blue-500">📊</span>
+          Sistema de monitoramento contínuo ativo
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Componente de Status do Sistema
+const SystemStatus = ({ 
+  mediaPipeStatus, 
+  detectionActive, 
+  cameraError,
+  onRestart 
+}: { 
+  mediaPipeStatus: string;
+  detectionActive: boolean;
+  cameraError: string | null;
+  onRestart: () => void;
+}) => {
+  return (
+    <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+      <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+        <span className="text-xl">⚙️</span>
+        Status do Sistema
+      </h3>
+      
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">Inteligência Artificial</span>
+          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+            mediaPipeStatus === 'ready' ? 'bg-green-100 text-green-800' :
+            mediaPipeStatus === 'loading' ? 'bg-blue-100 text-blue-800' :
+            'bg-red-100 text-red-800'
+          }`}>
+            {mediaPipeStatus === 'ready' ? '✅ Ativa' :
+             mediaPipeStatus === 'loading' ? '🔄 Inicializando' : '❌ Inativa'}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">Detecção de Postura</span>
+          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+            detectionActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {detectionActive ? '✅ Ativa' : '⏸️ Pausada'}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">Modo de Operação</span>
+          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+            🎯 IMAGE Mode
+          </span>
+        </div>
+      </div>
+
+      {cameraError && (
+        <div 
+          className="p-3 bg-red-50 border border-red-200 rounded-lg"
+          role="alert"
+          aria-live="assertive"
+        >
+          <p className="text-sm text-red-700 font-medium flex items-center gap-2">
+            <span>❌</span>
+            {cameraError}
+          </p>
+        </div>
+      )}
+
+      <button 
+        onClick={onRestart}
+        className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+        aria-label="Reiniciar sistema de câmera e detecção"
+      >
+        <span className="text-lg">🔄</span>
+        Reiniciar Sistema
+      </button>
+
+      <div className="pt-3 border-t border-gray-100">
+        <p className="text-xs text-gray-500 text-center">
+          💡 Dica: Mantenha boa iluminação e posicione-se centralizado
+        </p>
+      </div>
     </div>
   );
 };
@@ -127,8 +248,6 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
 // =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
-  // const { consultaId } = useParams<{ consultaId: string }>();
-  // const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
   const [feedback, setFeedback] = useState<PostureFeedback>({ 
     message: "Iniciando sistema...",
     status: 'loading' 
@@ -150,7 +269,6 @@ export function Teleconsulta(): JSX.Element {
   useEffect(() => {
     let mediaPipeInitialized = false;
 
-    // 2. Inicializar MediaPipe com IMAGE mode (mais estável)
     const initMediaPipe = async () => {
       if (mediaPipeInitialized) return;
       mediaPipeInitialized = true;
@@ -163,13 +281,12 @@ export function Teleconsulta(): JSX.Element {
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
         );
 
-        // Usar IMAGE mode em vez de VIDEO mode para evitar problemas de timestamp
         poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
             delegate: "GPU"
           },
-          runningMode: "IMAGE", // IMAGE mode é mais estável
+          runningMode: "IMAGE",
           numPoses: 1
         });
 
@@ -182,12 +299,10 @@ export function Teleconsulta(): JSX.Element {
       }
     };
 
-    // 3. Inicializar câmera
     const initCamera = async () => {
       try {
         console.log('📷 Iniciando câmera...');
         
-        // Parar stream anterior se existir
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
         }
@@ -206,13 +321,11 @@ export function Teleconsulta(): JSX.Element {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           
-          // Configurar canvas para captura
           if (canvasRef.current) {
             canvasRef.current.width = 640;
             canvasRef.current.height = 480;
           }
 
-          // Esperar o vídeo estar pronto
           const checkVideoReady = () => {
             if (videoRef.current && videoRef.current.readyState >= 2) {
               console.log('✅ Vídeo pronto!');
@@ -227,13 +340,12 @@ export function Teleconsulta(): JSX.Element {
         }
       } catch (err) {
         console.error("❌ Erro na câmera:", err);
-        const errorMessage = "Câmera não acessível. Verifique as permissões.";
+        const errorMessage = "Câmera não acessível. Verifique as permissões do navegador.";
         setFeedback({ message: errorMessage, status: 'error' });
         setCameraError(errorMessage);
       }
     };
 
-    // 4. Sistema de detecção com IMAGE mode
     const startDetection = () => {
       if (detectionActiveRef.current) return;
       detectionActiveRef.current = true;
@@ -250,12 +362,10 @@ export function Teleconsulta(): JSX.Element {
             const ctx = canvas.getContext('2d');
 
             if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
-              // Desenhar frame atual no canvas
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
               
               console.log('🔍 Detectando pose...');
               
-              // Usar detect() em vez de detectForVideo() para IMAGE mode
               const result = poseLandmarkerRef.current.detect(canvas);
               
               if (result.landmarks && result.landmarks.length > 0) {
@@ -265,7 +375,7 @@ export function Teleconsulta(): JSX.Element {
               } else {
                 console.log('❌ Nenhum landmark detectado');
                 setFeedback({
-                  message: "👤 Posicione-se frente à câmera",
+                  message: "👤 Posicione-se frente à câmera para análise",
                   status: 'warning'
                 });
               }
@@ -287,26 +397,20 @@ export function Teleconsulta(): JSX.Element {
           });
         }
 
-        // Continuar loop
         if (detectionActiveRef.current) {
-          // Usar requestAnimationFrame para melhor sincronização
           requestAnimationFrame(detectFrame);
         }
       };
 
-      // Iniciar o loop
       requestAnimationFrame(detectFrame);
     };
 
-    // Iniciar tudo
     initMediaPipe();
     
-    // Iniciar câmera
     setTimeout(() => {
       initCamera();
     }, 500);
 
-    // Cleanup
     return () => {
       console.log('🧹 Fazendo cleanup...');
       detectionActiveRef.current = false;
@@ -323,94 +427,130 @@ export function Teleconsulta(): JSX.Element {
     };
   }, []);
 
-  // =========================================================================================
-  // REINICIAR CÂMERA
-  // =========================================================================================
   const restartCamera = async () => {
     setCameraError(null);
     setFeedback({ message: "Reiniciando câmera...", status: 'loading' });
     window.location.reload();
   };
 
-  // =========================================================================================
-  // RENDER
-  // =========================================================================================
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 font-sans p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-extrabold text-indigo-800 text-center mb-8 border-b pb-4">
-            Painel de Orientações Teleconsulta
-          </h1>
-        </div>
+          <header className="text-center mb-8 space-y-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Assistente de Postura para Teleconsulta
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Sistema inteligente que ajuda a manter a posição correta durante sua consulta médica online
+            </p>
+          </header>
 
-        <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto min-h-[600px]">
-         
-          <div className="lg:flex-2 flex-1 bg-gray-800 rounded-2xl shadow-2xl relative overflow-hidden min-h-[400px]">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            {/* Área da Câmera */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+                <div className="relative aspect-video bg-gray-900 rounded-t-3xl">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover transform scale-x-[-1]"
+                    aria-label="Visualização da câmera para monitoramento de postura"
+                  />
 
-            {/* Canvas oculto para captura */}
-            <canvas 
-              ref={canvasRef} 
-              className="hidden"
-              width="640" 
-              height="480"
-            />
+                  <canvas 
+                    ref={canvasRef} 
+                    className="hidden"
+                    width="640" 
+                    height="480"
+                  />
 
-            {cameraError && (
-              <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg p-6 text-center max-w-md">
-                  <p className="font-semibold text-red-600 mb-4">{cameraError}</p>
-                  <button 
-                    onClick={restartCamera}
-                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
-                  >
-                    🔄 Tentar Novamente
-                  </button>
+                  {cameraError && (
+                    <div className="absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center p-6">
+                      <div className="bg-white rounded-2xl p-8 text-center max-w-md space-y-4">
+                        <div className="text-red-500 text-4xl" aria-hidden="true">❌</div>
+                        <p className="font-semibold text-red-600 text-lg">{cameraError}</p>
+                        <button 
+                          onClick={restartCamera}
+                          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-colors duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                          🔄 Tentar Novamente
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Overlay de Status */}
+                  <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
+                    <div className="bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg font-medium text-sm backdrop-blur-sm">
+                      <span className="flex items-center gap-2">
+                        <span className="text-green-400">●</span>
+                        Câmera {cameraError ? 'Inativa' : 'Ativa'}
+                      </span>
+                    </div>
+                    <div className="bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg font-medium text-sm backdrop-blur-sm">
+                      <span className="flex items-center gap-2">
+                        <span className={
+                          mediaPipeStatus === 'ready' ? 'text-green-400' :
+                          mediaPipeStatus === 'loading' ? 'text-yellow-400' : 'text-red-400'
+                        }>●</span>
+                        IA: {mediaPipeStatus === 'ready' ? 'Ativa' : 
+                             mediaPipeStatus === 'loading' ? 'Carregando' : 'Inativa'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-gradient-to-r from-gray-50 to-white">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="text-blue-500">📹</span>
+                    Sua Visualização
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Esta é a visão que o médico terá durante a consulta. Ajuste sua posição conforme as orientações.
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
 
-            <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
-              <p>🎥 Câmera {cameraError ? 'Erro' : 'Ativa'}</p>
-              <p className="text-xs opacity-75">
-                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa (IMAGE)' : 
-                 mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚡ Modo Básico'}
-              </p>
+            {/* Painel de Orientações e Status */}
+            <div className="space-y-6">
+              <FeedbackPanel feedback={feedback} />
+              
+              <SystemStatus 
+                mediaPipeStatus={mediaPipeStatus}
+                detectionActive={detectionActiveRef.current}
+                cameraError={cameraError}
+                onRestart={restartCamera}
+              />
             </div>
           </div>
 
-          <div className="lg:flex-1 w-full lg:w-1/3">
-            <FeedbackPanel
-              feedback={feedback}
-            />
-            
-            <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
-              <p><strong>Status:</strong> {
-                mediaPipeStatus === 'ready' ? '🤖 IA Funcionando' :
-                mediaPipeStatus === 'loading' ? '🔄 Inicializando IA...' :
-                '⚡ Modo Básico'
-              }</p>
-              <p><strong>Detecção:</strong> {detectionActiveRef.current ? '✅ Ativa' : '⏸️ Pausada'}</p>
-              <p><strong>Modo:</strong> IMAGE (Estável)</p>
-              {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
-            
-            <div>
-              <button 
-              onClick={restartCamera}
-              className="w-full mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-medium"
-            >
-              🔄 Reiniciar Sistema
-            </button>
+          {/* Rodapé Informativo */}
+          <footer className="mt-12 text-center">
+            <div className="bg-white rounded-2xl shadow-lg p-6 max-w-4xl mx-auto">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-center gap-2">
+                <span className="text-purple-500">💡</span>
+                Dicas para uma Teleconsulta de Qualidade
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-2 justify-center">
+                  <span className="text-green-500">✓</span>
+                  Ambiente bem iluminado
+                </div>
+                <div className="flex items-center gap-2 justify-center">
+                  <span className="text-green-500">✓</span>
+                  Fundo neutro e organizado
+                </div>
+                <div className="flex items-center gap-2 justify-center">
+                  <span className="text-green-500">✓</span>
+                  Conexão estável com a internet
+                </div>
+              </div>
             </div>
-            </div>
-          </div>
+          </footer>
         </div>
       </div>
     </Layout>
