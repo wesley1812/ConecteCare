@@ -115,8 +115,8 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
             <div className="min-h-[90vh] flex">
 
                 <div className="hidden lg:flex w-full lg:w-1/2 items-center justify-center 
-                                bg-gradient-to-r from-blue-700 to-cyan-500 
-                                relative overflow-hidden p-12">
+                                 bg-gradient-to-r from-blue-700 to-cyan-500 
+                                 relative overflow-hidden p-12">
 
                     <div className="absolute inset-0 opacity-10">
                         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -140,7 +140,7 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
                             <Link
                                 to ='/login'
                                 className="hover: cursor-pointer inline-block px-8 py-3 bg-cyan-500 text-white-900 font-bold rounded-full 
-                                           transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-cyan-400/50"
+                                             transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-cyan-400/50"
                             >
                                 Voltar para o Login
                             </Link>
@@ -150,8 +150,9 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
 
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16 bg-gray-50">
 
-                    <div className="max-w-md w-full bg-white rounded-3xl shadow-3xl overflow-hidden p-8 sm:p-12 
-                                    border border-gray-100 transition-shadow duration-500">
+                    {/* AQUI ESTÁ A CORREÇÃO: Removido 'max-w-md' para permitir que o formulário expanda. */}
+                    <div className="w-full bg-white rounded-3xl shadow-3xl overflow-hidden p-8 sm:p-12 
+                                 border border-gray-100 transition-shadow duration-500">
                         
                         {message && (
                             <div className="bg-green-100 border-l-4 border-green-600 text-green-800 p-4 mb-6 rounded-lg shadow-md animate-pulse" role="alert">

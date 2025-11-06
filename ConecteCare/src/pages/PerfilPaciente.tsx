@@ -63,12 +63,10 @@ export function PerfilPaciente() {
       }
       setIsLoading(false);
     } else if (!loggedInUserEmail) {
-      // Se não há usuário logado, para de carregar
       setIsLoading(false);
     }
   }, [loggedInUserEmail, listaCuidadores, listaPacientes]);
 
-  // --- Tela de Carregamento ---
   if (isLoading) {
     return (
       <Layout>
@@ -79,7 +77,6 @@ export function PerfilPaciente() {
     );
   }
 
-  // --- Tela de Erro (Usuário não encontrado ou sem paciente) ---
   if (!pacienteAtual) {
     return (
       <Layout>
@@ -97,7 +94,6 @@ export function PerfilPaciente() {
     );
   }
 
-  // --- Painel Principal (Renderização de Sucesso) ---
   return (
     <Layout>
       <div className="bg-gradient-to-r from-blue-700 to-cyan-500 py-12 md:py-20 bg-gray-100 min-h-screen">
@@ -108,10 +104,8 @@ export function PerfilPaciente() {
               Painel do Paciente
             </h1>
             <p className="mt-3 text-xl text-white">
-              {/* NOME DINÂMICO! */}
               Boas vindas, <span className="font-bold text-white">{pacienteAtual.nome}</span>!
             </p>
-            {/* <p className="mt-1 text-lg text-white"></p> */}
             <p className="mt-1 text-lg text-white">
               O que você gostaria de fazer hoje?
             </p>
@@ -119,12 +113,8 @@ export function PerfilPaciente() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
 
-            {/* *
-                * ALTERAÇÃO FEITA AQUI 
-                *
-              */}
             <Redirecionador
-              to="/perfil-paciente/atualizar-perfil-paciente" // Rota atualizada para a nova página
+              to="/perfil-paciente/atualizar-perfil-paciente" 
               icon={<UserCircleIcon />}
               title="Meu Perfil"
               description="Atualize seus dados pessoais e consulte seus cuidadores."
@@ -132,7 +122,6 @@ export function PerfilPaciente() {
             />
 
             <Redirecionador
-              // LINK DINÂMICO! Baseado no ID do paciente encontrado
               to={`/dashboard/${pacienteAtual.id}`} //
               icon={<HeartIcon />}
               title="Minha Saúde"
@@ -141,7 +130,7 @@ export function PerfilPaciente() {
             />
 
             <Redirecionador
-              to="/teleconsulta/" // ID da consulta (ainda mocado)
+              to="/teleconsulta/"
               icon={<VideoCameraIcon />}
               title="Acessar Guia Teleconsulta"
               description="Entre na sala de consulta virtual para orientações de como utilizar a câmera."

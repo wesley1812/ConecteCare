@@ -1,240 +1,435 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
+import { useParams } from 'react-router-dom';
+import type { TeleconsultaData } from '../types/interfaces';
 import { Layout } from '../components/Layout';
-// Importações do MediaPipe
-import { PoseLandmarker, FilesetResolver, DrawingUtils } from '@mediapipe/tasks-vision';
 
-// Tipagem para simplificar
-type PoseLandmarkerInstance = Awaited<ReturnType<typeof PoseLandmarker.createFromOptions>> | null;
+// =========================================================================================
+// 1. IMPORTAÇÕES DO MEDIAPIPE
+// =========================================================================================
+import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 
-export function Teleconsulta() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameId = useRef<number | null>(null);
+// =========================================================================================
+// 2. TIPOS E INTERFACES
+// =========================================================================================
 
-  // Estados do MediaPipe e Webcam
-  const [poseLandmarker, setPoseLandmarker] = useState<PoseLandmarkerInstance>(null);
-  const [webcamRunning, setWebcamRunning] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true); // Estado para o carregamento do modelo
-  const [error, setError] = useState<string | null>(null);
+type PostureFeedback = {
+  message: string;
+  status: 'ideal' | 'warning' | 'error' | 'loading';
+};
 
-  // 1. Inicializa o PoseLandmarker
-  useEffect(() => {
-    const createPoseLandmarker = async () => {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm" // Local padrão do WASM
-        );
-        const landmarker = await PoseLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            // Caminho para o seu modelo .task
-            modelAssetPath: `/src/app/shared/models/pose_landmarker_full.task`, 
-            delegate: "GPU" // Usa GPU se disponível
-          },
-          runningMode: "VIDEO", // Essencial para processamento de vídeo
-          numPoses: 1 // Detecta apenas uma pessoa para performance
-        });
-        setPoseLandmarker(landmarker);
-        setLoading(false); // Modelo carregado
-        console.log("PoseLandmarker loaded successfully.");
-      } catch (err) {
-        console.error("Error loading PoseLandmarker:", err);
-        setError("Falha ao carregar o modelo de detecção de pose.");
-        setLoading(false);
-      }
+// =========================================================================================
+// 3. LÓGICA DE ANÁLISE DE POSTURA
+// =========================================================================================
+
+const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
+  if (!landmarks || landmarks.length === 0) {
+    return {
+      message: "🔍 Nenhuma pessoa detectada. Certifique-se de estar visível na câmera.",
+      status: 'warning'
     };
-    createPoseLandmarker();
+  }
 
-    // Cleanup: Descarrega o modelo se o componente for desmontado (se houver método close)
-    // return () => { poseLandmarker?.close(); } // Descomente se 'close' existir
-  }, []);
+  try {
+    const nose = landmarks[0];
+    const leftShoulder = landmarks[11];
+    const rightShoulder = landmarks[12];
+    
+    const shoulderDistance = Math.sqrt(
+      Math.pow(leftShoulder.x - rightShoulder.x, 2) + 
+      Math.pow(leftShoulder.y - rightShoulder.y, 2)
+    );
 
-  // 2. Ajusta o tamanho do Canvas quando o vídeo começa a tocar
-  useEffect(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+    const noseVerticalPosition = nose.y;
 
-    const handleVideoPlay = () => {
-      if (video && canvas) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        console.log(`Canvas resized to ${video.videoWidth}x${video.videoHeight}`);
-      }
-    };
-
-    if (video) {
-      video.addEventListener('loadedmetadata', handleVideoPlay); // Usa loadedmetadata que é mais confiável para dimensões
-    }
-
-    return () => {
-      if (video) {
-        video.removeEventListener('loadedmetadata', handleVideoPlay);
-      }
-    };
-  }, [webcamRunning]); // Roda quando a webcam é ativada/desativada
-
-  // 3. Função para Iniciar/Parar a Webcam e Detecção
-  const enableCam = async () => {
-    if (!poseLandmarker) {
-      console.log("PoseLandmarker not ready yet.");
-      setError("Modelo de detecção ainda não está pronto.");
-      return;
-    }
-
-    if (webcamRunning) {
-      // Desativar
-      if (videoRef.current && videoRef.current.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-        videoRef.current.srcObject = null;
-      }
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-        animationFrameId.current = null;
-      }
-      // Limpa o canvas ao parar
-      const canvasCtx = canvasRef.current?.getContext("2d");
-      if(canvasCtx && canvasRef.current){
-        canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      }
-      setWebcamRunning(false);
-      console.log("Webcam stopped.");
-    } else {
-      // Ativar
-      setError(null); // Limpa erros anteriores
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); // Áudio não é necessário
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          // Espera o vídeo começar a tocar para iniciar a predição
-          videoRef.current.onloadedmetadata = () => {
-             if (videoRef.current) { // Checagem dupla
-              videoRef.current.play();
-              setWebcamRunning(true);
-              console.log("Webcam started, starting prediction loop.");
-              predictWebcam(); // Inicia o loop
-            }
-          };
-        }
-      } catch (err) {
-        console.error("Error accessing webcam:", err);
-        setError("Não foi possível acessar sua câmera. Verifique as permissões do navegador.");
-        setWebcamRunning(false); // Garante que o estado reflita a falha
-      }
-    }
-  };
-
-  // 4. Loop de Predição
-  const predictWebcam = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const canvasCtx = canvas?.getContext("2d");
-
-    if (!video || !canvas || !canvasCtx || !poseLandmarker || !webcamRunning) {
-        console.log("Prediction loop stopped or dependencies not ready.");
-        if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current); // Garante parada
-        animationFrameId.current = null;
-        return;
-    }
-
-    // Garante que o canvas tem o tamanho certo (caso haja redimensionamento dinâmico)
-    if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
-    if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
-
-
-    const startTimeMs = performance.now();
-    // Detecta poses no frame atual do vídeo
-    poseLandmarker.detectForVideo(video, startTimeMs, (result) => {
-        // Limpa o canvas
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Desenha os landmarks
-        const drawingUtils = new DrawingUtils(canvasCtx);
-        for (const landmarks of result.landmarks) {
-            drawingUtils.drawLandmarks(landmarks, {
-                radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1) // Pontos menores mais distantes
-            });
-            drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS); // Desenha as conexões
-        }
+    console.log('📊 Métricas:', {
+      shoulderDistance: shoulderDistance.toFixed(3),
+      noseVertical: noseVerticalPosition.toFixed(3)
     });
 
-    // Chama a função novamente no próximo frame
-    if (webcamRunning) { // Verifica novamente antes de continuar o loop
-      animationFrameId.current = requestAnimationFrame(predictWebcam);
+    if (shoulderDistance < 0.15) {
+      return {
+        message: "⚠️ Muito longe! Aproxime-se para melhor enquadramento.",
+        status: 'warning'
+      };
+    } else if (shoulderDistance > 0.4) {
+      return {
+        message: "⚠️ Muito próximo! Recue um pouco.",
+        status: 'warning'
+      };
+    } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.8) {
+      return {
+        message: "📏 Ajuste a altura: mantenha o rosto mais centralizado.",
+        status: 'warning'
+      };
     } else {
-       if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-       animationFrameId.current = null;
+      return {
+        message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
+        status: 'ideal'
+      };
     }
+  } catch (error) {
+    return {
+      message: "📊 Analisando sua postura...",
+      status: 'loading'
+    };
+  }
+};
+
+// Componente para exibir o painel de feedback
+const FeedbackPanel = ({ feedback, patientName }: { feedback: PostureFeedback, patientName: string }) => {
+  let bgColor, borderColor, icon;
+ 
+  switch (feedback.status) {
+    case 'ideal':
+      bgColor = 'bg-green-50';
+      borderColor = 'border-green-500';
+      icon = '✅';
+      break;
+    case 'warning':
+      bgColor = 'bg-yellow-50';
+      borderColor = 'border-yellow-500';
+      icon = '⚠️';
+      break;
+    case 'error':
+      bgColor = 'bg-red-50';
+      borderColor = 'border-red-500';
+      icon = '❌';
+      break;
+    case 'loading':
+    default:
+      bgColor = 'bg-blue-50';
+      borderColor = 'border-blue-500';
+      icon = '🔄';
+      break;
+  }
+
+  return (
+    <div className={`p-6 rounded-xl shadow-xl border-l-4 ${bgColor} ${borderColor} h-full space-y-4`}>
+      <h3 className="text-xl font-bold text-gray-800">Orientações de Postura</h3>
+      <p className="text-sm text-gray-600">
+        Ajuste sua posição na câmera, {patientName}, para garantir que o médico tenha a melhor visibilidade.
+      </p>
+     
+      <div className={`p-4 rounded-lg font-semibold text-lg border ${
+        feedback.status === 'ideal' ? 'bg-green-100 border-green-600 text-green-800' : 
+        feedback.status === 'warning' ? 'bg-yellow-100 border-yellow-600 text-yellow-800' :
+        feedback.status === 'error' ? 'bg-red-100 border-red-600 text-red-800' :
+        'bg-white border-gray-300 text-gray-700'
+      }`}>
+        {icon} {feedback.message}
+      </div>
+
+      <p className="text-xs text-gray-500 pt-2">O sistema monitora em tempo real a posição do seu corpo e rosto.</p>
+    </div>
+  );
+};
+
+// =========================================================================================
+// 4. COMPONENTE PRINCIPAL - SOLUÇÃO IMAGE MODE
+// =========================================================================================
+
+export function Teleconsulta(): JSX.Element {
+  const { consultaId } = useParams<{ consultaId: string }>();
+  const [teleconsulta, setTeleconsulta] = useState<TeleconsultaData | null>(null);
+  const [feedback, setFeedback] = useState<PostureFeedback>({ 
+    message: "Iniciando sistema...", 
+    status: 'loading' 
+  });
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [mediaPipeStatus, setMediaPipeStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
+  const detectionActiveRef = useRef(false);
+  const mediaPipeReadyRef = useRef(false);
+
+  // =========================================================================================
+  // INICIALIZAÇÃO COM IMAGE MODE
+  // =========================================================================================
+
+  useEffect(() => {
+    // 1. Carregar dados da consulta
+    const fetchedData: TeleconsultaData = {
+      id: consultaId || '1',
+      patientName: "João da Silva",
+      patientAge: 75,
+    };
+    setTeleconsulta(fetchedData);
+
+    let mediaPipeInitialized = false;
+
+    // 2. Inicializar MediaPipe com IMAGE mode (mais estável)
+    const initMediaPipe = async () => {
+      if (mediaPipeInitialized) return;
+      mediaPipeInitialized = true;
+
+      try {
+        setMediaPipeStatus('loading');
+        console.log('🚀 Inicializando MediaPipe (IMAGE mode)...');
+        
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+        );
+
+        // Usar IMAGE mode em vez de VIDEO mode para evitar problemas de timestamp
+        poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+            delegate: "GPU"
+          },
+          runningMode: "IMAGE", // IMAGE mode é mais estável
+          numPoses: 1
+        });
+
+        console.log('🎯 MediaPipe carregado (IMAGE mode)!');
+        setMediaPipeStatus('ready');
+        mediaPipeReadyRef.current = true;
+      } catch (error) {
+        console.error('❌ MediaPipe falhou:', error);
+        setMediaPipeStatus('error');
+      }
+    };
+
+    // 3. Inicializar câmera
+    const initCamera = async () => {
+      try {
+        console.log('📷 Iniciando câmera...');
+        
+        // Parar stream anterior se existir
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            frameRate: { ideal: 15 } // Reduzir FPS para performance
+          }, 
+          audio: true 
+        });
+        
+        streamRef.current = stream;
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          
+          // Configurar canvas para captura
+          if (canvasRef.current) {
+            canvasRef.current.width = 640;
+            canvasRef.current.height = 480;
+          }
+
+          // Esperar o vídeo estar pronto
+          const checkVideoReady = () => {
+            if (videoRef.current && videoRef.current.readyState >= 2) {
+              console.log('✅ Vídeo pronto!');
+              setCameraError(null);
+              startDetection();
+            } else {
+              setTimeout(checkVideoReady, 100);
+            }
+          };
+          
+          checkVideoReady();
+        }
+      } catch (err) {
+        console.error("❌ Erro na câmera:", err);
+        const errorMessage = "Câmera não acessível. Verifique as permissões.";
+        setFeedback({ message: errorMessage, status: 'error' });
+        setCameraError(errorMessage);
+      }
+    };
+
+    // 4. Sistema de detecção com IMAGE mode
+    const startDetection = () => {
+      if (detectionActiveRef.current) return;
+      detectionActiveRef.current = true;
+
+      console.log('🎯 Iniciando detecção (IMAGE mode)...');
+
+      const detectFrame = async () => {
+        if (!detectionActiveRef.current) return;
+
+        try {
+          if (poseLandmarkerRef.current && mediaPipeReadyRef.current && videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+
+            if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
+              // Desenhar frame atual no canvas
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              console.log('🔍 Detectando pose...');
+              
+              // Usar detect() em vez de detectForVideo() para IMAGE mode
+              const result = poseLandmarkerRef.current.detect(canvas);
+              
+              if (result.landmarks && result.landmarks.length > 0) {
+                console.log('👤 Pessoa detectada! Landmarks:', result.landmarks[0].length);
+                const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
+                setFeedback(newFeedback);
+              } else {
+                console.log('❌ Nenhum landmark detectado');
+                setFeedback({
+                  message: "👤 Posicione-se frente à câmera",
+                  status: 'warning'
+                });
+              }
+            }
+          } else {
+            console.log('⏳ Aguardando inicialização...');
+            if (!mediaPipeReadyRef.current) {
+              setFeedback({
+                message: "🔄 Inicializando sistema de detecção...",
+                status: 'loading'
+              });
+            }
+          }
+        } catch (error) {
+          console.error('💥 Erro na detecção:', error);
+          setFeedback({
+            message: "⚠️ Sistema temporariamente indisponível",
+            status: 'warning'
+          });
+        }
+
+        // Continuar loop
+        if (detectionActiveRef.current) {
+          // Usar requestAnimationFrame para melhor sincronização
+          requestAnimationFrame(detectFrame);
+        }
+      };
+
+      // Iniciar o loop
+      requestAnimationFrame(detectFrame);
+    };
+
+    // Iniciar tudo
+    initMediaPipe();
+    
+    // Iniciar câmera
+    setTimeout(() => {
+      initCamera();
+    }, 500);
+
+    // Cleanup
+    return () => {
+      console.log('🧹 Fazendo cleanup...');
+      detectionActiveRef.current = false;
+      mediaPipeReadyRef.current = false;
+      
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    };
+  }, [consultaId]);
+
+  // =========================================================================================
+  // REINICIAR CÂMERA
+  // =========================================================================================
+  const restartCamera = async () => {
+    setCameraError(null);
+    setFeedback({ message: "Reiniciando câmera...", status: 'loading' });
+    window.location.reload();
   };
 
-  // --- Renderização ---
-
-  // Estado de carregamento do modelo
-  if (loading) {
+  // =========================================================================================
+  // RENDER
+  // =========================================================================================
+  if (!teleconsulta) {
     return (
       <Layout>
-        <div className="text-center py-20 min-h-screen flex items-center justify-center bg-gray-50">
-          <p className="text-lg text-gray-600">Carregando modelo de detecção de pose...</p>
-        </div>
+        <div className="text-center py-12">Carregando informações da teleconsulta...</div>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8 flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-gray-900 text-center mb-4">
-          Monitoramento de Pontos Corporais
-        </h1>
-        <p className="text-center text-gray-600 mb-6 max-w-xl">
-          Posicione-se em frente à câmera. O sistema detectará os pontos chave do seu corpo em tempo real.
-          Certifique-se de que seu corpo esteja visível.
-        </p>
-
-        {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 w-full max-w-2xl text-center" role="alert">
-            <p className="font-bold">Erro</p>
-            <p>{error}</p>
-          </div>
-        )}
-
-        <div className="relative w-full max-w-4xl aspect-video mx-auto mb-6 bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-          {/* Vídeo da Webcam */}
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="absolute top-0 left-0 w-full h-full object-cover"
-          ></video>
-          {/* Canvas para Desenhar os Landmarks */}
-          <canvas
-            ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full"
-          ></canvas>
-           {/* Mensagem de Câmera Inativa */}
-           {!webcamRunning && (
-             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <p className="text-white text-xl font-semibold">Câmera inativa</p>
-             </div>
-           )}
+      <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-extrabold text-indigo-800 text-center mb-8 border-b pb-4">
+            Teleconsulta: {teleconsulta.patientName} ({teleconsulta.patientAge} anos)
+          </h1>
         </div>
 
-        {/* Botão para Ativar/Desativar */}
-        <button
-          onClick={enableCam}
-          disabled={loading} // Desabilita enquanto o modelo carrega
-          className={`px-8 py-3 rounded-lg font-semibold text-lg shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
-            ${webcamRunning
-              ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500'
-              : 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500'
-            }
-            ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-          `}
-        >
-          {webcamRunning ? 'Desativar Câmera' : 'Ativar Câmera'}
-        </button>
+        <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto min-h-[600px]">
+         
+          <div className="lg:flex-2 flex-1 bg-gray-800 rounded-2xl shadow-2xl relative overflow-hidden min-h-[400px]">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"
+            />
 
+            {/* Canvas oculto para captura */}
+            <canvas 
+              ref={canvasRef} 
+              className="hidden"
+              width="640" 
+              height="480"
+            />
+
+            {cameraError && (
+              <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg p-6 text-center max-w-md">
+                  <p className="font-semibold text-red-600 mb-4">{cameraError}</p>
+                  <button 
+                    onClick={restartCamera}
+                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
+                  >
+                    🔄 Tentar Novamente
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="absolute bottom-4 left-4 p-2 px-4 bg-indigo-600 bg-opacity-80 text-white rounded-lg font-medium text-sm shadow-lg">
+              <p>🎥 Câmera {cameraError ? 'Erro' : 'Ativa'}</p>
+              <p className="text-xs opacity-75">
+                {mediaPipeStatus === 'ready' ? '🤖 IA Ativa (IMAGE)' : 
+                 mediaPipeStatus === 'loading' ? '🔄 Carregando IA...' : '⚡ Modo Básico'}
+              </p>
+            </div>
+          </div>
+
+          <div className="lg:flex-1 w-full lg:w-1/3">
+            <FeedbackPanel
+              feedback={feedback}
+              patientName={teleconsulta.patientName.split(' ')[0] || "paciente"}
+            />
+            
+            <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
+              <p><strong>Status:</strong> {
+                mediaPipeStatus === 'ready' ? '🤖 IA Funcionando' :
+                mediaPipeStatus === 'loading' ? '🔄 Inicializando IA...' :
+                '⚡ Modo Básico'
+              }</p>
+              <p><strong>Detecção:</strong> {detectionActiveRef.current ? '✅ Ativa' : '⏸️ Pausada'}</p>
+              <p><strong>Modo:</strong> IMAGE (Estável)</p>
+              {cameraError && <p className="text-red-600 mt-1">{cameraError}</p>}
+            </div>
+
+            <button 
+              onClick={restartCamera}
+              className="w-full mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-medium"
+            >
+              🔄 Reiniciar Sistema
+            </button>
+          </div>
+        </div>
       </div>
     </Layout>
   );
-};
-
+}
