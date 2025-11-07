@@ -75,7 +75,7 @@ export function Contato() {
                                     <div className="inline-block p-3 bg-gray-100 rounded-xl group-hover:bg-blue-100 transition-colors">
                                         <span className="text-3xl">📞</span>
                                     </div>
-                                    <h3 className="text-sm font-bold text-gray-800 mt-2">Telefone</h3>
+                                    <h3 className="text-sm font-bold text-gray-800 mt-2">telefoneContato</h3>
                                     <p className="text-xs text-gray-500 group-hover:text-blue-600 transition-colors">Ligar agora</p>
                                 </a>
 

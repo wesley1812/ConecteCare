@@ -1,57 +1,43 @@
 {
   "pacientes": [
     {
-      "id": "1bc3a724-3779-4805-a856-bcc9807155ac",
-      "nome": "Beatriz",
-      "idade": 24,
+      "id": "93015c1e-f8b2-464c-9432-623174d99157",
+      "nome": "Silvana Novais",
+      "idade": 54,
       "cpfPaciente": "257.938.818-40",
-      "email": "beatriz_crosa@hotmail.com",
+      "email": "beatriz@hotmail.com",
       "senha": "12345678",
-      "telefone": "(11) 96113-0932",
-      "patologia": "Nada",
+      "telefoneContato": "(11) 96113-0931",
+      "patologia": "nada",
+      "cepPaciente": "05440-001",
       "aceitarTermo": true
     }
   ],
   "cuidador": [
     {
-      "id": "b8e9d428-8dab-46f0-b766-a77d2ede24a4",
+      "id": "ae4f6bdc-3af3-42a5-aa0e-f9bedc953f91",
       "nome": "Wesley Silva de Andrade",
-      "idade": 77,
-      "cpf": "441.268.578-00",
+      "idade": 25,
+      "cpfCuidador": "441.268.578-00",
       "cpfPaciente": "257.938.818-40",
       "email": "wda1812@hotmail.com",
       "senha": "12345678",
-      "telefone": "(11) 96113-0931",
-      "parentesco": "Filho",
-      "aceitarTermo": true
-    },
-    {
-      "id": "b9995c74-7bef-4a5f-a71d-da53204b724a",
-      "nome": "Beatriz",
-      "idade": 27,
-      "cpf": "082.428.128-45",
-      "cpfPaciente": "257.938.818-40",
-      "email": "beatriz_cros@hotmail.com",
-      "senha": "12345678",
-      "telefone": "(11) 96113-0931",
-      "parentesco": "Filho",
+      "telefoneContato": "(11) 96113-0931",
+      "correlacaoPaciente": "Filho",
+      "cepPaciente": "05440-001",
+      "cepCuidador": "05440-001",
       "aceitarTermo": true
     }
   ],
-  "consultasHC":[
-    { 
-      "id": 1, 
-      "type": "Consulta de fisioterapia", 
-      "date": "20/11/2025", 
-      "time": "14h00",
-      "cpfPaciente":"257.938.818-40"
-    },
-    { 
-      "id": 2, 
-      "type": "Consulta de Psicologia", 
-      "date": "28/11/2025",
-      "time": "10h30",
-      "cpfPaciente":"257.938.818-40"
+  "consultasHC": [
+    {
+      "id": "0a82acba-3352-48c3-bd18-ffa452191e38",
+      "cpfPaciente": "257.938.818-40",
+      "type": "Cardiologia",
+      "doctorName": "Drª Beatriz Claudino Rosa",
+      "doctorSpecialty": "Cardiologia",
+      "date": "2025-11-05",
+      "time": "03:36"
     }
   ]
 }

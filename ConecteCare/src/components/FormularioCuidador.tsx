@@ -5,12 +5,12 @@ import { formSchemaCuidador, type FormSchemaCuidador } from "../schemas/forms-sc
 import type { Cuidador } from "../types/interfaces";
 
 interface FormularioCuidadorProps {
-  onTermoOpen: () => void;
-  onSuccess: () => void;
+    onTermoOpen: () => void;
+    onSuccess: () => void;
 }
 
 export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidadorProps) {
-    const { saveCuidador, isCpfCuidadorCadastrado } = useCadastro();
+    const { saveCuidador, iscpfCuidadorCadastrado } = useCadastro(); 
     
     const {
         register,
@@ -19,149 +19,189 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
         setError,
     } = useForm<FormSchemaCuidador>({
         resolver: zodResolver(formSchemaCuidador),
+        defaultValues: { aceitarTermo: false }
     });
 
     async function onSubmit({
       nome,
       idade,
-      cpf,
+      cpfCuidador,
       cpfPaciente,
       email,
       senha,
-      telefone,
-      parentesco,
-    //   residencia,
-    //   foto,
+      telefoneContato,
+      correlacaoPaciente,
+      cepPaciente,
+      cepCuidador,
       aceitarTermo
     } : FormSchemaCuidador): Promise<void> {
-        if (isCpfCuidadorCadastrado(cpf)) {
-            setError("cpf", {
+        if (iscpfCuidadorCadastrado(cpfCuidador)) {
+            setError("cpfCuidador", {
                 type: "manual",
-                message: "Este CPF já está cadastrado como cuidador.",
+                message: "Este cpfCuidador já está cadastrado como cuidador.",
             });
             return;
         }
+        
         const cuidador: Cuidador = {
             id: crypto.randomUUID(),
             nome,
             idade,
-            cpf,
+            cpfCuidador,
             cpfPaciente,
             email,
             senha,
-            telefone,
-            parentesco,
-            // residencia,
-            // foto,
+            telefoneContato,
+            correlacaoPaciente,
+            cepPaciente,
+            cepCuidador,
             aceitarTermo,
-    };
+        };
         await saveCuidador(cuidador);
 
         onSuccess();
-    }   
+    } 
 
-    const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out";
-    const labelClass = "block text-sm font-medium text-gray-700 mb-2";
-    const errorClass = "text-red-500 text-xs mt-1";
+    const inputClass = "w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 transition duration-200 ease-in-out shadow-sm text-base";
+    const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
+    const errorClass = "text-red-600 text-xs mt-1 font-medium";
+    const sectionTitleClass = "text-xl font-bold text-indigo-700 border-b pb-2 mb-4";
 
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
-            className="bg-white p-8 rounded-xl shadow-2xl space-y-6 max-w-4xl mx-auto border border-indigo-100"
+            className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl space-y-8 max-w-full md:max-w-5xl mx-auto border border-indigo-200 font-inter"
         >
-            <h2 className="text-3xl font-bold text-indigo-700 mb-6 border-b pb-3">Cadastro de Cuidador</h2>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+                {`
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+                    .font-inter {
+                        font-family: 'Inter', sans-serif;
+                    }
+                `}
+            </style>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <h2 className="text-4xl font-extrabold text-indigo-800 text-center mb-8">
+                Cadastro de Cuidador
+            </h2>
+
+            <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
+                <h3 className={sectionTitleClass}>1. Dados Pessoais, Contato e Endereço</h3>
                 
-                <div>
-                    <label htmlFor="nome" className={labelClass}>Nome Completo:</label>
-                    <input type="text" id="nome" {...register("nome")} className={inputClass} />
-                    {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <div className="md:col-span-2">
+                        <label htmlFor="nome" className={labelClass}>Nome Completo:</label>
+                        <input type="text" id="nome" {...register("nome")} className={inputClass} placeholder="Seu nome completo" />
+                        {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
+                    </div>
 
-                <div>
-                    <label htmlFor="idade" className={labelClass}>Idade:</label>
-                    <input type="number" id="idade" {...register("idade", { valueAsNumber: true })} className={inputClass} />
-                    {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
-                </div>
+                    <div>
+                        <label htmlFor="cpfCuidador" className={labelClass}>cpfCuidador do Cuidador:</label>
+                        <input type="text" id="cpfCuidador" {...register("cpfCuidador")} placeholder="000.000.000-00" className={inputClass} />
+                        {errors.cpfCuidador && <p className={errorClass}>{errors.cpfCuidador.message}</p>}
+                    </div>
 
-                <div>
-                    <label htmlFor="cpf" className={labelClass}>CPF do Cuidador:</label>
-                    <input type="text" id="cpf" {...register("cpf")} placeholder="XXX.XXX.XXX-XX" className={inputClass} />
-                    {errors.cpf && <p className={errorClass}>{errors.cpf.message}</p>}
-                </div>
+                    <div>
+                        <label htmlFor="idade" className={labelClass}>Idade:</label>
+                        <input type="number" id="idade" {...register("idade", { valueAsNumber: true })} className={inputClass} placeholder="Ex: 35" />
+                        {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
+                    </div>
+                    
+                    <div>
+                        <label htmlFor="telefoneContato" className={labelClass}>telefoneContato para Contato:</label>
+                        <input type="tel" id="telefoneContato" {...register("telefoneContato")} placeholder="(99) 99999-9999" className={inputClass} />
+                        {errors.telefoneContato && <p className={errorClass}>{errors.telefoneContato.message}</p>}
+                    </div>
 
-                <div>
-                    <label htmlFor="cpfPaciente" className={labelClass}>CPF do Paciente:</label>
-                    <input type="text" id="cpfPaciente" {...register("cpfPaciente")} placeholder="XXX.XXX.XXX-XX" className={inputClass} />
-                    {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
+                    <div>
+                        <label htmlFor="cepCuidador" className={labelClass}>CEP da Sua Residência:</label>
+                        <input type="text" id="cepCuidador" {...register("cepCuidador")} placeholder="00000-000" className={inputClass} />
+                        {errors.cepCuidador && <p className={errorClass}>{errors.cepCuidador.message}</p>}
+                    </div>
                 </div>
-
-                <div>
-                    <label htmlFor="email" className={labelClass}>Email do Cuidador:</label>
-                    <input type="email" id="email" {...register("email")} className={inputClass} />
-                    {errors.email && <p className={errorClass}>{errors.email.message}</p>}
-                </div>
-
-                <div>
-                    <label htmlFor="senha" className={labelClass}>Senha do Cuidador:</label>
-                    <input type="password" id="senha" {...register("senha")} className={inputClass} />
-                    {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
-                </div>
-
-                <div>
-                    <label htmlFor="parentesco" className={labelClass}>Relação com o Paciente:</label>
-                    <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} />
-                    {errors.parentesco && <p className={errorClass}>{errors.parentesco.message}</p>}
-                </div>
-
-                <div>
-                    <label htmlFor="telefone" className={labelClass}>Telefone para Contato:</label>
-                    <input type="tel" id="telefone" {...register("telefone")} placeholder="(XX) XXXXX-XXXX" className={inputClass} />
-                    {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
-                </div>
-
-                {/* <div>
-                    <label htmlFor="residencia" className={labelClass}>Comprovante de Residência (Foto):</label>
-                    <input type="file" id="residencia" {...register("residencia")} accept="image/*" className={inputClass} />
-                    {errors.residencia && <p className={errorClass}>{errors.residencia.message}</p>}
-                </div>
-                
-                <div>
-                    <label htmlFor="foto" className={labelClass}>Foto 3x4:</label>
-                    <input type="file" id="foto" {...register("foto")} accept="image/*" className={inputClass} />
-                    {errors.foto && <p className={errorClass}>{errors.foto.message}</p>}
-                </div> */}
             </div>
 
-            <div className="mt-8 border-t pt-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Termo de Compromisso do Cuidador</h3>
-                <button
-                    type="button"
-                    onClick={onTermoOpen}
-                    className="hover:cursor-pointer bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
-                >
-                    Ler Termo de Compromisso
-                </button>
-                <div className="mt-4 flex items-center">
-                    <input
-                        type="checkbox"
-                        id="aceitarTermoCuidador"
-                        {...register("aceitarTermo")}
-                        className="mr-3 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                    />
-                    <label htmlFor="aceitarTermoCuidador" className="text-sm text-gray-700 select-none">
-                        Declaro que li e concordo com o Termo de Compromisso.
-                    </label>
+            <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
+                <h3 className={sectionTitleClass}>2. Dados de Acesso à Plataforma</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <div>
+                        <label htmlFor="email" className={labelClass}>Email (Será seu Login):</label>
+                        <input type="email" id="email" {...register("email")} className={inputClass} placeholder="seu.email@exemplo.com" />
+                        {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="senha" className={labelClass}>Senha:</label>
+                        <input type="password" id="senha" {...register("senha")} className={inputClass} placeholder="Mínimo 6 caracteres" />
+                        {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
+                    </div>
                 </div>
-                {errors.aceitarTermo && <p className={errorClass}>{errors.aceitarTermo.message}</p>}
+            </div>
+
+            <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
+                <h3 className={sectionTitleClass}>3. Paciente Associado</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <div>
+                        <label htmlFor="cpfPaciente" className={labelClass}>cpfCuidador do Paciente Cuidado:</label>
+                        <input type="text" id="cpfPaciente" {...register("cpfPaciente")} placeholder="000.000.000-00" className={inputClass} />
+                        {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="cepPaciente" className={labelClass}>CEP da Residência do Paciente:</label>
+                        <input type="text" id="cepPaciente" {...register("cepPaciente")} placeholder="00000-000" className={inputClass} />
+                        {errors.cepPaciente && <p className={errorClass}>{errors.cepPaciente.message}</p>}
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                        <label htmlFor="correlacaoPaciente" className={labelClass}>Relação com o Paciente (Ex: Filho, Cônjuge, Amigo):</label>
+                        <input type="text" id="correlacaoPaciente" {...register("correlacaoPaciente")} className={inputClass} placeholder="Qual seu grau de correlacaoPaciente ou relação?" />
+                        {errors.correlacaoPaciente && <p className={errorClass}>{errors.correlacaoPaciente.message}</p>}
+                    </div>
+                </div>
+            </div>
+
+
+            <div className="pt-6 border-t border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">4. Termo de Compromisso</h3>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <button
+                        type="button"
+                        onClick={onTermoOpen}
+                        className="w-full sm:w-auto flex-shrink-0 bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow-md transform hover:scale-[1.02] text-center"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                        Ler Termo de Compromisso
+                    </button>
+                    
+                    <div className="flex items-center flex-shrink-0"> 
+                        <input
+                            type="checkbox"
+                            id="aceitarTermoCuidador"
+                            {...register("aceitarTermo")}
+                            className="mr-3 h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer flex-shrink-0"
+                        />
+                        <label htmlFor="aceitarTermoCuidador" className="text-sm text-gray-700 select-none font-medium cursor-pointer">
+                            Declaro que li e concordo.
+                        </label>
+                    </div>
+                </div>
+                {errors.aceitarTermo && <p className={`${errorClass} mt-2 text-sm`}>{errors.aceitarTermo.message}</p>}
             </div>
 
             <button
                 type="submit"
-                className="hover:cursor-pointer w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-lg shadow-xl"
+                className="hover:cursor-pointer w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-all text-xl shadow-xl hover:shadow-2xl tracking-wide transform hover:-translate-y-0.5"
             >
-                Enviar Cadastro de Cuidador
+                Finalizar Cadastro de Cuidador
             </button>
         </form>
     );

@@ -44,7 +44,7 @@ export function Login() {
 
         login(user.email);
 
-        navigate((user as Cuidador).parentesco ? '/perfil-cuidador' : '/menu-paciente');
+        navigate((user as Cuidador).correlacaoPaciente ? '/perfil-cuidador' : '/perfil-paciente');
     }
     return (
         <Layout>

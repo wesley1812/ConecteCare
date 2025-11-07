@@ -16,56 +16,20 @@ export interface TermoProps {
 }
 
 export interface VantagemProps {
-    title: string;
-    description: string;
-    icon: string;
+  title: string;
+  description: string;
+  icon: string;
 }
-
 
 export interface DepoimentoProps {
-    text: string;
-    author: string;
+  text: string;
+  author: string;
 }
-
 
 export interface ContactInfo {
   title: string;
   content: string;
   icon: string;
-}
-
-export interface Patient {
-  id: string;
-  name: string;
-  age: number;
-  medicalHistory: string;
-}
-
-export interface HealthIndicatorType {
-  name: string;
-  value: string;
-  percentage: number;
-  color: string;
-}
-
-export interface AppointmentType {
-  id: number;
-  type: string;
-  date: string;
-  time: string;
-  cpfPaciente: string
-}
-
-export interface Appointment {
-  id: number;
-  type: string;
-  date: string;
-  time: string;
-}
-
-export interface AgendamentoConsultaProps {
-  appointment: Appointment;
-  onContact: (appointmentId: number) => void;
 }
 
 export interface TeamMember {
@@ -79,17 +43,6 @@ export interface TeamMember {
 
 export interface TeamCardProps {
   member: TeamMember;
-}
-
-export interface IndicadorSaude {
-  name: string;
-  value: string;
-  percentage: number;
-  color: string;
-}
-
-export interface IndicadorSaudeProps {
-  indicador: IndicadorSaude;
 }
 
 export interface HeaderProps {
@@ -108,28 +61,76 @@ export interface TeleconsultaData {
 }
 
 export interface Cuidador {
-    id: string;
-    nome: string;
-    idade: number;
-    cpf: string;
-    cpfPaciente: string;
-    email: string;
-    senha: string;
-    telefone: string;
-    parentesco: string;
-    // residencia: File;
-    // foto: File;
-    aceitarTermo: boolean;
-  };
+  id: string;
+  nome: string;
+  idade: number;
+  cpfCuidador: string;
+  cpfPaciente: string;
+  cepCuidador: string;
+  cepPaciente: string;
+  email: string;
+  senha: string;
+  telefoneContato: string;
+  correlacaoPaciente: string;
+  // residencia: File;
+  // foto: File;
+  aceitarTermo: boolean;
+};
 
 export interface Paciente {
-    id: string;
-    nome: string;
-    idade: number;
-    cpfPaciente: string;
-    email: string;
-    senha: string;
-    telefone: string;
-    patologia: string;
-    aceitarTermo: boolean;
-  };
+  id: string;
+  nome: string;
+  idade: number;
+  cpfPaciente: string;
+  cepPaciente: string;
+  email: string;
+  senha: string;
+  telefoneContato: string;
+  patologia: string;
+  aceitarTermo: boolean;
+};
+
+export interface MedicamentoType {
+  id: number;
+  nome: string;
+  dosagem: string;
+  frequencia: string;
+  proximaDose: string;
+  horario: string;
+  ativo: boolean;
+}
+
+export interface Consulta {
+  id: string;
+  type: string;
+  date: string;
+  time: string;
+  cpfPaciente: string;
+  doctorName: string;
+  doctorSpecialty: string;
+}
+
+export interface Medico {
+  id: string;
+  nome: string;
+  especialidade: string;
+}
+
+export interface HealthIndicatorType {
+  name: string;
+  value: string;
+  percentage: number;
+  color: string;
+  icon: React.ReactNode
+}
+
+export interface IndicadorSaudeCard {
+  name: string;
+  value: string;
+  percentage: number;
+  color: string;
+}
+
+export interface IndicadorSaudeCardProps {
+  indicador: IndicadorSaudeCard;
+}

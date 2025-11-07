@@ -81,3 +81,5 @@ export function Termo({ isOpen, onClose, children }: TermoProps) {
         </div>
     );
 };
+
+

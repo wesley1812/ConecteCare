@@ -2,7 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useCadastro } from "../context/cadastro-context.tsx";
 import { type FormSchemaPaciente, formSchemaPaciente } from "../schemas/forms-schema";
-import type { Paciente } from "../types/interfaces";
+import type { Paciente } from "../types/interfaces"; 
+
 
 interface FormularioPacienteProps {
     onTermoOpen: () => void;
@@ -10,8 +11,7 @@ interface FormularioPacienteProps {
 }
 
 export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacienteProps) {
-    const { savePaciente, isCpfPacienteCadastrado } = useCadastro();
-
+    const { savePaciente, iscpfPacienteCadastrado } = useCadastro();
     
     const {
         register,
@@ -19,7 +19,8 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
         formState: { errors },
         setError,
     } = useForm<FormSchemaPaciente>({
-        resolver: zodResolver(formSchemaPaciente)
+        resolver: zodResolver(formSchemaPaciente),
+        defaultValues: { aceitarTermo: false }
     });
 
     async function onSubmit({
@@ -28,17 +29,20 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
         cpfPaciente,
         email,
         senha,
-        telefone,
+        telefoneContato,
         patologia,
-        aceitarTermo
+        aceitarTermo,
+        cepPaciente
     }: FormSchemaPaciente) : Promise<void> {
-        if (isCpfPacienteCadastrado(cpfPaciente)) {
+        if (iscpfPacienteCadastrado(cpfPaciente)) {
             setError("cpfPaciente", {
                 type: "manual",
-                message: "Este CPF já está cadastrado como paciente.",
+                message: "Este cpfCuidador já está cadastrado como paciente.",
             });
-            return; // Interrompe o processo de cadastro
+            return; 
         }
+        
+        
         const paciente: Paciente = {
             id: crypto.randomUUID(),
             nome,
@@ -46,8 +50,9 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
             cpfPaciente,
             email,
             senha,
-            telefone,
+            telefoneContato,
             patologia,
+            cepPaciente,
             aceitarTermo
         };
         await savePaciente(paciente);
@@ -55,89 +60,126 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
         onSuccess();
     }
 
-    const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-150 ease-in-out";
-    const labelClass = "block text-sm font-medium text-gray-700 mb-2";
-    const errorClass = "text-red-500 text-xs mt-1";
+    const inputClass = "w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 transition duration-200 ease-in-out shadow-sm text-base";
+    const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
+    const errorClass = "text-red-600 text-xs mt-1 font-medium";
+    const sectionTitleClass = "text-xl font-bold text-teal-700 border-b pb-2 mb-4";
 
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
-            className="bg-white p-8 rounded-xl shadow-2xl space-y-6 max-w-4xl mx-auto border border-teal-100"
+            className="bg-white p-6 md:p-10 rounded-2xl shadow-2xl space-y-8 max-w-full md:max-w-5xl mx-auto border border-teal-200 font-inter"
         >
-            <h2 className="text-3xl font-bold text-teal-700 mb-6 border-b pb-3">Cadastro de Paciente</h2>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+                {`
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+                    .font-inter {
+                        font-family: 'Inter', sans-serif;
+                    }
+                `}
+            </style>
+            
+            <h2 className="text-4xl font-extrabold text-teal-800 text-center mb-8">
+                Cadastro de Paciente
+            </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label htmlFor="paciente-nome" className={labelClass}>Nome Completo:</label>
-                    <input type="text" id="paciente-nome" {...register("nome")} className={inputClass} />
-                    {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
-                </div>
+            <div className="p-5 border border-gray-100 rounded-xl bg-teal-50/50 space-y-4">
+                <h3 className={sectionTitleClass}>1. Dados Pessoais e Contato</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <div className="md:col-span-2">
+                        <label htmlFor="paciente-nome" className={labelClass}>Nome Completo do Paciente:</label>
+                        <input type="text" id="paciente-nome" {...register("nome")} className={inputClass} placeholder="Nome completo" />
+                        {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
+                    </div>
 
-                <div>
-                    <label htmlFor="paciente-idade" className={labelClass}>Idade:</label>
-                    <input type="number" id="paciente-idade" {...register("idade", { valueAsNumber: true })} className={inputClass} />
-                    {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
-                </div>
+                    <div>
+                        <label htmlFor="paciente-cpfCuidador" className={labelClass}>cpfCuidador do Paciente:</label>
+                        <input type="text" id="paciente-cpfCuidador" {...register("cpfPaciente")} placeholder="000.000.000-00" className={inputClass} />
+                        {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
+                    </div>
 
-                <div>
-                    <label htmlFor="paciente-cpf" className={labelClass}>CPF:</label>
-                    <input type="text" id="paciente-cpf" {...register("cpfPaciente")} placeholder="XXX.XXX.XXX-XX" className={inputClass} />
-                    {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
-                </div>
+                    <div>
+                        <label htmlFor="paciente-idade" className={labelClass}>Idade:</label>
+                        <input type="number" id="paciente-idade" {...register("idade", { valueAsNumber: true })} className={inputClass} placeholder="Ex: 72" />
+                        {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
+                    </div>
+                    
+                    <div>
+                        <label htmlFor="paciente-telefoneContato" className={labelClass}>telefoneContato para Contato:</label>
+                        <input type="tel" id="paciente-telefoneContato" {...register("telefoneContato")} placeholder="(99) 99999-9999" className={inputClass} />
+                        {errors.telefoneContato && <p className={errorClass}>{errors.telefoneContato.message}</p>}
+                    </div>
 
-                <div>
-                    <label htmlFor="paciente-email" className={labelClass}>Email:</label>
-                    <input type="email" id="paciente-email" {...register("email")} className={inputClass} />
-                    {errors.email && <p className={errorClass}>{errors.email.message}</p>}
-                </div>
-
-                <div>
-                    <label htmlFor="paciente-senha" className={labelClass}>Senha:</label>
-                    <input type="password" id="paciente-senha" {...register("senha")} className={inputClass} />
-                    {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
-                </div>
-
-                <div>
-                    <label htmlFor="paciente-telefone" className={labelClass}>Telefone:</label>
-                    <input type="tel" id="paciente-telefone" {...register("telefone")} placeholder="(XX) XXXXX-XXXX" className={inputClass} />
-                    {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
-                </div>
-
-                <div>
-                    <label htmlFor="paciente-patologia" className={labelClass}>Patologia:</label>
-                    <input type="text" id="paciente-patologia" {...register("patologia")} className={inputClass} />
-                    {errors.patologia && <p className={errorClass}>{errors.patologia.message}</p>}
+                    <div>
+                        <label htmlFor="paciente-cep" className={labelClass}>CEP da Residência:</label>
+                        <input type="text" id="paciente-cep" {...register("cepPaciente")} placeholder="00000-000" className={inputClass} />
+                        {errors.cepPaciente && <p className={errorClass}>{errors.cepPaciente.message}</p>}
+                    </div>
                 </div>
             </div>
 
-            <div className="mt-8 border-t pt-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Termo de Consentimento do Paciente</h3>
-                <button
-                    type="button"
-                    onClick={onTermoOpen}
-                    className="hover:cursor-pointer bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-md"
-                >
-                    Ler Termo de Consentimento
-                </button>
-                <div className="mt-4 flex items-center">
-                    <input
-                        type="checkbox"
-                        id="aceitarTermoPaciente"
-                        {...register("aceitarTermo")}
-                        className="mr-3 h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                    />
-                    <label htmlFor="aceitarTermoPaciente" className="text-sm text-gray-700 select-none">
-                        Declaro que li e concordo com o Termo de Consentimento.
-                    </label>
+            <div className="p-5 border border-gray-100 rounded-xl bg-teal-50/50 space-y-4">
+                <h3 className={sectionTitleClass}>2. Dados Clínicos e de Acesso à Plataforma</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <div className="md:col-span-2">
+                        <label htmlFor="paciente-patologia" className={labelClass}>Patologia Principal ou Condição Crônica:</label>
+                        <input type="text" id="paciente-patologia" {...register("patologia")} className={inputClass} placeholder="Ex: Doença de Alzheimer, Diabetes, Hipertensão" />
+                        {errors.patologia && <p className={errorClass}>{errors.patologia.message}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="paciente-email" className={labelClass}>Email (Será o Login do Paciente):</label>
+                        <input type="email" id="paciente-email" {...register("email")} className={inputClass} placeholder="email.de.acesso@exemplo.com" />
+                        {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+                    </div>
+
+                    <div>
+                        <label htmlFor="paciente-senha" className={labelClass}>Senha:</label>
+                        <input type="password" id="paciente-senha" {...register("senha")} className={inputClass} placeholder="Mínimo 6 caracteres" />
+                        {errors.senha && <p className={errorClass}>{errors.senha.message}</p>}
+                    </div>
                 </div>
-                {errors.aceitarTermo && <p className={errorClass}>{errors.aceitarTermo.message}</p>}
+            </div>
+
+            <div className="pt-6 border-t border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">3. Termo de Consentimento</h3>
+                
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <button
+                        type="button"
+                        onClick={onTermoOpen}
+                        className="w-full sm:w-auto flex-shrink-0 bg-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-teal-700 transition-colors shadow-md transform hover:scale-[1.02] text-center"
+                    >
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                         </svg>
+                        Ler Termo de Consentimento
+                    </button>
+                    
+                    <div className="flex items-center flex-shrink-0"> 
+                        <input
+                            type="checkbox"
+                            id="aceitarTermoPaciente"
+                            {...register("aceitarTermo")}
+                            className="mr-3 h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer flex-shrink-0"
+                        />
+                        <label htmlFor="aceitarTermoPaciente" className="text-sm text-gray-700 select-none font-medium cursor-pointer">
+                            Declaro que li e concordo.
+                        </label>
+                    </div>
+                </div>
+                {errors.aceitarTermo && <p className={`${errorClass} mt-2 text-sm`}>{errors.aceitarTermo.message}</p>}
             </div>
 
             <button
                 type="submit"
-                className="hover:cursor-pointer w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-lg shadow-xl"
+                className="hover:cursor-pointer w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-all text-xl shadow-xl hover:shadow-2xl tracking-wide transform hover:-translate-y-0.5"
             >
-                Enviar Cadastro de Paciente
+                Finalizar Cadastro de Paciente
             </button>
         </form>
     );

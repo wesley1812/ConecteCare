@@ -14,11 +14,12 @@ interface CadastroContextProps {
   cuidador: Cuidador[]
   savePaciente: (paciente: Paciente) => void;
   removePaciente: (id: string) => void;
+  updatePaciente: (paciente: Paciente) => void; // <-- ADICIONADO
   saveCuidador: (cuidador: Cuidador) => void;
   removeCuidador: (id: string) => void;
   updateCuidador: (cuidador: Cuidador) => void; // <-- ADICIONADO
-  isCpfCuidadorCadastrado: (cpf: string) => boolean;
-  isCpfPacienteCadastrado: (cpf: string) => boolean;
+  iscpfCuidadorCadastrado: (cpfCuidador: string) => boolean;
+  iscpfPacienteCadastrado: (cpfCuidador: string) => boolean;
 }
 
 const CadastroContext = createContext<CadastroContextProps | null>(null);
@@ -59,6 +60,22 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
 
     await fetchPacientes();
   }, [fetchPacientes]);
+
+  const updatePaciente = useCallback(async (paciente: Paciente) => {
+    // A rota padrão REST para update é PUT ou PATCH com o ID
+    await fetch(`${API_CONECTE_CARE}/pacientes/${paciente.id}`, {
+      method: "PUT", 
+      body: JSON.stringify(paciente),
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+
+    // Re-busca os dados para manter o contexto atualizado
+    await fetchPacientes();
+  }, [fetchPacientes]);
+  // --- FIM DA ADIÇÃO ---
+
 
   const fetchCuidador = useCallback(async () => {
     const response = await fetch(`${API_CONECTE_CARE}/cuidador`, {
@@ -118,12 +135,12 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
     fetchCuidador()
   }, [fetchCuidador]);
 
-  const isCpfCuidadorCadastrado = useCallback((cpf: string): boolean => {
-    return cuidador.some(c => c.cpf === cpf);
+  const iscpfCuidadorCadastrado = useCallback((cpfCuidador: string): boolean => {
+    return cuidador.some(c => c.cpfCuidador === cpfCuidador);
   }, [cuidador]); //
 
-  const isCpfPacienteCadastrado = useCallback((cpf: string): boolean => {
-    return paciente.some(p => p.cpfPaciente === cpf);
+  const iscpfPacienteCadastrado = useCallback((cpfCuidador: string): boolean => {
+    return paciente.some(p => p.cpfPaciente === cpfCuidador);
   }, [paciente]); //
 
 
@@ -133,11 +150,12 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
         paciente,
         savePaciente,
         removePaciente,
-        isCpfPacienteCadastrado,
+        iscpfPacienteCadastrado,
+        updatePaciente,
         cuidador,
         saveCuidador,
         removeCuidador,
-        isCpfCuidadorCadastrado,
+        iscpfCuidadorCadastrado,
         updateCuidador, 
       }}
     >

@@ -29,8 +29,8 @@ export function FAQ() {
       answer: "Na tela de login, clique na opção 'Esqueci minha senha'. Informe o seu e-mail cadastrado e enviaremos um link seguro para que você possa redefinir uma nova senha."
     },
     {
-      question: "Há algum número de telefone para suporte técnico?",
-      answer: "Sim! Para suporte imediato, você pode entrar em contato através do telefone: +55 11 3053-5131 ou utilizar nosso canal de atendimento via WhatsApp, ambos disponíveis na nossa página de Contato."
+      question: "Há algum número de telefoneContato para suporte técnico?",
+      answer: "Sim! Para suporte imediato, você pode entrar em contato através do telefoneContato: +55 11 3053-5131 ou utilizar nosso canal de atendimento via WhatsApp, ambos disponíveis na nossa página de Contato."
     },
     {
       question: "A teleconsulta é segura? Meus dados estão protegidos?",

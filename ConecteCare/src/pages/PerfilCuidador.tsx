@@ -86,7 +86,7 @@
       return (
         <Layout>
           <div className="py-20 bg-gray-100 min-h-screen flex items-center justify-center">
-            <p className="text-lg text-gray-600">Carregando dados do usuário...</p>
+            <p className="text-lg text-gray-600">Paciente vinculado sem cadastro ativo</p>
           </div>
         </Layout>
       );
@@ -131,13 +131,9 @@
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-              
-              {/* *
-                * ALTERAÇÃO FEITA AQUI 
-                *
-              */}
+        
               <Redirecionador
-                to="/perfil-cuidador/atualizar-perfil-cuidador" // Rota atualizada para a nova página
+                to="/perfil-cuidador/atualizar-perfil-cuidador"
                 icon={<UserCircleIcon />}
                 title="Meu Perfil"
                 description="Atualize seus dados pessoais e informações de contato."
@@ -145,7 +141,6 @@
               />
 
               <Redirecionador
-                // LINK DINÂMICO! Baseado no ID do paciente encontrado
                 to={`/dashboard/${pacienteVinculado.id}`} //
                 icon={<HeartIcon />}
                 title="Paciente Vinculado"
@@ -154,17 +149,17 @@
               />
 
               <Redirecionador
-                to="/teleconsulta/123" // ID da consulta (ainda mocado)
+                to="/teleconsulta"
                 icon={<VideoCameraIcon />}
-                title="Acessar Teleconsulta"
-                description="Entre na sala de consulta virtual para o próximo agendamento."
+                title="Acessar Guia Teleconsulta"
+                description="Entre na sala de consulta virtual para orientações da consulta."
                 colorRing="focus:ring-blue-400"
               />
 
               <Redirecionador
-                to="/processo" // Rota fictícia
+                to={`/minhas-consultas/${pacienteVinculado.id}`}
                 icon={<ClipboardListIcon />}
-                title="Etapas do Processo"
+                title="Organizar Consultas"
                 description="Entenda como funciona o agendamento e a consulta."
                 colorRing="focus:ring-gray-400"
               />
