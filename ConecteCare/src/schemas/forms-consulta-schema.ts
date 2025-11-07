@@ -20,7 +20,6 @@ export const formSchemaRemarcar  = z.object({
     doctorName: z
         .string()
         .min(1, "Selecione um médico disponível."),
-
     especialidade: z
         .string()
         .min(1, "Especialidade é obrigatória. Selecione uma opção"),

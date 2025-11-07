@@ -66,7 +66,6 @@ export function MinhasConsultas() {
         
         setIsLoadingPatient(false);
         
-        // Limpa a mensagem ao carregar novas consultas/pacientes
         setMessage(null);
 
     }, [emailUserLogado, listaPacientes, pacienteIDURL, getConsultasPorPaciente]);

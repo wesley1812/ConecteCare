@@ -13,7 +13,7 @@ export const CardPacienteInfo = ({ paciente }: { paciente: Paciente }) => (
                     {paciente.nome}
                 </h2>
                 <p className="text-sm text-gray-500">
-                    cpfCuidador: {paciente.cpfPaciente} | {paciente.idade} anos
+                    CPF: {paciente.cpfPaciente} | {paciente.idade} anos
                 </p>
             </div>
         </div>
