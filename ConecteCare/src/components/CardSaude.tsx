@@ -1,6 +1,6 @@
-import type { IndicadorSaudeProps } from "../types/interfaces";
+import type { IndicadorSaudeCardProps } from "../types/interfaces";
 
-export function CardIndicadorSaude({ indicador }: IndicadorSaudeProps) {
+export function CardIndicadorSaude({ indicador }: IndicadorSaudeCardProps) {
   return (
     <div className="bg-white p-4 rounded-lg shadow-md text-center">
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{indicador.name}</h3>

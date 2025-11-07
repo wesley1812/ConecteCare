@@ -123,3 +123,14 @@ export interface HealthIndicatorType {
   color: string;
   icon: React.ReactNode
 }
+
+export interface IndicadorSaudeCard {
+  name: string;
+  value: string;
+  percentage: number;
+  color: string;
+}
+
+export interface IndicadorSaudeCardProps {
+  indicador: IndicadorSaudeCard;
+}
