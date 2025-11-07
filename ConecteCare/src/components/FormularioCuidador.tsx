@@ -98,7 +98,7 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                     </div>
 
                     <div>
-                        <label htmlFor="cpfCuidador" className={labelClass}>cpfCuidador do Cuidador:</label>
+                        <label htmlFor="cpfCuidador" className={labelClass}>CPF do Cuidador:</label>
                         <input type="text" id="cpfCuidador" {...register("cpfCuidador")} placeholder="000.000.000-00" className={inputClass} />
                         {errors.cpfCuidador && <p className={errorClass}>{errors.cpfCuidador.message}</p>}
                     </div>
@@ -147,7 +147,7 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
                     <div>
-                        <label htmlFor="cpfPaciente" className={labelClass}>cpfCuidador do Paciente Cuidado:</label>
+                        <label htmlFor="cpfPaciente" className={labelClass}>CPF do Paciente:</label>
                         <input type="text" id="cpfPaciente" {...register("cpfPaciente")} placeholder="000.000.000-00" className={inputClass} />
                         {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
                     </div>

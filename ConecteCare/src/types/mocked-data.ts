@@ -21,3 +21,21 @@ export const MEDICOS_DISPONIVEIS = [
     'Drª. Lúcia Mendes',
     'Drª Beatriz Claudino Rosa'
 ];
+
+export const PATOLOGIAS_EXISTENTES = [
+    "Câncer de Mama",
+    "Câncer de Próstata",
+    "Câncer de Pulmão de Células Não Pequenas",
+    "Câncer Colorretal",
+    "Câncer de Pele(Melanoma)",
+    "Câncer de Pele(Não Melanoma)",
+    "Câncer de Bexiga",
+    "Linfoma Não Hodgkin",
+    "Câncer do Rim",
+    "Leucemia Mieloide Aguda(LMA)",
+    "Câncer de Pâncreas",
+    "Câncer de Tireoide",
+    "Câncer de Endométrio",
+    "Câncer de Estômago",
+    "Câncer de Ovário"
+]

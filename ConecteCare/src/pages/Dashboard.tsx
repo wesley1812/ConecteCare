@@ -60,6 +60,7 @@ export function Dashboard() {
           console.log("Acesso como Cuidador autorizado.");
           temPermissao = true;
           pacienteParaMostrar = pacienteEncontrado;
+          setAppointments(getConsultasPorPaciente(pacienteEncontrado.cpfPaciente));
         } else {
           console.log("Acesso como Cuidador NEGADO. Paciente não vinculado.");
           setError("Você não tem permissão para ver os dados deste paciente.");

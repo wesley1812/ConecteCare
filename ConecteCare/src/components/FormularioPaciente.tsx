@@ -2,7 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useCadastro } from "../context/cadastro-context.tsx";
 import { type FormSchemaPaciente, formSchemaPaciente } from "../schemas/forms-schema";
-import type { Paciente } from "../types/interfaces"; 
+import type { Paciente } from "../types/interfaces";
+import { PATOLOGIAS_EXISTENTES } from "../types/mocked-data.ts";
 
 
 interface FormularioPacienteProps {
@@ -12,7 +13,7 @@ interface FormularioPacienteProps {
 
 export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacienteProps) {
     const { savePaciente, iscpfPacienteCadastrado } = useCadastro();
-    
+
     const {
         register,
         handleSubmit,
@@ -33,16 +34,16 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
         patologia,
         aceitarTermo,
         cepPaciente
-    }: FormSchemaPaciente) : Promise<void> {
+    }: FormSchemaPaciente): Promise<void> {
         if (iscpfPacienteCadastrado(cpfPaciente)) {
             setError("cpfPaciente", {
                 type: "manual",
                 message: "Este cpfCuidador já está cadastrado como paciente.",
             });
-            return; 
+            return;
         }
-        
-        
+
+
         const paciente: Paciente = {
             id: crypto.randomUUID(),
             nome,
@@ -56,7 +57,7 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
             aceitarTermo
         };
         await savePaciente(paciente);
-        
+
         onSuccess();
     }
 
@@ -79,16 +80,16 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                     }
                 `}
             </style>
-            
+
             <h2 className="text-4xl font-extrabold text-teal-800 text-center mb-8">
                 Cadastro de Paciente
             </h2>
 
             <div className="p-5 border border-gray-100 rounded-xl bg-teal-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>1. Dados Pessoais e Contato</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    
+
                     <div className="md:col-span-2">
                         <label htmlFor="paciente-nome" className={labelClass}>Nome Completo do Paciente:</label>
                         <input type="text" id="paciente-nome" {...register("nome")} className={inputClass} placeholder="Nome completo" />
@@ -106,7 +107,7 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                         <input type="number" id="paciente-idade" {...register("idade", { valueAsNumber: true })} className={inputClass} placeholder="Ex: 72" />
                         {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
                     </div>
-                    
+
                     <div>
                         <label htmlFor="paciente-telefoneContato" className={labelClass}>telefoneContato para Contato:</label>
                         <input type="tel" id="paciente-telefoneContato" {...register("telefoneContato")} placeholder="(99) 99999-9999" className={inputClass} />
@@ -124,13 +125,17 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
             <div className="p-5 border border-gray-100 rounded-xl bg-teal-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>2. Dados Clínicos e de Acesso à Plataforma</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    
+
                     <div className="md:col-span-2">
                         <label htmlFor="paciente-patologia" className={labelClass}>Patologia Principal ou Condição Crônica:</label>
-                        <input type="text" id="paciente-patologia" {...register("patologia")} className={inputClass} placeholder="Ex: Doença de Alzheimer, Diabetes, Hipertensão" />
+                        <select id="patologia" {...register("patologia")} className={inputClass}>
+                            <option value="">Selecione uma Patologia</option>
+                            {PATOLOGIAS_EXISTENTES.map(esp => (
+                                <option key={esp} value={esp}>{esp}</option>
+                            ))}
+                        </select>
                         {errors.patologia && <p className={errorClass}>{errors.patologia.message}</p>}
                     </div>
-
                     <div>
                         <label htmlFor="paciente-email" className={labelClass}>Email (Será o Login do Paciente):</label>
                         <input type="email" id="paciente-email" {...register("email")} className={inputClass} placeholder="email.de.acesso@exemplo.com" />
@@ -147,22 +152,22 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
 
             <div className="pt-6 border-t border-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">3. Termo de Consentimento</h3>
-                
+
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <button
                         type="button"
                         onClick={onTermoOpen}
                         className="w-full sm:w-auto flex-shrink-0 bg-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-teal-700 transition-colors shadow-md transform hover:scale-[1.02] text-center"
                     >
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
-                             <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                         </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
                         Ler Termo de Consentimento
                     </button>
-                    
-                    <div className="flex items-center flex-shrink-0"> 
+
+                    <div className="flex items-center flex-shrink-0">
                         <input
-                            type="checkbox"
+                            type="checkbox" 
                             id="aceitarTermoPaciente"
                             {...register("aceitarTermo")}
                             className="mr-3 h-5 w-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer flex-shrink-0"
