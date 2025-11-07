@@ -11,7 +11,7 @@ interface FormularioPacienteProps {
 }
 
 export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacienteProps) {
-    const { savePaciente, isCpfPacienteCadastrado } = useCadastro();
+    const { savePaciente, iscpfPacienteCadastrado } = useCadastro();
     
     const {
         register,
@@ -29,15 +29,15 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
         cpfPaciente,
         email,
         senha,
-        telefone,
+        telefoneContato,
         patologia,
         aceitarTermo,
         cepPaciente
     }: FormSchemaPaciente) : Promise<void> {
-        if (isCpfPacienteCadastrado(cpfPaciente)) {
+        if (iscpfPacienteCadastrado(cpfPaciente)) {
             setError("cpfPaciente", {
                 type: "manual",
-                message: "Este CPF já está cadastrado como paciente.",
+                message: "Este cpfCuidador já está cadastrado como paciente.",
             });
             return; 
         }
@@ -50,7 +50,7 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
             cpfPaciente,
             email,
             senha,
-            telefone,
+            telefoneContato,
             patologia,
             cepPaciente,
             aceitarTermo
@@ -96,8 +96,8 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                     </div>
 
                     <div>
-                        <label htmlFor="paciente-cpf" className={labelClass}>CPF do Paciente:</label>
-                        <input type="text" id="paciente-cpf" {...register("cpfPaciente")} placeholder="000.000.000-00" className={inputClass} />
+                        <label htmlFor="paciente-cpfCuidador" className={labelClass}>cpfCuidador do Paciente:</label>
+                        <input type="text" id="paciente-cpfCuidador" {...register("cpfPaciente")} placeholder="000.000.000-00" className={inputClass} />
                         {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
                     </div>
 
@@ -108,9 +108,9 @@ export function FormularioPaciente({ onTermoOpen, onSuccess }: FormularioPacient
                     </div>
                     
                     <div>
-                        <label htmlFor="paciente-telefone" className={labelClass}>Telefone para Contato:</label>
-                        <input type="tel" id="paciente-telefone" {...register("telefone")} placeholder="(99) 99999-9999" className={inputClass} />
-                        {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
+                        <label htmlFor="paciente-telefoneContato" className={labelClass}>telefoneContato para Contato:</label>
+                        <input type="tel" id="paciente-telefoneContato" {...register("telefoneContato")} placeholder="(99) 99999-9999" className={inputClass} />
+                        {errors.telefoneContato && <p className={errorClass}>{errors.telefoneContato.message}</p>}
                     </div>
 
                     <div>

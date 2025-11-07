@@ -37,8 +37,8 @@ export function AtualizarPerfilCuidador() {
         reset({
           nome: foundCuidador.nome,
           idade: foundCuidador.idade,
-          telefone: foundCuidador.telefone,
-          parentesco: foundCuidador.parentesco,
+          telefoneContato: foundCuidador.telefoneContato,
+          correlacaoPaciente: foundCuidador.correlacaoPaciente,
           cpfPaciente: foundCuidador.cpfPaciente,
           cepCuidador: foundCuidador.cepCuidador,
           cepPaciente:foundCuidador.cepPaciente
@@ -138,10 +138,10 @@ export function AtualizarPerfilCuidador() {
                     <input type="email" id="email" value={cuidadorAtual.email} className={inputReadOnlyClass} readOnly/>
                   </div>
 
-                  {/* CPF (Não editável) */}
+                  {/* cpfCuidador (Não editável) */}
                   <div>
-                    <label htmlFor="cpf" className={labelClass}>CPF (Não editável)</label>
-                    <input type="text" id="cpf" value={cuidadorAtual.cpf} className={inputReadOnlyClass} readOnly />
+                    <label htmlFor="cpfCuidador" className={labelClass}>CPF Cuidador (Não editável)</label>
+                    <input type="text" id="cpfCuidador" value={cuidadorAtual.cpfCuidador} className={inputReadOnlyClass} readOnly />
                   </div>
                   
                   {/* Idade */}
@@ -151,11 +151,11 @@ export function AtualizarPerfilCuidador() {
                     {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
                   </div>
 
-                  {/* Telefone */}
+                  {/* telefoneContato */}
                   <div>
-                    <label htmlFor="telefone" className={labelClass}>Telefone:</label>
-                    <input type="tel" id="telefone" {...register("telefone")} className={inputClass} />
-                    {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
+                    <label htmlFor="telefoneContato" className={labelClass}>telefoneContato:</label>
+                    <input type="tel" id="telefoneContato" {...register("telefoneContato")} className={inputClass} />
+                    {errors.telefoneContato && <p className={errorClass}>{errors.telefoneContato.message}</p>}
                   </div>
                   
                   {/* CEP Cuidador */}
@@ -172,7 +172,7 @@ export function AtualizarPerfilCuidador() {
                 <h3 className={sectionTitleClass}>2. Dados do Paciente Associado</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* CPF Paciente */}
+                  {/* cpfCuidador Paciente */}
                   <div>
                     <label htmlFor="cpfPaciente" className={labelClass}>CPF Paciente</label>
                     <input type="text" id="cpfPaciente" {...register("cpfPaciente")} className={inputClass}/>
@@ -188,9 +188,9 @@ export function AtualizarPerfilCuidador() {
                   
                   {/* Relação com Paciente (Ocupa 2 colunas) */}
                   <div className="md:col-span-2">
-                    <label htmlFor="parentesco" className={labelClass}>Relação com Paciente:</label>
-                    <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} placeholder="Ex: Filho, Cônjuge, Amigo" />
-                    {errors.parentesco && <p className={errorClass}>{errors.parentesco.message}</p>}
+                    <label htmlFor="correlacaoPaciente" className={labelClass}>Relação com Paciente:</label>
+                    <input type="text" id="correlacaoPaciente" {...register("correlacaoPaciente")} className={inputClass} placeholder="Ex: Filho, Cônjuge, Amigo" />
+                    {errors.correlacaoPaciente && <p className={errorClass}>{errors.correlacaoPaciente.message}</p>}
                   </div>
                 </div>
               </div>

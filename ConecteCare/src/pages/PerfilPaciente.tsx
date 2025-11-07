@@ -124,7 +124,7 @@ export function PerfilPaciente() {
             <Redirecionador
               to={`/dashboard/${pacienteAtual.id}`} //
               icon={<HeartIcon />}
-              title="Minha Saúde"
+              title="Minha Saúde Geral"
               description={`Consultar dados de ${pacienteAtual.nome}.`}
               colorRing="focus:ring-cyan-400"
             />
@@ -138,7 +138,7 @@ export function PerfilPaciente() {
             />
 
             <Redirecionador
-              to="/minhas-consultas/"
+              to={`/minhas-consultas/${pacienteAtual.id}`}
               icon={<ClipboardListIcon/>}
               title="Organizar Consultas"
               description="Entenda como funciona o agendamento e a consulta."

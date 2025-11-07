@@ -10,7 +10,7 @@ interface FormularioCuidadorProps {
 }
 
 export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidadorProps) {
-    const { saveCuidador, isCpfCuidadorCadastrado } = useCadastro(); 
+    const { saveCuidador, iscpfCuidadorCadastrado } = useCadastro(); 
     
     const {
         register,
@@ -25,20 +25,20 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
     async function onSubmit({
       nome,
       idade,
-      cpf,
+      cpfCuidador,
       cpfPaciente,
       email,
       senha,
-      telefone,
-      parentesco,
+      telefoneContato,
+      correlacaoPaciente,
       cepPaciente,
       cepCuidador,
       aceitarTermo
     } : FormSchemaCuidador): Promise<void> {
-        if (isCpfCuidadorCadastrado(cpf)) {
-            setError("cpf", {
+        if (iscpfCuidadorCadastrado(cpfCuidador)) {
+            setError("cpfCuidador", {
                 type: "manual",
-                message: "Este CPF já está cadastrado como cuidador.",
+                message: "Este cpfCuidador já está cadastrado como cuidador.",
             });
             return;
         }
@@ -47,12 +47,12 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
             id: crypto.randomUUID(),
             nome,
             idade,
-            cpf,
+            cpfCuidador,
             cpfPaciente,
             email,
             senha,
-            telefone,
-            parentesco,
+            telefoneContato,
+            correlacaoPaciente,
             cepPaciente,
             cepCuidador,
             aceitarTermo,
@@ -98,9 +98,9 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                     </div>
 
                     <div>
-                        <label htmlFor="cpf" className={labelClass}>CPF do Cuidador:</label>
-                        <input type="text" id="cpf" {...register("cpf")} placeholder="000.000.000-00" className={inputClass} />
-                        {errors.cpf && <p className={errorClass}>{errors.cpf.message}</p>}
+                        <label htmlFor="cpfCuidador" className={labelClass}>cpfCuidador do Cuidador:</label>
+                        <input type="text" id="cpfCuidador" {...register("cpfCuidador")} placeholder="000.000.000-00" className={inputClass} />
+                        {errors.cpfCuidador && <p className={errorClass}>{errors.cpfCuidador.message}</p>}
                     </div>
 
                     <div>
@@ -110,9 +110,9 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                     </div>
                     
                     <div>
-                        <label htmlFor="telefone" className={labelClass}>Telefone para Contato:</label>
-                        <input type="tel" id="telefone" {...register("telefone")} placeholder="(99) 99999-9999" className={inputClass} />
-                        {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
+                        <label htmlFor="telefoneContato" className={labelClass}>telefoneContato para Contato:</label>
+                        <input type="tel" id="telefoneContato" {...register("telefoneContato")} placeholder="(99) 99999-9999" className={inputClass} />
+                        {errors.telefoneContato && <p className={errorClass}>{errors.telefoneContato.message}</p>}
                     </div>
 
                     <div>
@@ -147,7 +147,7 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
                     <div>
-                        <label htmlFor="cpfPaciente" className={labelClass}>CPF do Paciente Cuidado:</label>
+                        <label htmlFor="cpfPaciente" className={labelClass}>cpfCuidador do Paciente Cuidado:</label>
                         <input type="text" id="cpfPaciente" {...register("cpfPaciente")} placeholder="000.000.000-00" className={inputClass} />
                         {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
                     </div>
@@ -159,9 +159,9 @@ export function FormularioCuidador({ onTermoOpen, onSuccess }: FormularioCuidado
                     </div>
                     
                     <div className="md:col-span-2">
-                        <label htmlFor="parentesco" className={labelClass}>Relação com o Paciente (Ex: Filho, Cônjuge, Amigo):</label>
-                        <input type="text" id="parentesco" {...register("parentesco")} className={inputClass} placeholder="Qual seu grau de parentesco ou relação?" />
-                        {errors.parentesco && <p className={errorClass}>{errors.parentesco.message}</p>}
+                        <label htmlFor="correlacaoPaciente" className={labelClass}>Relação com o Paciente (Ex: Filho, Cônjuge, Amigo):</label>
+                        <input type="text" id="correlacaoPaciente" {...register("correlacaoPaciente")} className={inputClass} placeholder="Qual seu grau de correlacaoPaciente ou relação?" />
+                        {errors.correlacaoPaciente && <p className={errorClass}>{errors.correlacaoPaciente.message}</p>}
                     </div>
                 </div>
             </div>

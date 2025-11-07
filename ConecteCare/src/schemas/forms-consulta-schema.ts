@@ -1,22 +1,5 @@
 import { z } from "zod";
 
-export const ESPECIALIDADES_DISPONIVEIS = [
-    'Cardiologia', 
-    'Neurologia', 
-    'Psiquiatria', 
-    'Fisioterapia',
-    'Clínica Geral'
-];
-
-export const MEDICOS_DISPONIVEIS = [
-    'Dr. João Silva', 
-    'Drª. Ana Pereira', 
-    'Dr. Carlos Santos', 
-    'Drª. Lúcia Mendes',
-    'Drª Beatriz Claudino Rosa'
-];
-
-
 export const formSchemaAgendar  = z.object({
     doctorName: z
         .string()

@@ -18,8 +18,8 @@ interface CadastroContextProps {
   saveCuidador: (cuidador: Cuidador) => void;
   removeCuidador: (id: string) => void;
   updateCuidador: (cuidador: Cuidador) => void; // <-- ADICIONADO
-  isCpfCuidadorCadastrado: (cpf: string) => boolean;
-  isCpfPacienteCadastrado: (cpf: string) => boolean;
+  iscpfCuidadorCadastrado: (cpfCuidador: string) => boolean;
+  iscpfPacienteCadastrado: (cpfCuidador: string) => boolean;
 }
 
 const CadastroContext = createContext<CadastroContextProps | null>(null);
@@ -135,12 +135,12 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
     fetchCuidador()
   }, [fetchCuidador]);
 
-  const isCpfCuidadorCadastrado = useCallback((cpf: string): boolean => {
-    return cuidador.some(c => c.cpf === cpf);
+  const iscpfCuidadorCadastrado = useCallback((cpfCuidador: string): boolean => {
+    return cuidador.some(c => c.cpfCuidador === cpfCuidador);
   }, [cuidador]); //
 
-  const isCpfPacienteCadastrado = useCallback((cpf: string): boolean => {
-    return paciente.some(p => p.cpfPaciente === cpf);
+  const iscpfPacienteCadastrado = useCallback((cpfCuidador: string): boolean => {
+    return paciente.some(p => p.cpfPaciente === cpfCuidador);
   }, [paciente]); //
 
 
@@ -150,12 +150,12 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
         paciente,
         savePaciente,
         removePaciente,
-        isCpfPacienteCadastrado,
+        iscpfPacienteCadastrado,
         updatePaciente,
         cuidador,
         saveCuidador,
         removeCuidador,
-        isCpfCuidadorCadastrado,
+        iscpfCuidadorCadastrado,
         updateCuidador, 
       }}
     >

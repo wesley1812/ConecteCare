@@ -3,10 +3,10 @@ import { useForm } from "react-hook-form";
 import { useConsultas } from "../context/consultas-context";
 import {
     type FormSchemaAgendar, formSchemaAgendar,
-    ESPECIALIDADES_DISPONIVEIS, MEDICOS_DISPONIVEIS,
     type FormSchemaRemarcar, formSchemaRemarcar,
     type FormSchemaCancelar, formSchemaCancelar
 } from "../schemas/forms-consulta-schema";
+import {ESPECIALIDADES_DISPONIVEIS, MEDICOS_DISPONIVEIS} from "../types/mocked-data"
 import type { Consulta } from "../types/interfaces";
 
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out";

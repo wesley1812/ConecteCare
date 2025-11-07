@@ -31,8 +31,8 @@ function CardCuidador({ cuidador }: { cuidador: Cuidador }) {
         <h3 className="text-xl font-bold text-gray-800">{cuidador.nome}</h3>
       </div>
       <div className="space-y-2 text-gray-600 text-sm">
-        <p><strong className="font-medium text-gray-700">Parentesco:</strong> {cuidador.parentesco}</p>
-        <p><strong className="font-medium text-gray-700">Telefone:</strong> {cuidador.telefone}</p>
+        <p><strong className="font-medium text-gray-700">correlacaoPaciente:</strong> {cuidador.correlacaoPaciente}</p>
+        <p><strong className="font-medium text-gray-700">telefoneContato:</strong> {cuidador.telefoneContato}</p>
         <p><strong className="font-medium text-gray-700">Email:</strong> {cuidador.email}</p>
       </div>
     </div>
@@ -89,7 +89,7 @@ export function AtualizarPerfilPaciente() {
       reset({
         nome: foundPaciente.nome,
         idade: foundPaciente.idade,
-        telefone: foundPaciente.telefone,
+        telefoneContato: foundPaciente.telefoneContato,
         cpfPaciente: foundPaciente.cpfPaciente
       });
 
@@ -207,9 +207,9 @@ export function AtualizarPerfilPaciente() {
                     {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
                   </div>
                   <div>
-                    <label htmlFor="telefone" className={labelClass}>Telefone</label>
-                    <input type="tel" id="telefone" {...register("telefone")} className={inputClass} />
-                    {errors.telefone && <p className={errorClass}>{errors.telefone.message}</p>}
+                    <label htmlFor="telefoneContato" className={labelClass}>telefoneContato</label>
+                    <input type="tel" id="telefoneContato" {...register("telefoneContato")} className={inputClass} />
+                    {errors.telefoneContato && <p className={errorClass}>{errors.telefoneContato.message}</p>}
                   </div>
                 </div>
 
@@ -219,8 +219,8 @@ export function AtualizarPerfilPaciente() {
                 </div>
 
                 <div>
-                  <label htmlFor="cpf" className={labelClass}>CPF</label>
-                  <input type="text" id="cpf" value={pacienteAtual.cpfPaciente} className={`${inputClass} bg-gray-200 cursor-not-allowed`} readOnly />
+                  <label htmlFor="cpfPaciente" className={labelClass}>CPF</label>
+                  <input type="text" id="cpfPaciente" value={pacienteAtual.cpfPaciente} className={`${inputClass} bg-gray-200 cursor-not-allowed`} readOnly />
                 </div>
 
                 <button
