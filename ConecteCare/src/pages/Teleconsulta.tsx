@@ -1,31 +1,13 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
 
-// =========================================================================================
-// 0. COMPONENTE DE LAYOUT (SIMPLIFICADO PARA O ARQUIVO ÚNICO)
-// =========================================================================================
-// O componente original importava o Layout, aqui está uma versão simples
-// para garantir que o código seja self-contained e funcional.
-// NOTA: Os estilos globais de fonte são assumidos pelo ambiente Tailwind
 import { Layout } from "../components/Layout";
 
-
-// =========================================================================================
-// 1. IMPORTAÇÕES DO MEDIAPIPE
-// =========================================================================================
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
-
-// =========================================================================================
-// 2. TIPOS E INTERFACES
-// =========================================================================================
 
 type PostureFeedback = {
   message: string;
   status: 'ideal' | 'warning' | 'error' | 'loading';
 };
-
-// =========================================================================================
-// 3. LÓGICA DE ANÁLISE DE POSTURA (INTACTA)
-// =========================================================================================
 
 const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
   if (!landmarks || landmarks.length === 0) {
@@ -36,18 +18,15 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
   }
 
   try {
-    // 0: Nariz, 11: Ombro Esquerdo, 12: Ombro Direito
     const nose = landmarks[0];
     const leftShoulder = landmarks[11];
     const rightShoulder = landmarks[12];
-    
-    // Cálculo da distância dos ombros para enquadramento (horizontal)
+
     const shoulderDistance = Math.sqrt(
-      Math.pow(leftShoulder.x - rightShoulder.x, 2) + 
+      Math.pow(leftShoulder.x - rightShoulder.x, 2) +
       Math.pow(leftShoulder.y - rightShoulder.y, 2)
     );
 
-    // Posição vertical do nariz para altura (vertical)
     const noseVerticalPosition = nose.y;
 
     if (shoulderDistance < 0.15) {
@@ -55,12 +34,12 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
         message: "⚠️ Muito longe! Aproxime-se para melhor enquadramento.",
         status: 'warning'
       };
-    } else if (shoulderDistance > 0.45) { // Aumentei um pouco a margem de ideal para focar mais na postura
+    } else if (shoulderDistance > 0.45) {
       return {
         message: "✅ Posição Ideal! Postura correta e bem enquadrada.",
         status: 'ideal'
       };
-    } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.6) { // Ajustei o range vertical
+    } else if (noseVerticalPosition < 0.2 || noseVerticalPosition > 0.6) {
       return {
         message: "📏 Ajuste a altura: mantenha o rosto e o tronco centralizados no quadro (entre 20% e 60% da tela).",
         status: 'warning'
@@ -79,14 +58,10 @@ const analyzePostureFromLandmarks = (landmarks: any[]): PostureFeedback => {
   }
 };
 
-// =========================================================================================
-// COMPONENTES DE VISUALIZAÇÃO (DESIGN REVISADO PARA O TEMA AZUL/CIANO)
-// =========================================================================================
 
 const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
   let bgColor, ringColor, icon, statusText, ariaLabel;
-  
-  // Cores ajustadas para o tema (blue-600 / cyan-500)
+
   switch (feedback.status) {
     case 'ideal':
       bgColor = 'bg-white';
@@ -112,7 +87,7 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
     case 'loading':
     default:
       bgColor = 'bg-white';
-      ringColor = 'ring-blue-400'; // Alterado para blue
+      ringColor = 'ring-blue-400'; 
       icon = '🔄';
       statusText = 'Aguardando';
       ariaLabel = 'Sistema analisando postura';
@@ -120,7 +95,7 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
   }
 
   return (
-    <div 
+    <div
       className={`p-6 rounded-3xl shadow-2xl bg-white space-y-5 transition-all duration-500 transform border-t-8 border-cyan-500`} // Cor de destaque Cyan (Sintaxe corrigida)
       role="status"
       aria-live="polite"
@@ -128,21 +103,20 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
     >
       <div className="flex items-center justify-between border-b pb-3 border-gray-100">
         <h2 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-          <span className="text-3xl text-blue-600">🎯</span> {/* Cor primária Blue */}
+          <span className="text-3xl text-blue-600">🎯</span> 
           Feedback Rápido
         </h2>
-        <span className={`px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase ${
-            feedback.status === 'ideal' ? 'bg-green-600 text-white shadow-md' :
+        <span className={`px-4 py-1 rounded-full text-sm font-bold tracking-wider uppercase ${feedback.status === 'ideal' ? 'bg-green-600 text-white shadow-md' :
             feedback.status === 'warning' ? 'bg-yellow-400 text-gray-800 shadow-md' :
-            feedback.status === 'error' ? 'bg-red-600 text-white shadow-md' :
-            'bg-blue-100 text-blue-700' // Alterado para blue
-          }`} // Sintaxe corrigida
+              feedback.status === 'error' ? 'bg-red-600 text-white shadow-md' :
+                'bg-blue-100 text-blue-700'
+          }`} 
         >
           {statusText}
         </span>
       </div>
 
-      <div 
+      <div
         className={`p-4 rounded-xl font-semibold text-lg ring-4 ${ringColor} ${bgColor} 
                     shadow-inner transition-all duration-300`}
         role="alert"
@@ -155,7 +129,7 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
 
       <div className="space-y-2 pt-2">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <span className="text-xl text-cyan-600">💡</span> {/* Cor de destaque Cyan */}
+          <span className="text-xl text-cyan-600">💡</span> 
           Orientações
         </h3>
         <p className="text-sm text-gray-600 leading-relaxed">
@@ -183,7 +157,7 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
 //         <span className="text-3xl text-blue-600">⚙️</span> {/* Cor primária Blue */}
 //         Detalhes Técnicos
 //       </h3>
-      
+
 //       <div className="space-y-4">
 //         {/* IA Status */}
 //         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl shadow-inner">
@@ -258,14 +232,11 @@ const FeedbackPanel = ({ feedback }: { feedback: PostureFeedback }) => {
 // };
 
 
-// =========================================================================================
-// 4. COMPONENTE PRINCIPAL - SOLUÇÃO IMAGE MODE (ESTRUTURA REVISADA)
-// =========================================================================================
 
 export function Teleconsulta(): JSX.Element {
-  const [feedback, setFeedback] = useState<PostureFeedback>({ 
+  const [feedback, setFeedback] = useState<PostureFeedback>({
     message: "Iniciando sistema...",
-    status: 'loading' 
+    status: 'loading'
   });
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [mediaPipeStatus, setMediaPipeStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -277,9 +248,6 @@ export function Teleconsulta(): JSX.Element {
   const detectionActiveRef = useRef(false);
   const mediaPipeReadyRef = useRef(false);
 
-  // =========================================================================================
-  // INICIALIZAÇÃO COM IMAGE MODE (LÓGICA INTACTA)
-  // =========================================================================================
 
   useEffect(() => {
     let mediaPipeInitialized = false;
@@ -290,7 +258,7 @@ export function Teleconsulta(): JSX.Element {
 
       try {
         setMediaPipeStatus('loading');
-        
+
         const vision = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
         );
@@ -313,25 +281,25 @@ export function Teleconsulta(): JSX.Element {
 
     const initCamera = async () => {
       try {
-        
+
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
         }
 
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { 
+          video: {
             width: { ideal: 640 },
             height: { ideal: 480 },
             frameRate: { ideal: 15 }
           },
-          audio: true 
+          audio: true
         });
-        
+
         streamRef.current = stream;
-        
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          
+
           if (canvasRef.current) {
             canvasRef.current.width = 640;
             canvasRef.current.height = 480;
@@ -345,7 +313,7 @@ export function Teleconsulta(): JSX.Element {
               setTimeout(checkVideoReady, 100);
             }
           };
-          
+
           checkVideoReady();
         }
       } catch (err) {
@@ -361,7 +329,7 @@ export function Teleconsulta(): JSX.Element {
 
       let lastVideoTime = -1;
       let lastDetectionTime = 0;
-      const detectionInterval = 1000 / 10; // Tentar 10 FPS de detecção
+      const detectionInterval = 1000 / 10;
 
       const detectFrame = async () => {
         if (!detectionActiveRef.current) return;
@@ -371,20 +339,17 @@ export function Teleconsulta(): JSX.Element {
         const canvas = canvasRef.current;
 
         if (video && canvas && poseLandmarkerRef.current && mediaPipeReadyRef.current) {
-          // Garante que o vídeo tenha avançado e que o intervalo de tempo tenha passado
           if (video.currentTime !== lastVideoTime && (now - lastDetectionTime) > detectionInterval) {
             lastVideoTime = video.currentTime;
             lastDetectionTime = now;
-            
+
             try {
               const ctx = canvas.getContext('2d');
               if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
-                // Desenha o frame no canvas (necessário para o detect IMAGE mode)
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                // O detect() aceita CanvasElement (como esperado no Image mode)
+
                 const result = poseLandmarkerRef.current.detect(canvas);
-                
+
                 if (result.landmarks && result.landmarks.length > 0) {
                   const newFeedback = analyzePostureFromLandmarks(result.landmarks[0]);
                   setFeedback(newFeedback);
@@ -396,7 +361,6 @@ export function Teleconsulta(): JSX.Element {
                 }
               }
             } catch (error) {
-              // Erro silencioso na detecção para não interromper a RAF
             }
           }
         } else if (!mediaPipeReadyRef.current) {
@@ -405,8 +369,7 @@ export function Teleconsulta(): JSX.Element {
             status: 'loading'
           });
         }
-        
-        // Continua o loop de animação
+
         if (detectionActiveRef.current) {
           requestAnimationFrame(detectFrame);
         }
@@ -416,8 +379,7 @@ export function Teleconsulta(): JSX.Element {
     };
 
     initMediaPipe();
-    
-    // Pequeno atraso para dar tempo ao MediaPipe iniciar antes da câmera
+
     setTimeout(() => {
       initCamera();
     }, 500);
@@ -425,17 +387,16 @@ export function Teleconsulta(): JSX.Element {
     return () => {
       detectionActiveRef.current = false;
       mediaPipeReadyRef.current = false;
-      
+
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
       }
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
-      
-      // Limpeza do PoseLandmarker
+
       if (poseLandmarkerRef.current) {
         poseLandmarkerRef.current.close();
         poseLandmarkerRef.current = null;
@@ -444,13 +405,11 @@ export function Teleconsulta(): JSX.Element {
   }, []);
 
   const restartCamera = async () => {
-    // A maneira mais simples e robusta de reiniciar todo o sistema e tentar novamente as permissões.
-    window.location.reload(); 
+    window.location.reload();
   };
 
   return (
     <Layout>
-      {/* Alterado de bg-gray-50 para usar o fundo da marca (se houver, senão branco/cinza claro) */}
       <div className="min-h-screen bg-white font-sans p-4 sm:p-6 lg:p-10">
         <div className="max-w-7xl mx-auto">
           <header className="text-center mb-10 space-y-4">
@@ -463,11 +422,9 @@ export function Teleconsulta(): JSX.Element {
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {/* Área da Câmera (2/3 da tela em desktop) */}
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white rounded-3xl shadow-2xl shadow-blue-100 border border-gray-100 overflow-hidden transition-shadow duration-300 hover:shadow-cyan-300/50"> {/* Sombra azul */}
                 <div className="relative aspect-video bg-gray-900 rounded-t-3xl">
-                  {/* Container da Câmera */}
                   <div className="w-full h-full">
                     <video
                       ref={videoRef}
@@ -479,22 +436,20 @@ export function Teleconsulta(): JSX.Element {
                     />
                   </div>
 
-                  {/* Canvas (Oculto - usado apenas para o processamento do MediaPipe em IMAGE mode) */}
-                  <canvas 
-                    ref={canvasRef} 
+                  <canvas
+                    ref={canvasRef}
                     className="absolute top-0 left-0 hidden"
-                    width="640" 
+                    width="640"
                     height="480"
                   />
 
-                  {/* Mensagem de Erro da Câmera */}
                   {cameraError && (
                     <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 z-10">
                       <div className="bg-white rounded-2xl p-8 text-center max-w-sm space-y-4 shadow-xl border-t-4 border-red-500">
                         <div className="text-red-500 text-5xl" aria-hidden="true">🚫</div>
                         <h2 className="font-bold text-xl text-red-700">Acesso Negado à Câmera</h2>
                         <p className="font-medium text-gray-700 text-sm leading-relaxed">{cameraError}</p>
-                        <button 
+                        <button
                           onClick={restartCamera}
                           className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                         >
@@ -504,7 +459,6 @@ export function Teleconsulta(): JSX.Element {
                     </div>
                   )}
 
-                  {/* Overlay de Status Inferior */}
                   <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-3">
                     <div className="bg-black/70 text-white px-4 py-2 rounded-xl font-medium text-sm backdrop-blur-sm shadow-lg border border-white/20">
                       <span className="flex items-center gap-2">
@@ -516,20 +470,20 @@ export function Teleconsulta(): JSX.Element {
                       <span className="flex items-center gap-2">
                         <span className={
                           mediaPipeStatus === 'ready' ? 'text-green-400' :
-                          mediaPipeStatus === 'loading' ? 'text-cyan-400 animate-spin' : 'text-red-400' // Ajustado para cyan
+                            mediaPipeStatus === 'loading' ? 'text-cyan-400 animate-spin' : 'text-red-400' 
                         }>
                           {mediaPipeStatus === 'ready' ? '🧠' : mediaPipeStatus === 'loading' ? '⏳' : '❌'}
                         </span>
-                        IA: {mediaPipeStatus === 'ready' ? 'Ativa' : 
-                              mediaPipeStatus === 'loading' ? 'Carregando' : 'Inativa'}
+                        IA: {mediaPipeStatus === 'ready' ? 'Ativa' :
+                          mediaPipeStatus === 'loading' ? 'Carregando' : 'Inativa'}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-6 bg-gradient-to-r from-blue-50 to-white rounded-b-3xl"> {/* Gradiente suave com Blue */}
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-white rounded-b-3xl">
                   <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                    <span className="text-blue-600">✨</span> {/* Cor primária Blue */}
+                    <span className="text-blue-600">✨</span> 
                     Sua Visualização de Teleconsulta
                   </h3>
                   <p className="text-sm text-gray-600">
@@ -539,20 +493,11 @@ export function Teleconsulta(): JSX.Element {
               </div>
             </div>
 
-            {/* Painel de Orientações e Status (1/3 da tela em desktop) */}
             <div className="space-y-8">
               <FeedbackPanel feedback={feedback} />
-              
-              {/* <SystemStatus 
-                mediaPipeStatus={mediaPipeStatus}
-                detectionActive={detectionActiveRef.current}
-                cameraError={cameraError}
-                onRestart={restartCamera}
-              /> */}
             </div>
           </div>
 
-          {/* Rodapé Informativo (Melhorado) */}
           <footer className="mt-16 text-center">
             <div className="bg-white rounded-3xl shadow-xl p-8 max-w-5xl mx-auto border-t-4 border-cyan-500"> {/* Borda Cyan */}
               <h3 className="text-2xl font-extrabold text-gray-900 mb-5 flex items-center justify-center gap-3">

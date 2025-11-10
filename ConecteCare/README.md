@@ -9,6 +9,8 @@
 - Typescript
 - Tailwind CSS
 - React Router DOM
+- Media Pipe da Google
+
 
 -> Imagens, Icones e Video
 - joao.jpg
@@ -32,34 +34,56 @@ CONECTECARE---SPRINT-3/
     │       └── logo.jpg
     │       └── wesley.jpg
     │
-    ├── src/                  
+    ├── src/
+    │   ├── api/conecte-care-api.ts                     
     │   ├── components/        
     │   │       └── CardConsulta.jsx
-    │   │       └── CardContato.jsx
     │   │       └── CardEquipe.jsx
-    │   │       └── CardIndicadorSaude.jsx
-    │   │       └── Depoimentos.jsx
-    │   │       └── FaqItem.jsx
-    │   │       └── FormularioCadastro.jsx
+    │   │       └── CardSaude.jsx
+    │   │       └── CardsDashboard.jsx
+    │   │       └── FormularioCuidador.jsx
+    │   │       └── FormularioPaciente.jsx
+    │   │       └── FormulariosConsulta.jsx
     │   │       └── Layout.jsx
-    │   │       └── Termo.jsx
-    │   │       └── VantagensConecte.jsx
-    │   │
+    │   │       └── Recursos.jsx
+    │   │    
+    |   ├── context/        
+    │   │       └── auth-context.jsx
+    │   │       └── cadastro-context.jsx
+    │   │       └── consultas-context.jsx
+    │   │   
+    │   |
     │   ├── pages/             
-    │   │   ├── CadastroCuidador.jsx       
+    │   │   ├── AtualizarPerfilCuidador.jsx       
+    │   │   ├── AtualizarPerfilPaciente.jsx       
+    │   │   ├── Cadastro.jsx       
     │   │   ├── Contato.jsx       
+    │   │   ├── Dashboard.jsx       
     │   │   ├── FAQ.jsx       
     │   │   ├── GuiaUsuario.jsx       
-    │   │   ├── Home.jsx       
-    │   │   ├── MenuCuidador.jsx       
+    │   │   ├── Home.jsx
+    │   │   └── Login.jsx
+    |   |   ├── MinhasConsultas.jsx       
     │   │   ├── NotFound.jsx       
-    │   │   ├── QuemSomos.jsx
-    │   │   └── Teleconsulta.jsx   
+    │   │   ├── PerfilCuidador.jsx
+    |   |   ├── PerfilPaciente.jsx       
+    │   │   ├── QuemSomos.jsx       
+    │   │   ├── Teleconsulta.jsx  
     │   │
     │   ├── types/            
+    │   │   ├── auth-user.ts
     │   │   ├── interfaces.ts
+    │   │   ├── mocked-data.ts
     │   │   └── useForm.ts
     │   │
+    |   ├── routes/            
+    │   │   ├── ProtectedRoute.ts
+    │   ├── schemas/            
+    │   │   ├── forms-consulta-schema.ts
+    │   │   └── forms-schema.ts
+    │   │   └── login-schema.ts
+    |   ├── styles/            
+    │   │   ├── icons.ts
     │   ├── App.css   
     │   ├── App.tsx           
     │   ├── index.css           

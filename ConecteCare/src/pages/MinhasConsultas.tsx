@@ -41,23 +41,19 @@ export function MinhasConsultas() {
         let pacienteEncontrado: Paciente | undefined;
 
         if (pacienteIDURL) {
-            // CUIDADOR: Busca o paciente pelo ID fornecido na URL
             pacienteEncontrado = listaPacientes.find(p => p.id === pacienteIDURL);
             if (!pacienteEncontrado) {
                 setError("Paciente não encontrado com o ID fornecido.");
             }
         } else {
-            // PACIENTE: Busca o paciente pelo email logado (acesso direto)
             pacienteEncontrado = listaPacientes.find(p => p.email === emailUserLogado);
             if (!pacienteEncontrado) {
-                // Se o usuário logado não for paciente, mas for cuidador, pode não ter um ID na URL (erro no fluxo)
                 setError("Seu perfil de paciente não foi encontrado ou a rota está incorreta.");
             }
         }
 
         if (pacienteEncontrado) {
             setPacienteExibido(pacienteEncontrado);
-            // Busca as consultas se o paciente foi encontrado
             setAppointments(getConsultasPorPaciente(pacienteEncontrado.cpfPaciente));
         } else {
             setPacienteExibido(null);
@@ -71,23 +67,20 @@ export function MinhasConsultas() {
     }, [emailUserLogado, listaPacientes, pacienteIDURL, getConsultasPorPaciente]);
 
 
-    // Função de tratamento de sucesso após ação no formulário (agendar/remarcar/cancelar)
     const handleSuccess = useCallback((text: string, type: 'success' | 'error' = 'success') => {
         setMessage({ type, text });
-        setActiveForm(null); // Fecha o formulário após a ação bem-sucedida
+        setActiveForm(null); 
         setSelectedConsulta(null);
 
-        // Força a atualização da lista após o sucesso
         if (pacienteExibido) {
              setAppointments(getConsultasPorPaciente(pacienteExibido.cpfPaciente));
         }
     }, [pacienteExibido, getConsultasPorPaciente]);
 
-    // Função para lidar com cliques de ação (Remarcar/Cancelar) no CardConsulta
     const handleAction = useCallback((type: 'remarcar' | 'cancelar', appointment: Consulta) => {
         setActiveForm(type);
         setSelectedConsulta(appointment);
-        setMessage(null); // Limpa a mensagem de status anterior
+        setMessage(null); 
     }, []);
 
     const handleFormClose = () => {
@@ -96,9 +89,7 @@ export function MinhasConsultas() {
     };
 
 
-    // Renderização de carregamento e erro
     if (isLoadingPatient) {
-        // Assume que o Layout está configurado para receber children sem title/icon, ou que CalendarIcon está no escopo
         return <Layout title="Carregando Consultas..." icon={<CalendarIcon />}> 
             <div className="text-center py-10 text-lg text-gray-500">
                 Aguarde, buscando dados do paciente...
@@ -115,7 +106,6 @@ export function MinhasConsultas() {
         </Layout>;
     }
     
-    // Texto de cabeçalho para diferenciar o acesso
     const isCaregiverAccess = !!pacienteIDURL;
     const headerTitle = isCaregiverAccess 
         ? `Consultas de ${pacienteExibido.nome}` 
@@ -129,7 +119,6 @@ export function MinhasConsultas() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-10">
 
-                    {/* Mensagem de Status (Sucesso/Erro) */}
                     {message && (
                         <div className={`p-4 rounded-lg shadow-md ${message.type === 'success' ? 'bg-green-100 border-l-4 border-green-600 text-green-800' : 'bg-red-100 border-l-4 border-red-600 text-red-800'}`} role="alert">
                             <p className="font-bold">{message.type === 'success' ? 'Sucesso!' : 'Erro!'}</p>
@@ -137,7 +126,6 @@ export function MinhasConsultas() {
                         </div>
                     )}
 
-                    {/* Formulário Ativo (Agendar/Remarcar/Cancelar) */}
                     {activeForm && (
                         <div className="relative">
                             <button onClick={handleFormClose} className="absolute top-0 right-0 p-2 text-gray-500 hover:text-gray-900 transition-colors">
@@ -155,7 +143,6 @@ export function MinhasConsultas() {
                     )}
 
 
-                    {/* 2. LISTA DE CONSULTAS */}
                     <section>
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-gray-900">Consultas Agendadas</h2>

@@ -4,7 +4,6 @@ import { PhoneIcon } from "../styles/icons";
 
 export function Contato() {
 
-    // aqui agente vai mandar para o whatsapp
     const handleWhatsAppClick = () => {
         window.open("https://wa.me/551130535131", "_blank");
     };

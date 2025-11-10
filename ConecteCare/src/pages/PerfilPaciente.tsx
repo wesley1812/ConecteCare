@@ -40,18 +40,14 @@ function Redirecionador({ to, icon, title, description, colorRing }: ActionCardP
 }
 
 export function PerfilPaciente() {
-  // Acessa os contextos
   const { user: loggedInUserEmail } = useAuth(); //
   const { cuidador: listaCuidadores, paciente: listaPacientes } = useCadastro(); //
 
-  // Estados para o usuário logado e seu paciente
   const [pacienteAtual, setPacienteAtual] = useState<Paciente | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Aguarda os contextos carregarem
     if (loggedInUserEmail) {
-      // 1. Encontra o cuidador logado (assumindo que 'user' é o email)
       const foundPaciente = listaPacientes.find(
         p => p.email === loggedInUserEmail
       ); //

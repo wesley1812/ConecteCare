@@ -14,10 +14,10 @@ interface CadastroContextProps {
   cuidador: Cuidador[]
   savePaciente: (paciente: Paciente) => void;
   removePaciente: (id: string) => void;
-  updatePaciente: (paciente: Paciente) => void; // <-- ADICIONADO
+  updatePaciente: (paciente: Paciente) => void; 
   saveCuidador: (cuidador: Cuidador) => void;
   removeCuidador: (id: string) => void;
-  updateCuidador: (cuidador: Cuidador) => void; // <-- ADICIONADO
+  updateCuidador: (cuidador: Cuidador) => void;
   iscpfCuidadorCadastrado: (cpfCuidador: string) => boolean;
   iscpfPacienteCadastrado: (cpfCuidador: string) => boolean;
 }
@@ -62,7 +62,6 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
   }, [fetchPacientes]);
 
   const updatePaciente = useCallback(async (paciente: Paciente) => {
-    // A rota padrão REST para update é PUT ou PATCH com o ID
     await fetch(`${API_CONECTE_CARE}/pacientes/${paciente.id}`, {
       method: "PUT", 
       body: JSON.stringify(paciente),
@@ -71,11 +70,8 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    // Re-busca os dados para manter o contexto atualizado
     await fetchPacientes();
   }, [fetchPacientes]);
-  // --- FIM DA ADIÇÃO ---
-
 
   const fetchCuidador = useCallback(async () => {
     const response = await fetch(`${API_CONECTE_CARE}/cuidador`, {
@@ -110,9 +106,7 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
     await fetchCuidador();
   }, [fetchCuidador]); //
 
-  // --- FUNÇÃO ADICIONADA ---
   const updateCuidador = useCallback(async (cuidador: Cuidador) => {
-    // A rota padrão REST para update é PUT ou PATCH com o ID
     await fetch(`${API_CONECTE_CARE}/cuidador/${cuidador.id}`, {
       method: "PUT", 
       body: JSON.stringify(cuidador),
@@ -121,10 +115,8 @@ export function CadastroProvider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    // Re-busca os dados para manter o contexto atualizado
     await fetchCuidador();
   }, [fetchCuidador]);
-  // --- FIM DA ADIÇÃO ---
 
 
   useEffect(() => {
