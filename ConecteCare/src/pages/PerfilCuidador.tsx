@@ -40,19 +40,15 @@
   }
 
   export function PerfilCuidador() {
-    // Acessa os contextos
     const { user: loggedInUserEmail } = useAuth(); //
     const { cuidador: listaCuidadores, paciente: listaPacientes } = useCadastro(); //
 
-    // Estados para o usuário logado e seu paciente
     const [cuidadorAtual, setCuidadorAtual] = useState<Cuidador | null>(null);
     const [pacienteVinculado, setPacienteVinculado] = useState<Paciente | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-      // Aguarda os contextos carregarem
       if (loggedInUserEmail && listaCuidadores.length > 0 && listaPacientes.length > 0) {
-        // 1. Encontra o cuidador logado (assumindo que 'user' é o email)
         const foundCuidador = listaCuidadores.find(
           c => c.email === loggedInUserEmail
         ); //
@@ -60,7 +56,6 @@
         if (foundCuidador) {
           setCuidadorAtual(foundCuidador);
 
-          // 2. Encontra o paciente vinculado a esse cuidador
           const foundPaciente = listaPacientes.find(
             p => p.cpfPaciente === foundCuidador.cpfPaciente
           ); //
@@ -75,13 +70,10 @@
         }
         setIsLoading(false);
       } else if (!loggedInUserEmail) {
-        // Se não há usuário logado, para de carregar
         setIsLoading(false);
       }
-      // Roda o efeito se o usuário logado ou as listas da API mudarem
     }, [loggedInUserEmail, listaCuidadores, listaPacientes]);
 
-    // --- Tela de Carregamento ---
     if (isLoading) {
       return (
         <Layout>
@@ -92,7 +84,6 @@
       );
     }
 
-    // --- Tela de Erro (Usuário não encontrado ou sem paciente) ---
     if (!cuidadorAtual || !pacienteVinculado) {
       return (
         <Layout>
@@ -110,7 +101,6 @@
       );
     }
 
-    // --- Painel Principal (Renderização de Sucesso) ---
     return (
       <Layout>
         <div className="bg-gradient-to-r from-blue-700 to-cyan-500 py-12 md:py-20 bg-gray-100 min-h-screen">
@@ -121,10 +111,8 @@
                 Painel do Cuidador
               </h1>
               <p className="mt-3 text-xl text-white">
-                {/* NOME DINÂMICO! */}
                 Bem-vinda de volta, <span className="font-bold text-white">{cuidadorAtual.nome}</span>!
               </p>
-              {/* <p className="mt-1 text-lg text-white"></p> */}
               <p className="mt-1 text-lg text-white">
                 O que você gostaria de fazer hoje?
               </p>

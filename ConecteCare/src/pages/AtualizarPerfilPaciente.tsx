@@ -8,21 +8,18 @@ import { useCadastro } from "../context/cadastro-context";
 import { formSchemaAtualizarPaciente, type FormSchemaAtualizarPaciente } from "../schemas/forms-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-// Ícone simples para o cartão do cuidador
 const UserIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
   </svg>
 );
 
-// Ícone de Perfil (Avatar)
 const ProfileIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
-// Componente para exibir um cartão de cuidador
 function CardCuidador({ cuidador }: { cuidador: Cuidador }) {
   return (
     <div className="bg-white p-5 rounded-lg shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200">
@@ -39,9 +36,6 @@ function CardCuidador({ cuidador }: { cuidador: Cuidador }) {
   );
 }
 
-// ----------------------------------------------------------------------
-// COMPONENTE PRINCIPAL: Combina Perfil e Lista
-// ----------------------------------------------------------------------
 
 export function AtualizarPerfilPaciente() {
 
@@ -67,7 +61,6 @@ export function AtualizarPerfilPaciente() {
     resolver: zodResolver(formSchemaAtualizarPaciente),
   });
 
-  // Efeito para carregar dados do paciente e dos cuidadores
   useEffect(() => {
     if (loggedInUserEmail && listaPacientes.length > 0 && listaTodosCuidadores.length > 0) {
       setIsLoading(true);
@@ -85,7 +78,6 @@ export function AtualizarPerfilPaciente() {
 
       setPacienteAtual(foundPaciente);
 
-      // 1. Preenche o formulário
       reset({
         nome: foundPaciente.nome,
         idade: foundPaciente.idade,
@@ -93,7 +85,6 @@ export function AtualizarPerfilPaciente() {
         cpfPaciente: foundPaciente.cpfPaciente
       });
 
-      // 2. Filtra os cuidadores
       const foundCuidadores = listaTodosCuidadores.filter(
         c => c.cpfPaciente === foundPaciente.cpfPaciente
       );
@@ -128,7 +119,6 @@ export function AtualizarPerfilPaciente() {
   const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
   const errorClass = "text-red-600 text-xs mt-1";
 
-  // --- Telas de Carregamento e Erro ---
 
   if (isLoading || !pacienteAtual) {
     return (
@@ -141,7 +131,6 @@ export function AtualizarPerfilPaciente() {
   }
 
   if (globalError) {
-    // Usa a tela de erro da ListaCuidadores
     return (
       <Layout>
         <div className="py-20 bg-gray-50 min-h-screen flex items-center justify-center text-center">
@@ -158,13 +147,11 @@ export function AtualizarPerfilPaciente() {
   }
 
 
-  // --- Layout Unificado ---
   return (
     <Layout>
       <div className="py-12 bg-gray-100 min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* TÍTULO PRINCIPAL */}
           <div className="flex items-center justify-start bg-indigo-600 p-6 sm:p-8 rounded-xl shadow-2xl mb-8">
             <div className="p-3 bg-indigo-700 rounded-full mr-4">
               <ProfileIcon />
@@ -180,7 +167,6 @@ export function AtualizarPerfilPaciente() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            {/* COLUNA 1: ATUALIZAR PERFIL (MAIS IMPORTANTE) */}
             <section className="lg:col-span-1 bg-white p-6 sm:p-8 rounded-xl shadow-lg h-fit lg:sticky lg:top-4">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-4 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>

@@ -68,7 +68,6 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
             </Link>
           </div>
 
-          {/* Navegação Principal (Desktop) */}
           <div className="hidden lg:flex items-center space-x-2">
             {navigation.map((item) => (
               <Link
@@ -84,27 +83,21 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
             ))}
           </div>
 
-          {/* Botões de Ação (Desktop) */}
           <div className="hidden lg:flex items-center space-x-3">
             {user ? (
-              // Se estiver logado
               <>
-                {/* Link "Meu Painel" Dinâmico */}
                 <Link
-                  // Usa a URL do estado; desativado se nulo ou a carregar
                   to={painelUrl ?? '#'}
                   className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-lg
                               bg-cyan-500 text-white hover:bg-cyan-600
                               focus:outline-none focus:ring-4 focus:ring-cyan-300
                               ${isLoadingUrl || !painelUrl ? 'opacity-50 pointer-events-none cursor-not-allowed' : ''}
                             `}
-                  // Impede o clique enquanto desativado
                   onClick={(e) => { if (isLoadingUrl || !painelUrl) e.preventDefault(); }}
                 >
                   {isLoadingUrl ? 'A carregar...' : 'Meu Painel'}
                 </Link>
 
-                {/* Botão Sair */}
                 <button
                   onClick={handleLogout}
                   className={`px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-lg
@@ -115,7 +108,6 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
                 </button>
               </>
             ) : (
-              // Se NÃO estiver logado
               <>
                 {actionNavigation.map(item => (
                   <Link
@@ -133,13 +125,11 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
             )}
           </div>
 
-          {/* Botão Menu Mobile */}
           <div className="lg:hidden flex items-center">
             <button
               onClick={toggleMenu}
               className="p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none"
             >
-              {/* Ícone Hambúrguer/X */}
               {isMenuOpen ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
               ) : (
@@ -149,11 +139,9 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
           </div>
         </div>
 
-        {/* --- MENU MOBILE CONDICIONAL --- */}
         {isMenuOpen && (
           <div className="lg:hidden absolute w-full left-0 bg-white shadow-xl pt-2 pb-4 border-t border-gray-100 z-50"> {/* Adicionado z-50 */}
             <div className="px-2 space-y-2">
-              {/* Links de Navegação Padrão */}
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -165,11 +153,8 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
                 </Link>
               ))}
 
-              {/* Links de Ação Condicionais (Mobile) */}
               {user ? (
-                // Se estiver logado
                 <>
-                  {/* Link "Meu Painel" Dinâmico (Mobile) */}
                   <Link
                     key="meu-painel-mobile"
                     to={painelUrl ?? '#'}
@@ -185,7 +170,6 @@ export function Header({ isMenuOpen, toggleMenu }: any) {
                     {isLoadingUrl ? 'A carregar...' : 'Meu Painel'}
                   </Link>
 
-                  {/* Botão Sair (Mobile) */}
                   <button
                     onClick={() => { handleLogout(); toggleMenu(); }}
                     className={`block w-[calc(100%-2rem)] text-left mx-4 px-3 py-2 rounded-lg text-base font-semibold text-white bg-red-600 hover:bg-red-700`} // Ajuste de largura

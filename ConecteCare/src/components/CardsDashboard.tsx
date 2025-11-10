@@ -25,9 +25,7 @@ export const CardPacienteInfo = ({ paciente }: { paciente: Paciente }) => (
 );
 
 
-// Card para Indicadores de Saúde (Design Aprimorado)
 export const CardIndicadorSaude = ({ indicator }: { indicator: HealthIndicatorType }) => {
-    // Forçamos a tipagem do ícone para SVGProps, o que permite adicionar className e style
     const iconElement = indicator.icon as React.ReactElement<React.SVGProps<SVGSVGElement>>;
     const statusText = indicator.percentage >= 70 ? 'Ótimo' : indicator.percentage >= 50 ? 'Estável' : 'Atenção';
     const statusColor = indicator.percentage >= 70 ? 'text-green-600' : indicator.percentage >= 50 ? 'text-yellow-600' : 'text-red-600';
@@ -45,7 +43,6 @@ export const CardIndicadorSaude = ({ indicator }: { indicator: HealthIndicatorTy
                     <p className={`text-xs font-medium ${statusColor} mt-1`}>Status: {statusText}</p>
                 </div>
                 
-                {/* Barra de Progresso Visual */}
                 <div className="w-1/3 ml-4">
                     <div className="h-1 bg-gray-200 rounded-full">
                         <div 
@@ -61,7 +58,6 @@ export const CardIndicadorSaude = ({ indicator }: { indicator: HealthIndicatorTy
 };
 
 
-// Card para Medicamentos
 export const CardMedicamento = ({ medicamento }: { medicamento: MedicamentoType }) => {
     const isUrgent = medicamento.proximaDose === "Hoje" && parseInt(medicamento.horario.split(':')[0]) <= new Date().getHours() + 2; // Dose nas próximas 2h
     
@@ -95,7 +91,6 @@ export const CardMedicamento = ({ medicamento }: { medicamento: MedicamentoType 
 };
 
 
-// Card para Consultas (Sem integração IA)
 export const CardConsulta = ({ appointment }: { 
     appointment: Consulta, 
 }) => (

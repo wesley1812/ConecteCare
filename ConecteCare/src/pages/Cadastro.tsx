@@ -150,7 +150,6 @@ export function MenuCadastro({ navigate }: MenuCadastroProps) {
 
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16 bg-gray-50">
 
-                    {/* AQUI ESTÁ A CORREÇÃO: Removido 'max-w-md' para permitir que o formulário expanda. */}
                     <div className="w-full bg-white rounded-3xl shadow-3xl overflow-hidden p-8 sm:p-12 
                                  border border-gray-100 transition-shadow duration-500">
                         

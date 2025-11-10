@@ -35,11 +35,10 @@ export function Dashboard() {
     if (id && loggedInUserEmail && listaCuidadores.length > 0 && listaPacientes.length > 0) {
       setIsLoading(true);
 
-      setError(null); // Limpa erros anteriores
-      // 1. Encontra o paciente solicitado pela URL
+      setError(null);
       const pacienteEncontrado = listaPacientes.find(
         p => p.id === id
-      ); // [cite: cadastro-context.tsx]
+      ); 
 
       if (!pacienteEncontrado) {
         setError("Paciente não encontrado.");
@@ -55,7 +54,6 @@ export function Dashboard() {
       );
 
       if (cuidadorLogado) {
-        // É um cuidador. Verifica se o paciente encontrado é o vinculado a ele.
         if (pacienteEncontrado.cpfPaciente === cuidadorLogado.cpfPaciente) {
           console.log("Acesso como Cuidador autorizado.");
           temPermissao = true;
@@ -66,7 +64,6 @@ export function Dashboard() {
           setError("Você não tem permissão para ver os dados deste paciente.");
         }
       } else {
-        // 3. Se não for cuidador, verifica se é o PRÓPRIO Paciente
         if (pacienteEncontrado.email === loggedInUserEmail) {
           console.log("Acesso como Paciente autorizado.");
           temPermissao = true;
@@ -83,13 +80,12 @@ export function Dashboard() {
         setPaciente(pacienteParaMostrar);
 
 
-      } else if (!error) { // Se não tem permissão mas ainda não houve erro explícito
+      } else if (!error) { 
         setError("Erro inesperado ao verificar permissões.");
       }
 
-      setIsLoading(false); // Terminou o processo
+      setIsLoading(false);
     } else if (!loggedInUserEmail) {
-      // Caso o utilizador não esteja logado (ProtectedRoute deveria impedir, mas é uma segurança extra)
       setError("Utilizador não autenticado.");
       setIsLoading(false);
     }
@@ -152,10 +148,8 @@ export function Dashboard() {
               </div>
             </div>
 
-            {/* COLUNA 2/3: Indicadores e Consultas */}
             <div className="lg:col-span-2 space-y-8">
 
-              {/* Seção Indicadores de Saúde */}
               <section>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline mr-2 text-red-500"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>

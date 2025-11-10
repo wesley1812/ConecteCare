@@ -64,7 +64,6 @@ export function AtualizarPerfilCuidador() {
     }, 2000);
   };
 
-  // Classes adaptadas do FormularioCuidador
   const inputClass = "w-full px-5 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 transition duration-200 ease-in-out shadow-sm text-base bg-white";
   const inputReadOnlyClass = `${inputClass} bg-gray-100 cursor-not-allowed text-gray-500`;
   const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
@@ -86,7 +85,6 @@ export function AtualizarPerfilCuidador() {
     <Layout>
       <div className="py-12 bg-gray-50 min-h-screen font-inter">
         <style>
-            {/* Definindo a fonte Inter globalmente */}
             {`
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
                 .font-inter {
@@ -96,7 +94,6 @@ export function AtualizarPerfilCuidador() {
         </style>
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Botão Voltar Aprimorado */}
           <div className="mb-6">
             <Link
               to="/perfil-cuidador"
@@ -120,45 +117,38 @@ export function AtualizarPerfilCuidador() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               
-              {/* --- Seção 1: Dados Pessoais e Contato do Cuidador --- */}
               <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>1. Dados Pessoais e Contato</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* Nome Completo (Ocupa 2 colunas) */}
                   <div className="md:col-span-2">
                     <label htmlFor="nome" className={labelClass}>Nome Completo:</label>
                     <input type="text" id="nome" {...register("nome")} className={inputClass} />
                     {errors.nome && <p className={errorClass}>{errors.nome.message}</p>}
                   </div>
                   
-                  {/* Email (Não editável) */}
                   <div className="md:col-span-2">
                     <label htmlFor="email" className={labelClass}>Email (Login - Não editável)</label>
                     <input type="email" id="email" value={cuidadorAtual.email} className={inputReadOnlyClass} readOnly/>
                   </div>
 
-                  {/* cpfCuidador (Não editável) */}
                   <div>
                     <label htmlFor="cpfCuidador" className={labelClass}>CPF Cuidador (Não editável)</label>
                     <input type="text" id="cpfCuidador" value={cuidadorAtual.cpfCuidador} className={inputReadOnlyClass} readOnly />
                   </div>
                   
-                  {/* Idade */}
                   <div>
                     <label htmlFor="idade" className={labelClass}>Idade:</label>
                     <input type="number" id="idade" {...register("idade", { valueAsNumber: true })} className={inputClass} />
                     {errors.idade && <p className={errorClass}>{errors.idade.message}</p>}
                   </div>
 
-                  {/* telefoneContato */}
                   <div>
                     <label htmlFor="telefoneContato" className={labelClass}>telefoneContato:</label>
                     <input type="tel" id="telefoneContato" {...register("telefoneContato")} className={inputClass} />
                     {errors.telefoneContato && <p className={errorClass}>{errors.telefoneContato.message}</p>}
                   </div>
                   
-                  {/* CEP Cuidador */}
                   <div>
                     <label htmlFor="cepCuidador" className={labelClass}>CEP da Sua Residência:</label>
                     <input type="text" id="cepCuidador" {...register("cepCuidador")} className={inputClass}/>
@@ -167,26 +157,22 @@ export function AtualizarPerfilCuidador() {
                 </div>
               </div>
 
-              {/* --- Seção 2: Dados do Paciente Associado --- */}
               <div className="p-5 border border-gray-100 rounded-xl bg-indigo-50/50 space-y-4">
                 <h3 className={sectionTitleClass}>2. Dados do Paciente Associado</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* cpfCuidador Paciente */}
                   <div>
                     <label htmlFor="cpfPaciente" className={labelClass}>CPF Paciente</label>
                     <input type="text" id="cpfPaciente" {...register("cpfPaciente")} className={inputClass}/>
                     {errors.cpfPaciente && <p className={errorClass}>{errors.cpfPaciente.message}</p>}
                   </div>
                   
-                  {/* CEP Paciente */}
                   <div>
                     <label htmlFor="cepPaciente" className={labelClass}>CEP da Residência do Paciente:</label>
                     <input type="text" id="cepPaciente" {...register("cepPaciente")} className={inputClass}/>
                     {errors.cepPaciente && <p className={errorClass}>{errors.cepPaciente.message}</p>}
                   </div>
                   
-                  {/* Relação com Paciente (Ocupa 2 colunas) */}
                   <div className="md:col-span-2">
                     <label htmlFor="correlacaoPaciente" className={labelClass}>Relação com Paciente:</label>
                     <input type="text" id="correlacaoPaciente" {...register("correlacaoPaciente")} className={inputClass} placeholder="Ex: Filho, Cônjuge, Amigo" />
@@ -195,7 +181,6 @@ export function AtualizarPerfilCuidador() {
                 </div>
               </div>
 
-              {/* --- Botão de Envio --- */}
               <button
                 type="submit"
                 disabled={isSubmitting}
